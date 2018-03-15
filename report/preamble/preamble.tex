@@ -1,0 +1,243 @@
+% Dokumentklassen sættes til memoir.
+% Manual: http://ctan.org/tex-archive/macros/latex/contrib/memoir/memman.pdf
+%\documentclass[a4paper,11pt,twoside,openright]{memoir}
+\setlrmarginsandblock{*}{2.5cm}{0.75} % højre og venstre 
+\setulmarginsandblock{3cm}{*}{1.2} % top og bund 
+\checkandfixthelayout[nearest] % specifikt valg af højde algoritme
+
+%Styrer hvordan nye afsnit håndteres
+%https://www.sharelatex.com/learn/Paragraph_formatting#Reference_guide
+\parindent=1em %Start på nyt afsnit rykkes ind
+\parskip=0.5em %Mellemrum mellem afsnit
+ 
+% Danske udtryk (fx figur og tabel) samt dansk orddeling og fonte med
+% danske tegn. Hvis LaTeX brokker sig over æ, ø og å skal du udskifte
+% "utf8" med "latin1" eller "applemac". 
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{mflogo}
+\usepackage{titlesec}
+\titleformat{\chapter}[hang] 
+{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter:}{1em}{} 
+\titlespacing*{\chapter}{0pt}{-50pt}{40pt}
+
+%bruges til at fastgøre billeder hvor man vil have dem ved brug af H
+\usepackage{float}
+
+%sexy pdf'er
+%\usepackage[export]{adjustbox}
+\usepackage{pdfpages}
+\usepackage{pdflscape}
+
+%Kompakte lister
+\usepackage{paralist}
+ 
+% Matematisk udtryk, fede symboler, theoremer og fancy ting (fx kædebrøker)
+\usepackage{amsmath,amssymb}
+\usepackage{bm}
+\usepackage{amsthm}
+\usepackage{mathtools}
+
+% Fancy ting med enheder og datatabeller. Læs manualen til pakken
+% Manual: http://www.ctan.org/tex-archive/macros/latex/contrib/siunitx/siunitx.pdf
+\usepackage{siunitx}
+ 
+%Fancy headers, 
+%Manual: https://www.sharelatex.com/learn/Headers_and_footers
+\let\footruleskip\undefined
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+ 
+% Indsættelse af grafik. og man kan rotere tekst in line
+\usepackage{graphicx} 
+\usepackage{fix-cm} 
+\usepackage{soul}
+\sodef\an{}{0.13em}{0em}{0em} \sodef\ann{}{0.13em}{0.5em}{0em}
+ 
+
+%Fancy tabeller.
+%\usepackage[table]{xcolor}
+\usepackage{multirow}
+\usepackage{rotating} %sidewaystables!
+\usepackage{longtable} %tables spanning multible pages.
+\usepackage{tablefootnote} %for at indstætte fornoter i tabeller.
+\usepackage{hhline} %Fixer farvede felter
+\usepackage{ltxtable} %Longtabular X
+\usepackage{tabularx} %Med dynamisk bredte
+
+%URL fodnoter
+\usepackage{url}
+
+% Reaktionsskemaer. Læs manualen for at se eksempler.
+% Manual: http://www.ctan.org/tex-archive/macros/latex/contrib/mhchem/mhchem.pdf
+\usepackage[version=3]{mhchem}
+
+%Lav chapter clickable og fjern border
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+%Table of contents settings
+\setsecnumdepth{subsection} % organisational level that receives a numbers
+\settocdepth{subsection}   % print table of  for level 3
+
+%Til programkode
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+ 
+ % Added to use LaTeX From jupiternotebook
+ \usepackage{fancyvrb}
+ \definecolor{incolor}{rgb}{0.0, 0.0, 0.5}
+ \definecolor{outcolor}{rgb}{0.545, 0.0, 0.0}
+ 
+\lstset{ 
+  language=C++,                % the language of the code
+  basicstyle=\footnotesize,           % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
+  stepnumber=1,                   % the step between two line-numbers. If it's 1, each line 
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},      % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                   % show the filename of files included with \lstinputlisting;
+                                  % also try caption instead of title
+  keywordstyle=\color{blue},          % keyword style
+  commentstyle=\color{dkgreen},       % comment style
+  stringstyle=\color{mauve},         % string literal style
+  escapeinside={\%*}{*)},            % if you want to add LaTeX within your code
+  morekeywords={*,...},               % if you want to add more keywords to the set
+  rangeprefix=//----------,			%Used for sexy code includes
+  rangesuffix=----------,			%---||---
+  includerangemarker=false,			%---||---
+  literate=
+  {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+  {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+  {à}{{\`a}}1 {è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1
+  {À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1
+  {ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+  {Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+  {â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1
+  {Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1
+  {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1
+  {ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1
+  {€}{{\EUR}}1 {£}{{\pounds}}1
+}
+
+%Til at udregne forskel mellem sider, brug \pagedifference{A}{B} mellem to labels A og B.
+\usepackage{refcount}
+\newcommand{\pagedifference}[2]{%
+  \number\numexpr\getpagerefnumber{#2}-\getpagerefnumber{#1}\relax}
+ 
+%Til at lave referencer med:
+\usepackage{cite}
+
+%Til at lave eksterne \ref til \labels
+\usepackage{xr}
+
+%Til at lave \Beam (DC symbol)
+\usepackage{marvosym}
+
+%Forsøg på nice lister i tabeller
+\usepackage[shortlabels]{enumitem}
+
+\newenvironment{packed_enum}{
+\begin{enumerate}[1., topsep=0pt, nosep, partopsep=0pt, itemsep=0pt, parsep=0pt]
+}{\end{enumerate}}
+
+\newenvironment{packed_item}{
+\begin{itemize}[•, topsep=0pt, nosep, partopsep=0pt, itemsep=0pt, parsep=0pt]
+}{\end{itemize}}
+
+%Lækker kommando til at skrive I2C flot uden at bruge \textsuperscript hver gang:
+\newcommand*{\IIC}{\texorpdfstring{I\textsuperscript{2}C }{I2C}}
+
+%Lækker kommando til ref. -> \ref{input} \nameref{input} på side \pageref{input}
+\newcommand*{\myRef}[1] {\ref{#1} \nameref{#1} på side \pageref{#1}}
+
+%Lorem ipsum
+\usepackage{lipsum}
+
+
+\usepackage{longtable}
+\usepackage{array} % for extrarowheight
+
+%Juicy columntypes - http://tex.stackexchange.com/questions/12703/how-to-create-fixed-width-table-columns-with-text-raggedright-centered-raggedlef
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
+\newcolumntype{Z}{>{\raggedright\arraybackslash}X}
+
+%Dejlig kommando til at få nye kapitler på højre side
+\newcommand*\cleartorightpage{%
+	\clearpage
+ 	\checkoddpage
+	\ifoddpage
+  		%do nothing
+	\else
+		\thispagestyle{empty}
+		\mbox{}
+ 		\clearpage
+	\fi
+}
+
+
+%Hacky løsning til at ordne indholdsfortegnelsen.. Why memoir class.. WHY??!
+\renewcommand*{\cftdotsep}{1}
+\setpnumwidth{3em}
+\setrmarg{4em}
+
+%Bugfix til Longtables
+\makeatletter
+\def\LT@start{%
+  \let\LT@start\endgraf
+  \endgraf\penalty\z@\vskip\LTpre
+  \dimen@\pagetotal
+  \advance\dimen@ \ht\ifvoid\LT@firsthead\LT@head\else\LT@firsthead\fi
+  \advance\dimen@ \dp\ifvoid\LT@firsthead\LT@head\else\LT@firsthead\fi
+  \advance\dimen@ \ht\LT@foot
+  \edef\restore@vbadness{\vbadness\the\vbadness\relax}% (added)
+  \vbadness=\@M % (added)
+  \dimen@ii\vfuzz
+  \vfuzz\maxdimen
+    \setbox\tw@\copy\z@
+    \setbox\tw@\vsplit\tw@ to \ht\@arstrutbox
+    \setbox\tw@\vbox{\unvbox\tw@}%
+  \vfuzz\dimen@ii
+  \restore@vbadness % (added)
+  \advance\dimen@ \ht
+        \ifdim\ht\@arstrutbox>\ht\tw@\@arstrutbox\else\tw@\fi
+  \advance\dimen@\dp
+        \ifdim\dp\@arstrutbox>\dp\tw@\@arstrutbox\else\tw@\fi
+  \advance\dimen@ -\pagegoal
+  \ifdim \dimen@>\z@\vfil\break\fi
+      \global\@colroom\@colht
+  \ifvoid\LT@foot\else
+    \advance\vsize-\ht\LT@foot
+    \global\advance\@colroom-\ht\LT@foot
+    \dimen@\pagegoal\advance\dimen@-\ht\LT@foot\pagegoal\dimen@
+    \maxdepth\z@
+  \fi
+  \ifvoid\LT@firsthead\copy\LT@head\else\box\LT@firsthead\fi\nobreak
+  \output{\LT@output}%
+}
+\makeatother
