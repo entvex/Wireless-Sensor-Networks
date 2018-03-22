@@ -61,8 +61,6 @@ module BaseStationP {
 implementation
 {
 	// Some fixed types
-	uint8_t positionArray[10];
-
 	enum {
       THRESHOLD = 700,
       DISTANCE = 500,
@@ -78,9 +76,9 @@ implementation
 		message_t buffer[12];
 	};
 	
-	uint8_t probeNode() {
+	double probeNode() {
       // get RSSI of moving node
-      uint8_t rssi = 0;
+      double rssi = 501;
       if(rssi > THRESHOLD)
       	return rssi;
       else
@@ -95,46 +93,23 @@ implementation
     
     void sendUsingNorthNode() {
     }
-    
-   	// Estimates the last position based on previous positions
-	// Eg pos = 601, 602, 603, 604, 605
-    double estimateLastPosition() {
-    	double currentPosition = 0;
-    	double lastPosition = positionArray[0];
-    	uint8_t index;
     	
-    	for(index = 1; index <= sizeof(positionArray); index++) {
-			currentPosition += positionArray[index];
-		}
-		
-		double previousPosition = currentPosition/(sizeof(positionArray)-1);
-		
-		if (lastPosition <= previousPosition)
-			return (lastPosition - (previousPosition-lastPosition));
-		else if (lastPosition >= previousPosition)
-			return (lastPosition + (lastPosition-previousPosition));
-		else
-			return 0;
-	}
-    
     event void Boot.booted() {
     	// Call stuff when booted
 		call AMControl.start();
 	}
 
-	event void Timer0.fired(){
+	event void Timer0.fired() {
 		// Main loop
-		uint8_t signalStrength = probeNode();
+		// Runs every time timer is fired
+		double signalStrength = probeNode();
 		
 		if (signalStrength > THRESHOLD) {
 			sendDirect();
 		}
-		else if (signalStrength < THRESHOLD) {
-			double lastPosition = estimateLastPosition();
-			if (lastPosition > DISTANCE)
-				sendUsingSouthNode();
-			else
-				sendUsingNorthNode();	
+		else {
+			sendUsingSouthNode();
+			sendUsingNorthNode();
 		}
 	}
 
@@ -385,4 +360,4 @@ implementation
 //    
 //    post radioSendTask();
 //  }
-//} 
+//}
