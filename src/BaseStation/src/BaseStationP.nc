@@ -34,9 +34,9 @@ implementation
 	
 	// Some fixed types
 	enum {
-      THRESHOLD = 700,
+      THRESHOLD = 100,
       DISTANCE = 500,
-      TIMER_PERIOD_MILLI = 5000
+      TIMER_PERIOD_MILLI = 5000,
 	  SEND_POWER = 31
     };
 	
@@ -51,6 +51,10 @@ implementation
 	
 	struct Queue* rssiQueue;
 	bool busy = FALSE;
+	
+	task void sendDirectTask();
+	task void sendUsingNorthNodeTask();
+	task void sendUsingSouthNodeTask();
 	
 	// All queue implementation code is courtesy of
 	// https://gist.github.com/orcnyilmaz/06a7b9b4a03580826e7619fd8381aa00
@@ -86,7 +90,7 @@ implementation
 		printf("%d enqueued to queue\n", item);
 	}
 	
-	// Remove an item from queue. It changes front and size.
+	// Remove an item from queue. It changes front and size
 	int dequeue(struct Queue* queue)
 	{
 		if (isEmpty(queue))
@@ -113,7 +117,7 @@ implementation
 		return queue->array[queue->rear];
 	}
  
-    void sendDirect() {
+    task void sendDirectTask() {
 		// Here we send directly to moving node
 		if(!busy) {
 			BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(&pkt, sizeof (BlinkToRadioMsg)));
@@ -121,7 +125,7 @@ implementation
 				return;
 			}
 			
-			// NodeId so moving node can tell msg is from basestation
+			// Node Id so moving node can tell msg is from basestation
 			btrpkt->nodeid = TOS_NODE_ID;
 			
 			// Set power to chosen value
@@ -133,11 +137,11 @@ implementation
 		}
     }
     
-    void sendUsingSouthNode() {
+    task void sendUsingSouthNodeTask() {
 		// Here we send using south node
     }
     
-    void sendUsingNorthNode() {
+    task void sendUsingNorthNodeTask() {
 		// Here we send using north node
     }
     
@@ -152,14 +156,14 @@ implementation
 	event void Timer0.fired() {
 		// Main loop
 		// Runs every time timer is fired
-		if (isEmpty(queue))
+		if (isEmpty(rssiQueue) || rear(rssiQueue) > THRESHOLD)
 		{
-			sendDirect();
+			post sendDirectTask();
 		}
 		else if (rear(rssiQueue) < THRESHOLD)
 		{
-			sendUsingNorthNode();
-			sendUsingSouthNode();
+			post sendUsingNorthNodeTask();
+			post sendUsingSouthNodeTask();
 		}	
 	}
 
