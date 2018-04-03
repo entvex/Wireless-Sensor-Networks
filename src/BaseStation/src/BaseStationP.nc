@@ -1,51 +1,14 @@
-// $Id: BaseStationP.nc,v 1.10 2008/06/23 20:25:14 regehr Exp $
-
-/*									tab:4
- * "Copyright (c) 2000-2005 The Regents of the University  of California.  
- * All rights reserved.
- *
- * Permission to use, copy, modify, and distribute this software and its
- * documentation for any purpose, without fee, and without written agreement is
- * hereby granted, provided that the above copyright notice, the following
- * two paragraphs and the author appear in all copies of this software.
- * 
- * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
- * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
- * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
- * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
- * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
- * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
- * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
- * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
- *
- * Copyright (c) 2002-2005 Intel Corporation
- * All rights reserved.
- *
- * This file is distributed under the terms in the attached INTEL-LICENSE     
- * file. If you do not find these files, copies can be found by writing to
- * Intel Research Berkeley, 2150 Shattuck Avenue, Suite 1300, Berkeley, CA, 
- * 94704.  Attention:  Intel License Inquiry.
- */
-
-/*
- * @author Phil Buonadonna
- * @author Gilman Tolle
- * @author David Gay
- * Revision:	$Id: BaseStationP.nc,v 1.10 2008/06/23 20:25:14 regehr Exp $
- */
-  
 /* 
- * BaseStationP bridges packets between a serial channel and the radio.
- * Messages moving from serial to radio will be tagged with the group
- * ID compiled into the TOSBase, and messages moving from radio to
- * serial will be filtered by that same group id.
+ * WSN-GOT BaseStation
  */
 
 #include "AM.h"
 #include "Serial.h"
 #include <Timer.h>
+#include "printf.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
 
 module BaseStationP {
    	uses interface Boot;
@@ -56,15 +19,25 @@ module BaseStationP {
 	uses interface AMSend;
 	uses interface SplitControl as AMControl;
 	uses interface Receive;
+	uses interface CC2420Packet;
 }
 
 implementation
 {
+	typedef nx_struct BlinkToRadioMsg {
+		nx_uint16_t nodeid;
+		nx_uint16_t counter;
+		nx_int8_t rssi;
+		nx_uint8_t lqi;
+		nx_uint8_t power;
+	} BlinkToRadioMsg;
+	
 	// Some fixed types
 	enum {
       THRESHOLD = 700,
       DISTANCE = 500,
       TIMER_PERIOD_MILLI = 5000
+	  SEND_POWER = 31
     };
 	
 	struct response {
@@ -76,41 +49,118 @@ implementation
 		message_t buffer[12];
 	};
 	
-	double probeNode() {
-      // get RSSI of moving node
-      double rssi = 501;
-      if(rssi > THRESHOLD)
-      	return rssi;
-      else
-    	return 0;
-    }
-    
+	struct Queue* rssiQueue;
+	bool busy = FALSE;
+	
+	// All queue implementation code is courtesy of
+	// https://gist.github.com/orcnyilmaz/06a7b9b4a03580826e7619fd8381aa00
+	struct Queue {
+		int front, rear, size;
+		unsigned capacity;
+		int* array;
+	};
+	
+	// Create a queue of given capacity. queue size is 0
+	struct Queue* createQueue(unsigned capacity)
+	{
+		struct Queue* queue = (struct Queue*) malloc(sizeof(struct Queue));
+		queue->capacity = capacity;
+		queue->front = queue->size = 0; 
+		queue->rear = capacity - 1;  // This is important, see the enqueue
+		queue->array = (int*) malloc(queue->capacity * sizeof(int));
+		return queue;
+	}
+	
+	int isEmpty(struct Queue* queue) {
+		return (queue->size == 0);
+	}
+	
+	// Add an item to the queue
+	void enqueue(struct Queue* queue, int item) {
+		if (isFull(queue)) {
+			dequeue(queue);
+		}
+		queue->rear = (queue->rear + 1) % queue->capacity;
+		queue->array[queue->rear] = item;
+		queue->size = queue->size + 1;
+		printf("%d enqueued to queue\n", item);
+	}
+	
+	// Remove an item from queue. It changes front and size.
+	int dequeue(struct Queue* queue)
+	{
+		if (isEmpty(queue))
+			return INT_MIN;
+		int item = queue->array[queue->front];
+		queue->front = (queue->front + 1)%queue->capacity;
+		queue->size = queue->size - 1;
+		return item;
+	}
+	
+	// Return front of queue
+	int front(struct Queue* queue)
+	{
+		if (isEmpty(queue))
+			return INT_MIN;
+		return queue->array[queue->front];
+	
+ 
+	// Return rear of queue
+	int rear(struct Queue* queue)
+	{
+		if (isEmpty(queue))
+			return INT_MIN;
+		return queue->array[queue->rear];
+	}
+ 
     void sendDirect() {
+		// Here we send directly to moving node
+		if(!busy) {
+			BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(&pkt, sizeof (BlinkToRadioMsg)));
+			if (btrpkt == NULL) {
+				return;
+			}
+			
+			// NodeId so moving node can tell msg is from basestation
+			btrpkt->nodeid = TOS_NODE_ID;
+			
+			// Set power to chosen value
+			call CC2420Packet.setPower(&pkt, SEND_POWER);
+		
+			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(BlinkToRadioMsg)) == SUCCESS) {
+				busy = TRUE;
+			}
+		}
     }
     
     void sendUsingSouthNode() {
+		// Here we send using south node
     }
     
     void sendUsingNorthNode() {
+		// Here we send using north node
     }
-    	
+    
     event void Boot.booted() {
     	// Call stuff when booted
+		rssiQueue = createQueue(10);
 		call AMControl.start();
+		printf("BaseStation started!\n");
+		printfflush();
 	}
 
 	event void Timer0.fired() {
 		// Main loop
 		// Runs every time timer is fired
-		double signalStrength = probeNode();
-		
-		if (signalStrength > THRESHOLD) {
+		if (isEmpty(queue))
+		{
 			sendDirect();
 		}
-		else {
-			sendUsingSouthNode();
+		else if (rear(rssiQueue) < THRESHOLD)
+		{
 			sendUsingNorthNode();
-		}
+			sendUsingSouthNode();
+		}	
 	}
 
 	event void AMControl.startDone(error_t error){
@@ -125,10 +175,23 @@ implementation
 	}
 
 	event void AMSend.sendDone(message_t *msg, error_t error){
-		// TODO Auto-generated method stub
+		 if (&pkt == msg) {
+			busy = FALSE;
+		}
 	}
 
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
+		message_t *ret = msg;
+    
+		// Extract info about rssi
+		BlinkToRadioMsg* btrpkt;
+		btrpkt->rssi = call CC2420Packet.getRssi(msg);
+		
+		// Save rssi in queue
+		enqueue(rssiQueue, btrpkt->rssi);
+		printf("Newest rssi is: %d\n", rear(rssiQueue));
+		printfflush();
+	
 		return msg;
 	}
 }
