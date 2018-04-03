@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
-module BaseStationP {
+module BaseStationP @safe() {
    	uses interface Boot;
 	uses interface Leds;
 	uses interface Timer<TMilli> as Timer0;
@@ -42,7 +42,7 @@ implementation
 	
 	struct response {
 		uint8_t position;
-		double heartRate;
+		uint8_t heartRate;
 	};
 	
 	struct request {
@@ -51,6 +51,7 @@ implementation
 	
 	struct Queue* rssiQueue;
 	bool busy = FALSE;
+	message_t pkt;
 	
 	task void sendDirectTask();
 	task void sendUsingNorthNodeTask();
@@ -59,61 +60,62 @@ implementation
 	// All queue implementation code is courtesy of
 	// https://gist.github.com/orcnyilmaz/06a7b9b4a03580826e7619fd8381aa00
 	struct Queue {
-		int front, rear, size;
-		unsigned capacity;
-		int* array;
+		uint16_t front, rear, size;
+		uint16_t capacity;
+		uint16_t* array;
 	};
 	
 	// Create a queue of given capacity. queue size is 0
-	struct Queue* createQueue(unsigned capacity)
+	struct Queue* createQueue(uint16_t capacity)
 	{
 		struct Queue* queue = (struct Queue*) malloc(sizeof(struct Queue));
 		queue->capacity = capacity;
 		queue->front = queue->size = 0; 
 		queue->rear = capacity - 1;  // This is important, see the enqueue
-		queue->array = (int*) malloc(queue->capacity * sizeof(int));
+		queue->array = (uint16_t*) malloc(queue->capacity * sizeof(uint16_t));
 		return queue;
 	}
 	
-	int isEmpty(struct Queue* queue) {
+	uint16_t isFull(struct Queue* queue) {
+		return (queue->size == queue->capacity);
+	}
+	
+	uint16_t isEmpty(struct Queue* queue) {
 		return (queue->size == 0);
 	}
 	
+	// Remove an item from queue. It changes front and size
+	uint16_t dequeue(struct Queue* queue) {
+		uint16_t item;
+		if (isEmpty(queue))
+			return 0;
+		item = queue->array[queue->front];
+		queue->front = (queue->front + 1)%queue->capacity;
+		queue->size = queue->size - 1;
+		return item;
+	}
+	
 	// Add an item to the queue
-	void enqueue(struct Queue* queue, int item) {
-		if (isFull(queue)) {
+	void enqueue(struct Queue* queue, uint16_t item) {
+		if (isFull(queue))
 			dequeue(queue);
-		}
 		queue->rear = (queue->rear + 1) % queue->capacity;
 		queue->array[queue->rear] = item;
 		queue->size = queue->size + 1;
 		printf("%d enqueued to queue\n", item);
 	}
 	
-	// Remove an item from queue. It changes front and size
-	int dequeue(struct Queue* queue)
-	{
-		if (isEmpty(queue))
-			return INT_MIN;
-		int item = queue->array[queue->front];
-		queue->front = (queue->front + 1)%queue->capacity;
-		queue->size = queue->size - 1;
-		return item;
-	}
-	
 	// Return front of queue
-	int front(struct Queue* queue)
-	{
+	uint16_t front(struct Queue* queue) {
 		if (isEmpty(queue))
-			return INT_MIN;
+			return 0;
 		return queue->array[queue->front];
-	
+	}
  
 	// Return rear of queue
-	int rear(struct Queue* queue)
-	{
+	uint16_t rear(struct Queue* queue) {
 		if (isEmpty(queue))
-			return INT_MIN;
+			return 0;
 		return queue->array[queue->rear];
 	}
  
@@ -188,15 +190,15 @@ implementation
 		message_t *ret = msg;
     
 		// Extract info about rssi
-		BlinkToRadioMsg* btrpkt;
+		BlinkToRadioMsg* btrpkt = NULL;
 		btrpkt->rssi = call CC2420Packet.getRssi(msg);
 		
-		// Save rssi in queue
+		// Save rssi in rssiQueue
 		enqueue(rssiQueue, btrpkt->rssi);
 		printf("Newest rssi is: %d\n", rear(rssiQueue));
 		printfflush();
 	
-		return msg;
+		return ret;
 	}
 }
 //  enum {
