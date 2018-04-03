@@ -25,16 +25,16 @@ module BaseStationP @safe() {
 implementation
 {
 	typedef nx_struct BlinkToRadioMsg {
-		nx_uint16_t nodeid;
-		nx_uint16_t counter;
-		nx_int8_t rssi;
-		nx_uint8_t lqi;
-		nx_uint8_t power;
+  		nx_uint16_t nodeid;
+ 		nx_uint16_t counter;
+  		nx_int8_t rssi;
+  		nx_uint8_t lqi;
+  		nx_uint8_t power;
 	} BlinkToRadioMsg;
 	
 	// Some fixed types
 	enum {
-      THRESHOLD = 100,
+      THRESHOLD = 5,
       DISTANCE = 500,
       TIMER_PERIOD_MILLI = 5000,
 	  SEND_POWER = 31
@@ -62,7 +62,7 @@ implementation
 	struct Queue {
 		uint16_t front, rear, size;
 		uint16_t capacity;
-		uint16_t* array;
+		int16_t* array;
 	};
 	
 	// Create a queue of given capacity. queue size is 0
@@ -72,7 +72,7 @@ implementation
 		queue->capacity = capacity;
 		queue->front = queue->size = 0; 
 		queue->rear = capacity - 1;  // This is important, see the enqueue
-		queue->array = (uint16_t*) malloc(queue->capacity * sizeof(uint16_t));
+		queue->array = (int16_t*) malloc(queue->capacity * sizeof(int16_t));
 		return queue;
 	}
 	
@@ -85,8 +85,8 @@ implementation
 	}
 	
 	// Remove an item from queue. It changes front and size
-	uint16_t dequeue(struct Queue* queue) {
-		uint16_t item;
+	int16_t dequeue(struct Queue* queue) {
+		int16_t item;
 		if (isEmpty(queue))
 			return 0;
 		item = queue->array[queue->front];
@@ -96,24 +96,23 @@ implementation
 	}
 	
 	// Add an item to the queue
-	void enqueue(struct Queue* queue, uint16_t item) {
+	void enqueue(struct Queue* queue, int16_t item) {
 		if (isFull(queue))
 			dequeue(queue);
 		queue->rear = (queue->rear + 1) % queue->capacity;
 		queue->array[queue->rear] = item;
 		queue->size = queue->size + 1;
-		printf("%d enqueued to queue\n", item);
 	}
 	
 	// Return front of queue
-	uint16_t front(struct Queue* queue) {
+	int16_t front(struct Queue* queue) {
 		if (isEmpty(queue))
 			return 0;
 		return queue->array[queue->front];
 	}
  
 	// Return rear of queue
-	uint16_t rear(struct Queue* queue) {
+	int16_t rear(struct Queue* queue) {
 		if (isEmpty(queue))
 			return 0;
 		return queue->array[queue->rear];
@@ -121,6 +120,7 @@ implementation
  
     task void sendDirectTask() {
 		// Here we send directly to moving node
+		/*
 		if(!busy) {
 			BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(&pkt, sizeof (BlinkToRadioMsg)));
 			if (btrpkt == NULL) {
@@ -137,6 +137,7 @@ implementation
 				busy = TRUE;
 			}
 		}
+		*/
     }
     
     task void sendUsingSouthNodeTask() {
@@ -149,7 +150,7 @@ implementation
     
     event void Boot.booted() {
     	// Call stuff when booted
-		rssiQueue = createQueue(10);
+		rssiQueue = createQueue(20);
 		call AMControl.start();
 		printf("BaseStation started!\n");
 		printfflush();
@@ -158,12 +159,22 @@ implementation
 	event void Timer0.fired() {
 		// Main loop
 		// Runs every time timer is fired
-		if (isEmpty(rssiQueue) || rear(rssiQueue) > THRESHOLD)
-		{
+		if (isEmpty(rssiQueue)) {
+			printf("Queue is empty. Calling direct!\n");
+			printfflush();
 			post sendDirectTask();
 		}
-		else if (rear(rssiQueue) < THRESHOLD)
+		
+		if (front(rssiQueue) > THRESHOLD) {
+			printf("Rssi is within range. Calling direct!\n");
+			printfflush();
+			post sendDirectTask();
+		}
+		
+		if (rear(rssiQueue) < THRESHOLD)
 		{
+			printf("Rssi is outside range. Calling north/south!\n");
+			printfflush();
 			post sendUsingNorthNodeTask();
 			post sendUsingSouthNodeTask();
 		}	
@@ -190,13 +201,14 @@ implementation
 		message_t *ret = msg;
     
 		// Extract info about rssi
-		BlinkToRadioMsg* btrpkt = NULL;
+		BlinkToRadioMsg* btrpkt;
 		btrpkt->rssi = call CC2420Packet.getRssi(msg);
+		
+    	printf("Received message with rssi: %d and lqi: %d\n", btrpkt->rssi, btrpkt->lqi);
+    	printfflush();
 		
 		// Save rssi in rssiQueue
 		enqueue(rssiQueue, btrpkt->rssi);
-		printf("Newest rssi is: %d\n", rear(rssiQueue));
-		printfflush();
 	
 		return ret;
 	}
