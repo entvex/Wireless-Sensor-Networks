@@ -37,7 +37,8 @@ implementation
       THRESHOLD = 5,
       DISTANCE = 500,
       TIMER_PERIOD_MILLI = 5000,
-	  SEND_POWER = 31
+	  SEND_POWER = 31,
+	  RSSI_ARRAY_SIZE = 10
     };
 	
 	struct response {
@@ -46,81 +47,20 @@ implementation
 	};
 	
 	struct request {
-		message_t buffer[12];
+		message_t buffer[RSSI_ARRAY_SIZE];
 	};
 	
-	struct Queue* rssiQueue;
 	bool busy = FALSE;
 	message_t pkt;
+	uint16_t rssiArray[RSSI_ARRAY_SIZE];
 	
 	task void sendDirectTask();
 	task void sendUsingNorthNodeTask();
 	task void sendUsingSouthNodeTask();
 	
-	// All queue implementation code is courtesy of
-	// https://gist.github.com/orcnyilmaz/06a7b9b4a03580826e7619fd8381aa00
-	struct Queue {
-		uint16_t front, rear, size;
-		uint16_t capacity;
-		int16_t* array;
-	};
-	
-	// Create a queue of given capacity. queue size is 0
-	struct Queue* createQueue(uint16_t capacity)
-	{
-		struct Queue* queue = (struct Queue*) malloc(sizeof(struct Queue));
-		queue->capacity = capacity;
-		queue->front = queue->size = 0; 
-		queue->rear = capacity - 1;  // This is important, see the enqueue
-		queue->array = (int16_t*) malloc(queue->capacity * sizeof(int16_t));
-		return queue;
-	}
-	
-	uint16_t isFull(struct Queue* queue) {
-		return (queue->size == queue->capacity);
-	}
-	
-	uint16_t isEmpty(struct Queue* queue) {
-		return (queue->size == 0);
-	}
-	
-	// Remove an item from queue. It changes front and size
-	int16_t dequeue(struct Queue* queue) {
-		int16_t item;
-		if (isEmpty(queue))
-			return 0;
-		item = queue->array[queue->front];
-		queue->front = (queue->front + 1)%queue->capacity;
-		queue->size = queue->size - 1;
-		return item;
-	}
-	
-	// Add an item to the queue
-	void enqueue(struct Queue* queue, int16_t item) {
-		if (isFull(queue))
-			dequeue(queue);
-		queue->rear = (queue->rear + 1) % queue->capacity;
-		queue->array[queue->rear] = item;
-		queue->size = queue->size + 1;
-	}
-	
-	// Return front of queue
-	int16_t front(struct Queue* queue) {
-		if (isEmpty(queue))
-			return 0;
-		return queue->array[queue->front];
-	}
- 
-	// Return rear of queue
-	int16_t rear(struct Queue* queue) {
-		if (isEmpty(queue))
-			return 0;
-		return queue->array[queue->rear];
-	}
- 
-    task void sendDirectTask() {
+	task void sendDirectTask() {
 		// Here we send directly to moving node
-		/*
+		
 		if(!busy) {
 			BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(&pkt, sizeof (BlinkToRadioMsg)));
 			if (btrpkt == NULL) {
@@ -137,7 +77,6 @@ implementation
 				busy = TRUE;
 			}
 		}
-		*/
     }
     
     task void sendUsingSouthNodeTask() {
@@ -148,10 +87,40 @@ implementation
 		// Here we send using north node
     }
     
+    // Return true if array is empty, else false
+    bool isEmpty(uint8_t* arr, int size)
+	{
+		int i = 0;
+		for(i = 0; i < size; i++) {
+			if(arr[i] != INT_MIN || arr[i] != 0) {
+				return FALSE;
+			}
+		}
+		return TRUE;
+	}
+	
+	// Return true if array is full, else false
+	bool isFull(uint8_t* arr, int size) {
+		int i = 0;
+		int count = 0;
+		for(i = 0; i > size; i++) {
+			if(arr[i] != INT_MIN || arr[i] != 0) {
+				count++;
+			}
+		}
+		if(count == size)
+			return TRUE;
+		return FALSE;
+	}
+    
     event void Boot.booted() {
+    	int i = 0;
     	// Call stuff when booted
-		rssiQueue = createQueue(20);
 		call AMControl.start();
+		for (i = 0; i < sizeof(rssiArray); i++) {
+  			rssiArray[i] = 0;
+		}
+			
 		printf("BaseStation started!\n");
 		printfflush();
 	}
@@ -159,19 +128,19 @@ implementation
 	event void Timer0.fired() {
 		// Main loop
 		// Runs every time timer is fired
-		if (isEmpty(rssiQueue)) {
+		if (isEmpty(rssiArray, RSSI_ARRAY_SIZE)) {
 			printf("Queue is empty. Calling direct!\n");
 			printfflush();
 			post sendDirectTask();
 		}
 		
-		if (front(rssiQueue) > THRESHOLD) {
+		if (rssiArray[0] > THRESHOLD) {
 			printf("Rssi is within range. Calling direct!\n");
 			printfflush();
 			post sendDirectTask();
 		}
 		
-		if (rear(rssiQueue) < THRESHOLD)
+		if (rssiArray[0] < THRESHOLD)
 		{
 			printf("Rssi is outside range. Calling north/south!\n");
 			printfflush();
@@ -199,7 +168,8 @@ implementation
 
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
 		message_t *ret = msg;
-    
+    	int i = 0;
+    	
 		// Extract info about rssi
 		BlinkToRadioMsg* btrpkt;
 		btrpkt->rssi = call CC2420Packet.getRssi(msg);
@@ -208,8 +178,11 @@ implementation
     	printfflush();
 		
 		// Save rssi in rssiQueue
-		enqueue(rssiQueue, btrpkt->rssi);
-	
+		for (i = 0; i < sizeof(RSSI_ARRAY_SIZE) - 1; i++) {
+  			rssiArray[i] = rssiArray[i+1];
+		}
+		rssiArray[RSSI_ARRAY_SIZE] = btrpkt->rssi;
+		
 		return ret;
 	}
 }
