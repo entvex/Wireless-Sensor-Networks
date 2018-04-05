@@ -1,0 +1,5 @@
+COMPONENT=BlinkToRadioAppC
+CFLAGS += -DTOSH_DATA_LENGTH=110
+
+include $(MAKERULES)
+
