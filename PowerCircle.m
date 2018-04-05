@@ -4,14 +4,17 @@ max_datarate   = 250*1000*8;               %250k-byte Telos_B datasheet
 packagesize    = 128*1000*8;               %128k-byte WSN Problem Description
 TransmitPeriod = packagesize/max_datarate; %Second
 
-time       = 1;                             %Second
-sleep_duty = time-TransmitPeriod*time;     %Sleep period for one package every second
-R = 1;                                     %Measurement Shunt-Resistance
-I_tx    = 18.3*10.^(-3);                   %Transmit current
-I_sleep = 1*10.^(-6);                      %Sleep current
-Ptx     = I_tx*R^(2) * TransmitPeriod;     %Transmit Power
-Ptsleep = I_sleep*R^(2) * TransmitPeriod;  %Sleep Power
-P_Total = Ptx + Ptsleep;                   %Power without the sleep overshoot power
+time       = 1;                              %Second
+sleep_duty = time-TransmitPeriod*time;       %Sleep period for one package every second
+R = 1;                                       %Measurement Shunt-Resistance
+I_tx      = 18.3*10.^(-3);                   %Transmit current
+I_rx      = 23.0*10.^(-3);                   %Receive Current
+I_sleep   = 1*10.^(-6);                      %Sleep current
+Ptx       = I_tx*R^(2) * TransmitPeriod;     %Transmit Power
+Prx       = I_rx*R^(2) * TransmitPeriod;     %Receive Power 
+Ptsleep   = I_sleep*R^(2) * TransmitPeriod;  %Sleep Power
+Ptx_Total = Ptx + Ptsleep;                   %Power without the sleep overshoot power
+P_Total   = Ptx_Total + Prx;                 %Total receive and transmitting power
 
 % Antennasize = 3.5cm and freq = 2.4Gb
 % https://www.everythingrf.com/rf-calculators/antenna-near-field-distance-calculator
@@ -83,8 +86,10 @@ plot(x,f);
 
 % AA Battery https://en.wikipedia.org/wiki/AA_battery "RAM"
 V  = 1.5;
-Ah = 2600*10^(-3); %mAh
+Ah = 2*2600*10^(-3); %mAh for two batteries
 BatteryPower = V*Ah
-powerTime_nosleep     = BatteryPower/(I_tx*R^(2))       %Lifetime in hours
-powerTime_noOvershoot = BatteryPower/P_Total            %Lifetime in hours
-powerTime_Overshoot   = BatteryPower/(P_Total+OS_power) %Lifetime in hours
+powerTime_nosleep     = BatteryPower/(I_tx*R^(2))         %Lifetime in hours //Only Transmitting
+powerTime_noOvershoot = BatteryPower/Ptx_Total            %Lifetime in hours //Transmitting and sleeping
+powerTime_Overshoot   = BatteryPower/(Ptx_Total+OS_power) %Lifetime in hours //Transmitting and sleeping with overshoot!
+powerTimeTotal        = BatteryPower/(P_Total+OS_power)   %Lifetime in hours //Transmitting and sleeping with overshoot!
+
