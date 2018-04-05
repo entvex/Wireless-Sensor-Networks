@@ -89,20 +89,6 @@ implementation {
 
   event void Timer0.fired() {
     counter++;
-    if (!busy) {
-      BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(&pkt, sizeof(BlinkToRadioMsg)));
-      if (btrpkt == NULL) {
-		return;
-      }
-      btrpkt->nodeid = TOS_NODE_ID;
-      btrpkt->counter = counter;
-      
-      call CC2420Packet.setPower(&pkt, SET_POWER);
-      
-      if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(BlinkToRadioMsg)) == SUCCESS) {
-        busy = TRUE;
-      }
-    }
   }
 
   event void AMSend.sendDone(message_t* msg, error_t err) {
@@ -115,6 +101,20 @@ implementation {
     if (len == sizeof(BlinkToRadioMsg)) {
       BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)payload;
       setLeds(btrpkt->counter);
+    }
+    if (!busy) {
+      BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(&pkt, sizeof(BlinkToRadioMsg)));
+      if (btrpkt == NULL) {
+		return msg;
+      }
+      btrpkt->nodeid = TOS_NODE_ID;
+      btrpkt->counter = counter;
+      
+      call CC2420Packet.setPower(&pkt, SET_POWER);
+      
+      if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(BlinkToRadioMsg)) == SUCCESS) {
+        busy = TRUE;
+      }
     }
     return msg;
   }

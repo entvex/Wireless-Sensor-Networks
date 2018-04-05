@@ -68,26 +68,21 @@ configuration BaseStationC {
 }
 implementation {
   components MainC, BaseStationP, LedsC;
-  components ActiveMessageC as Radio, SerialActiveMessageC as Serial;
   components CC2420ActiveMessageC;
+  components new TimerMilliC() as Timer0;
+  components ActiveMessageC;
+  components new AMSenderC(AM_BLINKTORADIO);
+  components new AMReceiverC(AM_BLINKTORADIO);
   
   MainC.Boot <- BaseStationP;
   
-  BaseStationP.CC2420Packet -> CC2420ActiveMessageC;
-
-  BaseStationP.RadioControl -> Radio;
-  BaseStationP.SerialControl -> Serial;
-  
-  BaseStationP.UartSend -> Serial;
-  BaseStationP.UartReceive -> Serial.Receive;
-  BaseStationP.UartPacket -> Serial;
-  BaseStationP.UartAMPacket -> Serial;
-  
-  BaseStationP.RadioSend -> Radio;
-  BaseStationP.RadioReceive -> Radio.Receive;
-  BaseStationP.RadioSnoop -> Radio.Snoop;
-  BaseStationP.RadioPacket -> Radio;
-  BaseStationP.RadioAMPacket -> Radio;
-  
+  BaseStationP.Boot -> MainC;
   BaseStationP.Leds -> LedsC;
+  BaseStationP.Timer0 -> Timer0;
+  BaseStationP.Packet -> AMSenderC;
+  BaseStationP.AMPacket -> AMSenderC;
+  BaseStationP.AMControl -> ActiveMessageC;
+  BaseStationP.AMSend -> AMSenderC;
+  BaseStationP.Receive -> AMReceiverC;
+  BaseStationP.CC2420Packet -> CC2420ActiveMessageC;
 }
