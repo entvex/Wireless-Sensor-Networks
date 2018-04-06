@@ -14,6 +14,7 @@ module BaseStationP @safe() {
    	uses interface Boot;
 	uses interface Leds;
 	uses interface Timer<TMilli> as Timer0;
+	uses interface Timer<TMilli> as Timer1;
 	uses interface Packet;
 	uses interface AMPacket;
 	uses interface AMSend;
@@ -30,6 +31,7 @@ implementation
   		nx_int8_t rssi;
   		nx_uint8_t lqi;
   		nx_uint8_t power;
+  		nx_uint8_t seq;
 	} BlinkToRadioMsg;
 	
 	// Some fixed types
@@ -46,13 +48,16 @@ implementation
 		uint8_t heartRate;
 	};
 	
-	struct request {
-		message_t buffer[RSSI_ARRAY_SIZE];
+	struct sendQueue {
+		message_t buffer[100];
 	};
 	
 	bool busy = FALSE;
 	message_t pkt;
 	uint16_t rssiArray[RSSI_ARRAY_SIZE];
+	
+	int sentSeq = 0;
+	int receivedSeq = 0;
 	
 	task void sendDirectTask();
 	task void sendUsingNorthNodeTask();
@@ -60,23 +65,6 @@ implementation
 	
 	task void sendDirectTask() {
 		// Here we send directly to moving node
-		
-		if(!busy) {
-			BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(&pkt, sizeof (BlinkToRadioMsg)));
-			if (btrpkt == NULL) {
-				return;
-			}
-			
-			// Node Id so moving node can tell msg is from basestation
-			btrpkt->nodeid = TOS_NODE_ID;
-			
-			// Set power to chosen value
-			call CC2420Packet.setPower(&pkt, SEND_POWER);
-		
-			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(BlinkToRadioMsg)) == SUCCESS) {
-				busy = TRUE;
-			}
-		}
     }
     
     task void sendUsingSouthNodeTask() {
@@ -85,6 +73,44 @@ implementation
     
     task void sendUsingNorthNodeTask() {
 		// Here we send using north node
+    }
+    
+    void sendArq(message_t* msg) {
+    	int windowsize = sizeof(msg);
+    	int i = 0, retryCount = 0, maxRetryCount = 10;
+    	long a;
+    	for(i = 0; i < windowsize; i++) {
+    		if(retryCount < maxRetryCount + 1 && msg != NULL && !busy) {
+    			// Send packet.
+    			printf("Preparing to send packet, pass no: %d, windowsize: %d, retryCount: %d, \n", i, windowsize, retryCount);
+				printfflush();
+				
+				BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(msg, sizeof (BlinkToRadioMsg)));
+				btrpkt->seq = (uint8_t)i;
+				btrpkt->nodeid = TOS_NODE_ID;
+				
+				if (call AMSend.send(AM_BROADCAST_ADDR, msg, sizeof(BlinkToRadioMsg)) == SUCCESS) {
+					busy = TRUE;
+				}
+
+    			call Timer1.startOneShot(TIMER_PERIOD_MILLI);
+    			while(call Timer1.isRunning() || busy) {}
+    			
+    			if(receivedSeq == sentSeq) {
+    			    printf("Correct seq. no received, continuing\n");
+					printfflush();
+    				i++;
+    			} else {
+    				printf("Bad seq. no or no packet received, retrying\n");
+					printfflush();
+    				retryCount++;
+    			}
+    		}
+    		else {
+    			printf("Retry count exceeded sending packets\n");
+				printfflush();
+    		}
+    	}
     }
     
     // Return true if array is empty, else false
@@ -112,6 +138,10 @@ implementation
 			return TRUE;
 		return FALSE;
 	}
+	
+    event void Timer1.fired() {
+    	// Empty one-shot timer.
+    }
     
     event void Boot.booted() {
     	int i = 0;
@@ -162,6 +192,7 @@ implementation
 
 	event void AMSend.sendDone(message_t *msg, error_t error){
 		 if (&pkt == msg) {
+		 	sentSeq++;
 			busy = FALSE;
 		}
 	}
@@ -170,14 +201,18 @@ implementation
 		message_t *ret = msg;
     	int i = 0;
     	
+    	BlinkToRadioMsg* btrpkt =(BlinkToRadioMsg*)msg;
+   
+    	if(btrpkt->seq == (sentSeq-1))
+    		receivedSeq++;
+
 		// Extract info about rssi
-		BlinkToRadioMsg* btrpkt;
 		btrpkt->rssi = call CC2420Packet.getRssi(msg);
 		
     	printf("Received message with rssi: %d and lqi: %d\n", btrpkt->rssi, btrpkt->lqi);
     	printfflush();
 		
-		// Save rssi in rssiQueue
+		// Forward rssiQueue and save received rssi
 		for (i = 0; i < sizeof(RSSI_ARRAY_SIZE) - 1; i++) {
   			rssiArray[i] = rssiArray[i+1];
 		}
