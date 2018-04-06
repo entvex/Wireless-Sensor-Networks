@@ -40,7 +40,8 @@ implementation
       DISTANCE = 500,
       TIMER_PERIOD_MILLI = 5000,
 	  SEND_POWER = 31,
-	  RSSI_ARRAY_SIZE = 10
+	  RSSI_ARRAY_SIZE = 10,
+	  ARQ_RETRYCOUNT = 10	  
     };
 	
 	struct response {
@@ -63,21 +64,9 @@ implementation
 	task void sendUsingNorthNodeTask();
 	task void sendUsingSouthNodeTask();
 	
-	task void sendDirectTask() {
-		// Here we send directly to moving node
-    }
-    
-    task void sendUsingSouthNodeTask() {
-		// Here we send using south node
-    }
-    
-    task void sendUsingNorthNodeTask() {
-		// Here we send using north node
-    }
-    
-    void sendArq(message_t* msg) {
+    void sendArq(message_t* msg, am_addr_t dest) {
     	int windowsize = sizeof(msg);
-    	int i = 0, retryCount = 0, maxRetryCount = 10;
+    	int i = 0, retryCount = 0, maxRetryCount = ARQ_RETRYCOUNT;
     	long a;
     	for(i = 0; i < windowsize; i++) {
     		if(retryCount < maxRetryCount + 1 && msg != NULL && !busy) {
@@ -88,6 +77,8 @@ implementation
 				BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(msg, sizeof (BlinkToRadioMsg)));
 				btrpkt->seq = (uint8_t)i;
 				btrpkt->nodeid = TOS_NODE_ID;
+				
+				//call AMPacket.setDestination(msg, dest);
 				
 				if (call AMSend.send(AM_BROADCAST_ADDR, msg, sizeof(BlinkToRadioMsg)) == SUCCESS) {
 					busy = TRUE;
@@ -138,6 +129,21 @@ implementation
 			return TRUE;
 		return FALSE;
 	}
+	
+	task void sendDirectTask() {
+		// Send directly
+		sendArq(&pkt, 1);
+    }
+    
+    task void sendUsingSouthNodeTask() {
+		// Send using south node
+		sendArq(&pkt, 2);
+    }
+    
+    task void sendUsingNorthNodeTask() {
+		// Send using north node
+		sendArq(&pkt, 3);
+    }
 	
     event void Timer1.fired() {
     	// Empty one-shot timer.
@@ -195,7 +201,7 @@ implementation
 		 	sentSeq++;
 			busy = FALSE;
 		}
-	}
+	}	
 
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
 		message_t *ret = msg;
