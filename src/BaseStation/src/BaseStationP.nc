@@ -64,6 +64,11 @@ implementation
 	task void sendUsingNorthNodeTask();
 	task void sendUsingSouthNodeTask();
 	
+	void print(unsigned char* text) {
+    	printf(text);
+    	printfflush();
+    }
+	
     void sendArq(message_t* msg, am_addr_t dest) {
     	int windowsize = sizeof(msg);
     	int i = 0, retryCount = 0, maxRetryCount = ARQ_RETRYCOUNT;
@@ -71,8 +76,7 @@ implementation
     	for(i = 0; i < windowsize; i++) {
     		if(retryCount < maxRetryCount + 1 && msg != NULL && !busy) {
     			// Send packet.
-    			printf("Preparing to send packet, pass no: %d, windowsize: %d, retryCount: %d, \n", i, windowsize, retryCount);
-				printfflush();
+    			print("Preparing to send packet, pass no: %d, windowsize: %d, retryCount: %d, \n", i, windowsize, retryCount);
 				
 				BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(msg, sizeof (BlinkToRadioMsg)));
 				btrpkt->seq = (uint8_t)i;
@@ -88,18 +92,16 @@ implementation
     			while(call Timer1.isRunning() || busy) {}
     			
     			if(receivedSeq == sentSeq) {
-    			    printf("Correct seq. no received, continuing\n");
-					printfflush();
-    				i++;
+    				print("Correct seq. no received, continuing\n");
+					retryCount = 0;
     			} else {
-    				printf("Bad seq. no or no packet received, retrying\n");
-					printfflush();
+    				print("Bad seq. no or no packet received, retrying\n");
     				retryCount++;
+    				i--;
     			}
     		}
     		else {
-    			printf("Retry count exceeded sending packets\n");
-				printfflush();
+    			print("Retry count exceeded sending packets\n");
     		}
     	}
     }
@@ -157,29 +159,25 @@ implementation
   			rssiArray[i] = 0;
 		}
 			
-		printf("BaseStation started!\n");
-		printfflush();
+		print("BaseStation started!\n");
 	}
 
 	event void Timer0.fired() {
 		// Main loop
 		// Runs every time timer is fired
 		if (isEmpty(rssiArray, RSSI_ARRAY_SIZE)) {
-			printf("Queue is empty. Calling direct!\n");
-			printfflush();
+			print("Queue is empty. Calling direct!\n");
 			post sendDirectTask();
 		}
 		
 		if (rssiArray[0] > THRESHOLD) {
-			printf("Rssi is within range. Calling direct!\n");
-			printfflush();
+			print("Rssi is within range. Calling direct!\n");
 			post sendDirectTask();
 		}
 		
 		if (rssiArray[0] < THRESHOLD)
 		{
-			printf("Rssi is outside range. Calling north/south!\n");
-			printfflush();
+			print("Rssi is outside range. Calling north/south!\n");
 			post sendUsingNorthNodeTask();
 			post sendUsingSouthNodeTask();
 		}	
@@ -215,8 +213,7 @@ implementation
 		// Extract info about rssi
 		btrpkt->rssi = call CC2420Packet.getRssi(msg);
 		
-    	printf("Received message with rssi: %d and lqi: %d\n", btrpkt->rssi, btrpkt->lqi);
-    	printfflush();
+    	print("Received message with rssi: %d and lqi: %d\n", btrpkt->rssi, btrpkt->lqi);
 		
 		// Forward rssiQueue and save received rssi
 		for (i = 0; i < sizeof(RSSI_ARRAY_SIZE) - 1; i++) {
