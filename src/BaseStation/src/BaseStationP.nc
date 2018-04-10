@@ -64,8 +64,8 @@ implementation
 	task void sendUsingNorthNodeTask();
 	task void sendUsingSouthNodeTask();
 	
-	void print(unsigned char* text) {
-    	printf(text);
+	void print(unsigned char* string, ...) {
+    	printf(string);
     	printfflush();
     }
 	
@@ -89,7 +89,7 @@ implementation
 				}
 
     			call Timer1.startOneShot(TIMER_PERIOD_MILLI);
-    			while(call Timer1.isRunning() || busy) {}
+    			while(call Timer1.isRunning() && receivedSeq != sentSeq || busy) {}
     			
     			if(receivedSeq == sentSeq) {
     				print("Correct seq. no received, continuing\n");
