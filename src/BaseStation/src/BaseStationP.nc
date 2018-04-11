@@ -1,121 +1,170 @@
-// $Id: BaseStationP.nc,v 1.10 2008/06/23 20:25:14 regehr Exp $
-
-/*									tab:4
- * "Copyright (c) 2000-2005 The Regents of the University  of California.  
- * All rights reserved.
- *
- * Permission to use, copy, modify, and distribute this software and its
- * documentation for any purpose, without fee, and without written agreement is
- * hereby granted, provided that the above copyright notice, the following
- * two paragraphs and the author appear in all copies of this software.
- * 
- * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
- * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
- * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
- * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
- * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
- * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
- * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
- * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS."
- *
- * Copyright (c) 2002-2005 Intel Corporation
- * All rights reserved.
- *
- * This file is distributed under the terms in the attached INTEL-LICENSE     
- * file. If you do not find these files, copies can be found by writing to
- * Intel Research Berkeley, 2150 Shattuck Avenue, Suite 1300, Berkeley, CA, 
- * 94704.  Attention:  Intel License Inquiry.
- */
-
-/*
- * @author Phil Buonadonna
- * @author Gilman Tolle
- * @author David Gay
- * Revision:	$Id: BaseStationP.nc,v 1.10 2008/06/23 20:25:14 regehr Exp $
- */
-  
 /* 
- * BaseStationP bridges packets between a serial channel and the radio.
- * Messages moving from serial to radio will be tagged with the group
- * ID compiled into the TOSBase, and messages moving from radio to
- * serial will be filtered by that same group id.
+ * WSN-GOT BaseStation
  */
 
 #include "AM.h"
 #include "Serial.h"
 #include <Timer.h>
+#include "printf.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#include "BaseStation.h"
 
-module BaseStationP {
+module BaseStationP @safe() {
    	uses interface Boot;
 	uses interface Leds;
 	uses interface Timer<TMilli> as Timer0;
+	uses interface Timer<TMilli> as Timer1;
 	uses interface Packet;
 	uses interface AMPacket;
 	uses interface AMSend;
 	uses interface SplitControl as AMControl;
 	uses interface Receive;
+	uses interface CC2420Packet;
 }
 
 implementation
-{
-	// Some fixed types
-	enum {
-      THRESHOLD = 700,
-      DISTANCE = 500,
-      TIMER_PERIOD_MILLI = 5000
-    };
+{	
+	bool busy = FALSE;
+	message_t pkt;
+	//uint16_t rssiArray[RSSI_ARRAY_SIZE];
 	
-	struct response {
-		uint8_t position;
-		double heartRate;
-	};
+	uint8_t receivedCounter = 0;
+	uint8_t sentCounter = 0;
 	
-	struct request {
-		message_t buffer[12];
-	};
+	void sendRequestArq();
+	task void sendDirectTask();
+	task void sendUsingNorthNodeTask();
+	task void sendUsingSouthNodeTask();
 	
-	double probeNode() {
-      // get RSSI of moving node
-      double rssi = 501;
-      if(rssi > THRESHOLD)
-      	return rssi;
-      else
-    	return 0;
-    }
-    
-    void sendDirect() {
-    }
-    
-    void sendUsingSouthNode() {
-    }
-    
-    void sendUsingNorthNode() {
-    }
+    void sendRequestArq() {
+    	BlinkToRadioMsg* btrpkt;
     	
+    	if(receivedCounter == sentCounter)
+    		sentCounter++;
+    		
+    	if(!busy) {
+    		btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(&pkt, sizeof(BlinkToRadioMsg)));
+    		printf("Preparing to send packet with counter: %d\n", sentCounter);
+    		printfflush();
+    	
+    		if(btrpkt != NULL) {
+    			btrpkt->nodeid = TOS_NODE_ID;
+				btrpkt->seq = sentCounter % 2;
+				btrpkt->counter = sentCounter;
+				
+				call CC2420Packet.setPower(&pkt, SET_POWER);
+				
+				if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(BlinkToRadioMsg)) == SUCCESS) {
+					busy = TRUE;
+					call Timer1.startOneShot(500);
+					printf("Sucessfully sent packet\n");
+					printfflush();
+				}
+    		}
+    	}
+    }
+	
+    // Return true if array is empty, else false
+    bool isEmpty(uint8_t* arr, int size)
+	{
+		int i = 0;
+		for(i = 0; i < size; i++) {
+			if(arr[i] != INT_MIN || arr[i] != 0) {
+				return FALSE;
+			}
+		}
+		return TRUE;
+	}
+	
+	// Return true if array is full, else false
+	bool isFull(uint8_t* arr, int size) {
+		int i = 0;
+		int count = 0;
+		for(i = 0; i > size; i++) {
+			if(arr[i] != INT_MIN || arr[i] != 0) {
+				count++;
+			}
+		}
+		if(count == size)
+			return TRUE;
+		return FALSE;
+	}
+	
+	task void sendDirectTask() {
+		// Send directly
+		printf("in sendDirectTask\n");
+		printfflush();
+	//	sendArq();
+		//sendArq(&pkt, 1);
+    }
+    
+    task void sendUsingSouthNodeTask() {
+		// Send using south node
+		//sendArq(&pkt, 2);
+    }
+    
+    task void sendUsingNorthNodeTask() {
+		// Send using north node
+		//sendArq(&pkt, 3);
+    }
+    
     event void Boot.booted() {
+    	//int i = 0;
     	// Call stuff when booted
 		call AMControl.start();
+		//for (i = 0; i < sizeof(rssiArray); i++) {
+  			//rssiArray[i] = 0;
+		//}
+		printf("BaseStation started!\n");
 	}
-
+	
 	event void Timer0.fired() {
 		// Main loop
 		// Runs every time timer is fired
-		double signalStrength = probeNode();
 		
-		if (signalStrength > THRESHOLD) {
-			sendDirect();
-		}
-		else {
-			sendUsingSouthNode();
-			sendUsingNorthNode();
-		}
+		printf("Timer0 fired\n");
+		printfflush();
+		sendRequestArq();
+		
+		//sendDirectTask();
+//		if (isEmpty(rssiArray, RSSI_ARRAY_SIZE)) {
+//			print("Queue is empty. Calling direct!\n");
+//			post sendDirectTask();
+//		}
+//		
+//		if (rssiArray[0] > THRESHOLD) {
+//			print("Rssi is within range. Calling direct!\n");
+//			post sendDirectTask();
+//		}
+//		
+//		if (rssiArray[0] < THRESHOLD)
+//		{
+//			print("Rssi is outside range. Calling north/south!\n");
+//			post sendUsingNorthNodeTask();
+//			post sendUsingSouthNodeTask();
+//		}	
 	}
+	
+	event void Timer1.fired() {
+    	if(receivedCounter != sentCounter) {
+    		printf("Did not get a response, resending ...\n");
+    		printfflush();
+    		sendRequestArq();
+    	}
+    	else {
+    		printf("Did not get a response, resending ...\n");
+    		printfflush();
+    	}
+    }
 
 	event void AMControl.startDone(error_t error){
-		if (error == SUCCESS)
-			call Timer0.startPeriodic(TIMER_PERIOD_MILLI);
+		if (error == SUCCESS) {
+			printf("Starting timer0\n");
+			printfflush();
+			call Timer0.startPeriodic(1000);
+		}
 		else
 			call AMControl.start();
 	}
@@ -125,11 +174,33 @@ implementation
 	}
 
 	event void AMSend.sendDone(message_t *msg, error_t error){
-		// TODO Auto-generated method stub
-	}
+		 if (&pkt == msg) {
+		 	busy = FALSE;
+		}
+	}	
 
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
+		BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)payload;
+		btrpkt->seq = sentCounter % 2;
+		
+		if(btrpkt != NULL) {
+			printf("Received message with rssi: %d and seq: %d\n", btrpkt->rssi, btrpkt->seq);
+			printfflush();
+			if(btrpkt->seq == sentCounter % 2) {
+			    call Timer1.stop();
+				receivedCounter = sentCounter;
+			}
+		}
+		
 		return msg;
+		// Extract info about rssi
+		// btrpkt->rssi = call CC2420Packet.getRssi(msg);
+		
+		// Forward rssiQueue and save received rssi
+//		for (i = 0; i < sizeof(RSSI_ARRAY_SIZE) - 1; i++) {
+//  			rssiArray[i] = rssiArray[i+1];
+//		}
+//		rssiArray[RSSI_ARRAY_SIZE] = btrpkt->rssi;
 	}
 }
 //  enum {
