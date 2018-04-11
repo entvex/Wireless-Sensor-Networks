@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include "BaseStation.h"
 
 module BaseStationP @safe() {
    	uses interface Boot;
@@ -24,86 +25,47 @@ module BaseStationP @safe() {
 }
 
 implementation
-{
-	typedef nx_struct BlinkToRadioMsg {
-  		nx_uint16_t nodeid;
- 		nx_uint16_t counter;
-  		nx_int8_t rssi;
-  		nx_uint8_t lqi;
-  		nx_uint8_t power;
-  		nx_uint8_t seq;
-	} BlinkToRadioMsg;
-	
-	// Some fixed types
-	enum {
-      THRESHOLD = 5,
-      DISTANCE = 500,
-      TIMER_PERIOD_MILLI = 500,
-	  SEND_POWER = 31,
-	  RSSI_ARRAY_SIZE = 10,
-	  ARQ_RETRYCOUNT = 10	  
-    };
-	
+{	
 	bool busy = FALSE;
 	message_t pkt;
-	uint16_t rssiArray[RSSI_ARRAY_SIZE];
+	//uint16_t rssiArray[RSSI_ARRAY_SIZE];
 	
-	int sentSeq = 0;
-	int receivedSeq = 0;
+	uint8_t receivedCounter = 0;
+	uint8_t sentCounter = 0;
 	
-	//task void sendDirectTask();
+	void sendRequestArq();
+	task void sendDirectTask();
 	task void sendUsingNorthNodeTask();
 	task void sendUsingSouthNodeTask();
 	
-	void print(unsigned char* string, ...) {
-    	printf(string);
-    	printfflush();
-    }
-	
-    void sendArq(message_t* msg, uint8_t dest) {
-    	int windowsize;
-    	int i = 0, retryCount = 0, maxRetryCount = ARQ_RETRYCOUNT;
-    	long a;
+    void sendRequestArq() {
     	BlinkToRadioMsg* btrpkt;
     	
-    	windowsize = sizeof(msg);
+    	if(receivedCounter == sentCounter)
+    		sentCounter++;
+    		
+    	if(!busy) {
+    		btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(&pkt, sizeof(BlinkToRadioMsg)));
+    		printf("Preparing to send packet with counter: %d\n", sentCounter);
+    		printfflush();
     	
-    	print("In sendArq");
-    	print("In sendArq. Window size: %d", windowsize);
-    	
-    	for(i = 0; i < windowsize; i++) {
-    		if((retryCount < maxRetryCount + 1) && msg != NULL && !busy) {
-    			// Send packet.
-    			print("Preparing to send packet, pass no: %d, windowsize: %d, retryCount: %d, \n", i, windowsize, retryCount);
+    		if(btrpkt != NULL) {
+    			btrpkt->nodeid = TOS_NODE_ID;
+				btrpkt->seq = sentCounter % 2;
+				btrpkt->counter = sentCounter;
 				
-				btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(msg, sizeof (BlinkToRadioMsg)));
-				btrpkt->seq = (uint8_t)i;
-				btrpkt->nodeid = TOS_NODE_ID;
+				call CC2420Packet.setPower(&pkt, SET_POWER);
 				
-				//call AMPacket.setDestination(msg, dest);
-				
-				if (call AMSend.send(AM_BROADCAST_ADDR, msg, sizeof(BlinkToRadioMsg)) == SUCCESS) {
+				if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(BlinkToRadioMsg)) == SUCCESS) {
 					busy = TRUE;
+					call Timer1.startOneShot(500);
+					printf("Sucessfully sent packet\n");
+					printfflush();
 				}
-
-    			call Timer1.startOneShot(TIMER_PERIOD_MILLI);
-    			while((call Timer1.isRunning() && receivedSeq != sentSeq) || busy) {}
-    			
-    			if(receivedSeq == sentSeq) {
-    				print("Correct seq. no received, continuing\n");
-					retryCount = 0;
-    			} else {
-    				print("Bad seq. no or no packet received, retrying\n");
-    				retryCount++;
-    				i--;
-    			}
-    		}
-    		else {
-    			print("Retry count exceeded sending packets\n");
     		}
     	}
     }
-    
+	
     // Return true if array is empty, else false
     bool isEmpty(uint8_t* arr, int size)
 	{
@@ -130,10 +92,11 @@ implementation
 		return FALSE;
 	}
 	
-	void sendDirectTask() {
+	task void sendDirectTask() {
 		// Send directly
-		print("in sendDirectTask");
-		//sendArq(&pkt, 1);
+		printf("in sendDirectTask\n");
+		printfflush();
+	//	sendArq();
 		//sendArq(&pkt, 1);
     }
     
@@ -154,13 +117,17 @@ implementation
 		//for (i = 0; i < sizeof(rssiArray); i++) {
   			//rssiArray[i] = 0;
 		//}
-		print("BaseStation started!\n");
+		printf("BaseStation started!\n");
 	}
 	
 	event void Timer0.fired() {
 		// Main loop
 		// Runs every time timer is fired
-		print("Timer0 fired");
+		
+		printf("Timer0 fired\n");
+		printfflush();
+		sendRequestArq();
+		
 		//sendDirectTask();
 //		if (isEmpty(rssiArray, RSSI_ARRAY_SIZE)) {
 //			print("Queue is empty. Calling direct!\n");
@@ -181,13 +148,22 @@ implementation
 	}
 	
 	event void Timer1.fired() {
-    	// Empty one-shot timer.
+    	if(receivedCounter != sentCounter) {
+    		printf("Did not get a response, resending ...\n");
+    		printfflush();
+    		sendRequestArq();
+    	}
+    	else {
+    		printf("Did not get a response, resending ...\n");
+    		printfflush();
+    	}
     }
 
 	event void AMControl.startDone(error_t error){
 		if (error == SUCCESS) {
-			print("Staring timer0");
-			call Timer0.startPeriodic(TIMER_PERIOD_MILLI);
+			printf("Starting timer0\n");
+			printfflush();
+			call Timer0.startPeriodic(1000);
 		}
 		else
 			call AMControl.start();
@@ -199,32 +175,32 @@ implementation
 
 	event void AMSend.sendDone(message_t *msg, error_t error){
 		 if (&pkt == msg) {
-		 	sentSeq++;
-			busy = FALSE;
+		 	busy = FALSE;
 		}
 	}	
 
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
-		message_t *ret = msg;
-    	int i = 0;
-    	
-    	BlinkToRadioMsg* btrpkt =(BlinkToRadioMsg*)msg;
-   
-    	if(btrpkt->seq == (sentSeq-1))
-    		receivedSeq++;
-
-		// Extract info about rssi
-		btrpkt->rssi = call CC2420Packet.getRssi(msg);
+		BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)payload;
+		btrpkt->seq = sentCounter % 2;
 		
-    	print("Received message with rssi: %d and lqi: %d\n", btrpkt->rssi, btrpkt->lqi);
+		if(btrpkt != NULL) {
+			printf("Received message with rssi: %d and seq: %d\n", btrpkt->rssi, btrpkt->seq);
+			printfflush();
+			if(btrpkt->seq == sentCounter % 2) {
+			    call Timer1.stop();
+				receivedCounter = sentCounter;
+			}
+		}
+		
+		return msg;
+		// Extract info about rssi
+		// btrpkt->rssi = call CC2420Packet.getRssi(msg);
 		
 		// Forward rssiQueue and save received rssi
 //		for (i = 0; i < sizeof(RSSI_ARRAY_SIZE) - 1; i++) {
 //  			rssiArray[i] = rssiArray[i+1];
 //		}
 //		rssiArray[RSSI_ARRAY_SIZE] = btrpkt->rssi;
-		
-		return ret;
 	}
 }
 //  enum {

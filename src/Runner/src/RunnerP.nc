@@ -28,12 +28,22 @@ implementation
 	bool busy = FALSE;
 	message_t pkt;
 	
-	void print(unsigned char* string, ...) {
-    	printf(string);
-    	printfflush();
-    }
+	void setLeds(uint16_t val) {
+    if (val & 0x01)
+      call Leds.led0On();
+    else 
+      call Leds.led0Off();
+    if (val & 0x02)
+      call Leds.led1On();
+    else
+      call Leds.led1Off();
+    if (val & 0x04)
+      call Leds.led2On();
+    else
+      call Leds.led2Off();
+  	}
 	
-	void sendResponse(nx_uint8_t seq) {
+	void sendResponse(nx_uint16_t seq) {
 		if (!busy) {
 			BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(&pkt, sizeof(BlinkToRadioMsg)));
 
@@ -44,7 +54,7 @@ implementation
 			btrpkt->nodeid = TOS_NODE_ID;
 			btrpkt->seq = seq;
 
-			call CC2420Packet.setPower(&pkt, SET_POWER);
+			setLeds(btrpkt->counter);
 
 			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(BlinkToRadioMsg)) == SUCCESS) {
 				busy = TRUE;
@@ -55,7 +65,6 @@ implementation
     event void Boot.booted() {
     	// Call stuff when booted
 		call AMControl.start();
-		print("Runner started!\n");
 	}
 
 	event void Timer0.fired() {
@@ -80,16 +89,10 @@ implementation
 	}	
 
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
-		message_t *ret = msg;
-    	int i = 0;
-    	
-    	BlinkToRadioMsg* btrpkt =(BlinkToRadioMsg*)msg;
-   
-		// Extract info about rssi
-		btrpkt->rssi = call CC2420Packet.getRssi(msg);
-		
+    	BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)payload;
+   	
 		sendResponse(btrpkt->seq);
 		
-		return ret;
+		return msg;
 	}
 }
