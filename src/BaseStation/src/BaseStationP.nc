@@ -38,20 +38,11 @@ implementation
 	enum {
       THRESHOLD = 5,
       DISTANCE = 500,
-      TIMER_PERIOD_MILLI = 5000,
+      TIMER_PERIOD_MILLI = 500,
 	  SEND_POWER = 31,
 	  RSSI_ARRAY_SIZE = 10,
 	  ARQ_RETRYCOUNT = 10	  
     };
-	
-	struct response {
-		uint8_t position;
-		uint8_t heartRate;
-	};
-	
-	struct sendQueue {
-		message_t buffer[100];
-	};
 	
 	bool busy = FALSE;
 	message_t pkt;
@@ -60,7 +51,7 @@ implementation
 	int sentSeq = 0;
 	int receivedSeq = 0;
 	
-	task void sendDirectTask();
+	//task void sendDirectTask();
 	task void sendUsingNorthNodeTask();
 	task void sendUsingSouthNodeTask();
 	
@@ -69,16 +60,23 @@ implementation
     	printfflush();
     }
 	
-    void sendArq(message_t* msg, am_addr_t dest) {
-    	int windowsize = sizeof(msg);
+    void sendArq(message_t* msg, uint8_t dest) {
+    	int windowsize;
     	int i = 0, retryCount = 0, maxRetryCount = ARQ_RETRYCOUNT;
     	long a;
+    	BlinkToRadioMsg* btrpkt;
+    	
+    	windowsize = sizeof(msg);
+    	
+    	print("In sendArq");
+    	print("In sendArq. Window size: %d", windowsize);
+    	
     	for(i = 0; i < windowsize; i++) {
-    		if(retryCount < maxRetryCount + 1 && msg != NULL && !busy) {
+    		if((retryCount < maxRetryCount + 1) && msg != NULL && !busy) {
     			// Send packet.
     			print("Preparing to send packet, pass no: %d, windowsize: %d, retryCount: %d, \n", i, windowsize, retryCount);
 				
-				BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(msg, sizeof (BlinkToRadioMsg)));
+				btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(msg, sizeof (BlinkToRadioMsg)));
 				btrpkt->seq = (uint8_t)i;
 				btrpkt->nodeid = TOS_NODE_ID;
 				
@@ -89,7 +87,7 @@ implementation
 				}
 
     			call Timer1.startOneShot(TIMER_PERIOD_MILLI);
-    			while(call Timer1.isRunning() && receivedSeq != sentSeq || busy) {}
+    			while((call Timer1.isRunning() && receivedSeq != sentSeq) || busy) {}
     			
     			if(receivedSeq == sentSeq) {
     				print("Correct seq. no received, continuing\n");
@@ -132,60 +130,65 @@ implementation
 		return FALSE;
 	}
 	
-	task void sendDirectTask() {
+	void sendDirectTask() {
 		// Send directly
-		sendArq(&pkt, 1);
+		print("in sendDirectTask");
+		//sendArq(&pkt, 1);
+		//sendArq(&pkt, 1);
     }
     
     task void sendUsingSouthNodeTask() {
 		// Send using south node
-		sendArq(&pkt, 2);
+		//sendArq(&pkt, 2);
     }
     
     task void sendUsingNorthNodeTask() {
 		// Send using north node
-		sendArq(&pkt, 3);
-    }
-	
-    event void Timer1.fired() {
-    	// Empty one-shot timer.
+		//sendArq(&pkt, 3);
     }
     
     event void Boot.booted() {
-    	int i = 0;
+    	//int i = 0;
     	// Call stuff when booted
 		call AMControl.start();
-		for (i = 0; i < sizeof(rssiArray); i++) {
-  			rssiArray[i] = 0;
-		}
-			
+		//for (i = 0; i < sizeof(rssiArray); i++) {
+  			//rssiArray[i] = 0;
+		//}
 		print("BaseStation started!\n");
 	}
-
+	
 	event void Timer0.fired() {
 		// Main loop
 		// Runs every time timer is fired
-		if (isEmpty(rssiArray, RSSI_ARRAY_SIZE)) {
-			print("Queue is empty. Calling direct!\n");
-			post sendDirectTask();
-		}
-		
-		if (rssiArray[0] > THRESHOLD) {
-			print("Rssi is within range. Calling direct!\n");
-			post sendDirectTask();
-		}
-		
-		if (rssiArray[0] < THRESHOLD)
-		{
-			print("Rssi is outside range. Calling north/south!\n");
-			post sendUsingNorthNodeTask();
-			post sendUsingSouthNodeTask();
-		}	
+		print("Timer0 fired");
+		//sendDirectTask();
+//		if (isEmpty(rssiArray, RSSI_ARRAY_SIZE)) {
+//			print("Queue is empty. Calling direct!\n");
+//			post sendDirectTask();
+//		}
+//		
+//		if (rssiArray[0] > THRESHOLD) {
+//			print("Rssi is within range. Calling direct!\n");
+//			post sendDirectTask();
+//		}
+//		
+//		if (rssiArray[0] < THRESHOLD)
+//		{
+//			print("Rssi is outside range. Calling north/south!\n");
+//			post sendUsingNorthNodeTask();
+//			post sendUsingSouthNodeTask();
+//		}	
 	}
+	
+	event void Timer1.fired() {
+    	// Empty one-shot timer.
+    }
 
 	event void AMControl.startDone(error_t error){
-		if (error == SUCCESS)
+		if (error == SUCCESS) {
+			print("Staring timer0");
 			call Timer0.startPeriodic(TIMER_PERIOD_MILLI);
+		}
 		else
 			call AMControl.start();
 	}
@@ -216,10 +219,10 @@ implementation
     	print("Received message with rssi: %d and lqi: %d\n", btrpkt->rssi, btrpkt->lqi);
 		
 		// Forward rssiQueue and save received rssi
-		for (i = 0; i < sizeof(RSSI_ARRAY_SIZE) - 1; i++) {
-  			rssiArray[i] = rssiArray[i+1];
-		}
-		rssiArray[RSSI_ARRAY_SIZE] = btrpkt->rssi;
+//		for (i = 0; i < sizeof(RSSI_ARRAY_SIZE) - 1; i++) {
+//  			rssiArray[i] = rssiArray[i+1];
+//		}
+//		rssiArray[RSSI_ARRAY_SIZE] = btrpkt->rssi;
 		
 		return ret;
 	}

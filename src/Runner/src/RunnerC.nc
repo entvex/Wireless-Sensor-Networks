@@ -1,5 +1,5 @@
 /* 
- * WSN-GOT BaseStation
+ * WSN-GOT Runner
  */
 
 configuration RunnerC {

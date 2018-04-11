@@ -9,6 +9,7 @@ implementation {
   components LedsC;
   components BaseStationP;
   components new TimerMilliC() as Timer0;
+  components new TimerMilliC() as Timer1;
   components ActiveMessageC;
   components new AMSenderC(6);
   components new AMReceiverC(6);
@@ -19,6 +20,7 @@ implementation {
   BaseStationP.Boot -> MainC;
   BaseStationP.Leds -> LedsC;
   BaseStationP.Timer0 -> Timer0;
+  BaseStationP.Timer1 -> Timer1;
   BaseStationP.Packet -> AMSenderC;
   BaseStationP.AMPacket -> AMSenderC;
   BaseStationP.AMControl -> ActiveMessageC;

@@ -1,5 +1,5 @@
 /* 
- * WSN-GOT BaseStation
+ * WSN-GOT Runner
  */
 
 #include "Runner.h"
@@ -11,11 +11,10 @@
 #include <stdlib.h>
 #include <limits.h>
 
-module BaseStationP @safe() {
+module RunnerP @safe() {
    	uses interface Boot;
 	uses interface Leds;
 	uses interface Timer<TMilli> as Timer0;
-	uses interface Timer<TMilli> as Timer1;
 	uses interface Packet;
 	uses interface AMPacket;
 	uses interface AMSend;
@@ -43,7 +42,7 @@ implementation
 			}		
 
 			btrpkt->nodeid = TOS_NODE_ID;
-			btrpkt->ack = seq;
+			btrpkt->seq = seq;
 
 			call CC2420Packet.setPower(&pkt, SET_POWER);
 
@@ -86,9 +85,6 @@ implementation
     	
     	BlinkToRadioMsg* btrpkt =(BlinkToRadioMsg*)msg;
    
-    	if(btrpkt->seq == (sentSeq-1))
-    		receivedSeq++;
-
 		// Extract info about rssi
 		btrpkt->rssi = call CC2420Packet.getRssi(msg);
 		
