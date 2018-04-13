@@ -142,6 +142,9 @@ P_TrackSignal_Combined     = diag(P_TrackSignal_temp_Combined)';
 P_TrackSignal_All_Rounds_Combined(:,r) = P_TrackSignal_Combined; 
 end
 
+filename = 'ToHopOrNotToHop.mat';
+save(filename);
+
 %% Plotting Signal Range in AIR for 0dBm
 figure(1)
 hold on
@@ -159,7 +162,6 @@ hold off
 
 figure(2)
 hold on
-Samples = linspace(1,length(t),length(t));
 plot(Samples,P_TrackSignal_Base)
 title({'RECEIVED SIGNAL PER SAMPLE AT TRACK';'BASE-Station, AIR, Trx = 0dBm'})
 xlabel('Number of Samples for ONE track lab')
