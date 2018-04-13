@@ -21,6 +21,7 @@ module RunnerP @safe() {
 	uses interface SplitControl as AMControl;
 	uses interface Receive;
 	uses interface CC2420Packet;
+	uses interface Random;
 }
 
 implementation
@@ -43,21 +44,21 @@ implementation
       call Leds.led2Off();
   	}
 	
-	void sendResponse(nx_uint16_t seq) {
+	void sendResponse(nx_uint16_t seq) {		
 		if (!busy) {
-			BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(&pkt, sizeof(BlinkToRadioMsg)));
+			ReplyMsg* replypkt = (ReplyMsg*)(call Packet.getPayload(&pkt, sizeof(ReplyMsg)));
 
-			if (btrpkt == NULL) {
+			if (replypkt == NULL) {
 				return;
 			}		
+			
+			replypkt->nodeid = TOS_NODE_ID;
+			replypkt->seq = seq;
+			replypkt->data = call Random.rand16();
 
-			btrpkt->nodeid = TOS_NODE_ID;
-			btrpkt->seq = seq;
-
-			setLeds(btrpkt->counter);
-
-			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(BlinkToRadioMsg)) == SUCCESS) {
+			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(ReplyMsg)) == SUCCESS) {
 				busy = TRUE;
+				setLeds(replypkt->counter);
 			}
 		}
 	}
@@ -89,9 +90,10 @@ implementation
 	}	
 
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
-    	BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)payload;
-   	
-		sendResponse(btrpkt->seq);
+    	RequestMsg* requestpkt = (RequestMsg*)payload;
+   		
+   		if(requestpkt->counter % 2 == requestpkt->seq)
+   			sendResponse(requestpkt->seq);
 		
 		return msg;
 	}

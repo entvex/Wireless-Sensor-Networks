@@ -22,42 +22,61 @@ module BaseStationP @safe() {
 	uses interface SplitControl as AMControl;
 	uses interface Receive;
 	uses interface CC2420Packet;
+	uses interface Queue<uint16_t> as DataQueue;
+	uses interface Queue<uint16_t> as RssiQueue;
 }
 
 implementation
 {	
 	bool busy = FALSE;
 	message_t pkt;
-	//uint16_t rssiArray[RSSI_ARRAY_SIZE];
-	
 	uint8_t receivedCounter = 0;
 	uint8_t sentCounter = 0;
-	
-	void sendRequestArq();
+
+	void sendRequest(uint16_t);
 	task void sendDirectTask();
 	task void sendUsingNorthNodeTask();
 	task void sendUsingSouthNodeTask();
 	
-    void sendRequestArq() {
-    	BlinkToRadioMsg* btrpkt;
+	void setLeds(uint16_t val) {
+    if (val & 0x01)
+      call Leds.led0On();
+    else 
+      call Leds.led0Off();
+    if (val & 0x02)
+      call Leds.led1On();
+    else
+      call Leds.led1Off();
+    if (val & 0x04)
+      call Leds.led2On();
+    else
+      call Leds.led2Off();
+  	}
+	
+    void sendRequest(uint16_t relayNodeid) {
+    	RequestMsg* requestptr;
     	
     	if(receivedCounter == sentCounter)
     		sentCounter++;
     		
     	if(!busy) {
-    		btrpkt = (BlinkToRadioMsg*)(call Packet.getPayload(&pkt, sizeof(BlinkToRadioMsg)));
+    		requestptr = (RequestMsg*)(call Packet.getPayload(&pkt, sizeof(RequestMsg)));
     		printf("Preparing to send packet with counter: %d\n", sentCounter);
     		printfflush();
     	
-    		if(btrpkt != NULL) {
-    			btrpkt->nodeid = TOS_NODE_ID;
-				btrpkt->seq = sentCounter % 2;
-				btrpkt->counter = sentCounter;
+    		if(requestptr != NULL) {
+    			requestptr->nodeid = TOS_NODE_ID;
+				requestptr->seq = sentCounter % 2;
+				requestptr->counter = sentCounter;
+				
+				if(relayNodeid != 0)
+					requestptr->relayNodeid = relayNodeid;
 				
 				call CC2420Packet.setPower(&pkt, SET_POWER);
 				
-				if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(BlinkToRadioMsg)) == SUCCESS) {
+				if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(RequestMsg)) == SUCCESS) {
 					busy = TRUE;
+					setLeds(requestptr->counter);
 					call Timer1.startOneShot(500);
 					printf("Sucessfully sent packet\n");
 					printfflush();
@@ -65,36 +84,10 @@ implementation
     		}
     	}
     }
-	
-    // Return true if array is empty, else false
-    bool isEmpty(uint8_t* arr, int size)
-	{
-		int i = 0;
-		for(i = 0; i < size; i++) {
-			if(arr[i] != INT_MIN || arr[i] != 0) {
-				return FALSE;
-			}
-		}
-		return TRUE;
-	}
-	
-	// Return true if array is full, else false
-	bool isFull(uint8_t* arr, int size) {
-		int i = 0;
-		int count = 0;
-		for(i = 0; i > size; i++) {
-			if(arr[i] != INT_MIN || arr[i] != 0) {
-				count++;
-			}
-		}
-		if(count == size)
-			return TRUE;
-		return FALSE;
-	}
-	
+		
 	task void sendDirectTask() {
 		// Send directly
-		printf("in sendDirectTask\n");
+		printf("Sending request direct ...\n");
 		printfflush();
 	//	sendArq();
 		//sendArq(&pkt, 1);
@@ -111,13 +104,10 @@ implementation
     }
     
     event void Boot.booted() {
-    	//int i = 0;
     	// Call stuff when booted
 		call AMControl.start();
-		//for (i = 0; i < sizeof(rssiArray); i++) {
-  			//rssiArray[i] = 0;
-		//}
 		printf("BaseStation started!\n");
+		printfflush();
 	}
 	
 	event void Timer0.fired() {
@@ -126,7 +116,7 @@ implementation
 		
 		printf("Timer0 fired\n");
 		printfflush();
-		sendRequestArq();
+		sendRequest(0);
 		
 		//sendDirectTask();
 //		if (isEmpty(rssiArray, RSSI_ARRAY_SIZE)) {
@@ -151,10 +141,10 @@ implementation
     	if(receivedCounter != sentCounter) {
     		printf("Did not get a response, resending ...\n");
     		printfflush();
-    		sendRequestArq();
+    		sendRequest(RELAY_NODE_ID);
     	}
     	else {
-    		printf("Did not get a response, resending ...\n");
+    		printf("Did get a response, all done ...\n");
     		printfflush();
     	}
     }
@@ -180,255 +170,20 @@ implementation
 	}	
 
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
-		BlinkToRadioMsg* btrpkt = (BlinkToRadioMsg*)payload;
-		btrpkt->seq = sentCounter % 2;
+		ReplyMsg* replymsg = (ReplyMsg*)payload;
 		
-		if(btrpkt != NULL) {
-			printf("Received message with rssi: %d and seq: %d\n", btrpkt->rssi, btrpkt->seq);
+		if(replymsg != NULL) {
+			printf("Received message with rssi: %d and seq: %d\n", replymsg->rssi, replymsg->seq);
 			printfflush();
-			if(btrpkt->seq == sentCounter % 2) {
-			    call Timer1.stop();
-				receivedCounter = sentCounter;
+			if(replymsg->seq == sentCounter % 2) {
+				printf("Correct msg received. Seq no. match!");
+				printfflush();
+				receivedCounter++;
+				call Timer1.stop();
+				//call RssiQueue.enqueue(replymsg->counter);
 			}
 		}
 		
 		return msg;
-		// Extract info about rssi
-		// btrpkt->rssi = call CC2420Packet.getRssi(msg);
-		
-		// Forward rssiQueue and save received rssi
-//		for (i = 0; i < sizeof(RSSI_ARRAY_SIZE) - 1; i++) {
-//  			rssiArray[i] = rssiArray[i+1];
-//		}
-//		rssiArray[RSSI_ARRAY_SIZE] = btrpkt->rssi;
 	}
 }
-//  enum {
-//    UART_QUEUE_LEN = 12,
-//    RADIO_QUEUE_LEN = 12,
-//  };
-//
-//  message_t  uartQueueBufs[UART_QUEUE_LEN];
-//  message_t  * ONE_NOK uartQueue[UART_QUEUE_LEN];
-//  uint8_t    uartIn, uartOut;
-//  bool       uartBusy, uartFull;
-//
-//  message_t  radioQueueBufs[RADIO_QUEUE_LEN];
-//  message_t  * ONE_NOK radioQueue[RADIO_QUEUE_LEN];
-//  uint8_t    radioIn, radioOut;
-//  bool       radioBusy, radioFull;
-//
-//  task void uartSendTask();
-//  task void radioSendTask();
-//
-//  void dropBlink() {
-//    call Leds.led2Toggle();
-//  }
-//
-//  void failBlink() {
-//    call Leds.led2Toggle();
-//  }
-//
-//  event void Boot.booted() {
-//    uint8_t i;
-//
-//    for (i = 0; i < UART_QUEUE_LEN; i++)
-//      uartQueue[i] = &uartQueueBufs[i];
-//    uartIn = uartOut = 0;
-//    uartBusy = FALSE;
-//    uartFull = TRUE;
-//
-//    for (i = 0; i < RADIO_QUEUE_LEN; i++)
-//      radioQueue[i] = &radioQueueBufs[i];
-//    radioIn = radioOut = 0;
-//    radioBusy = FALSE;
-//    radioFull = TRUE;
-//
-//    call RadioControl.start();
-//    call SerialControl.start();
-//  }
-//
-//  event void RadioControl.startDone(error_t error) {
-//    if (error == SUCCESS) {
-//      radioFull = FALSE;
-//    }
-//  }
-//
-//  event void SerialControl.startDone(error_t error) {
-//    if (error == SUCCESS) {
-//      uartFull = FALSE;
-//    }
-//  }
-//
-//  event void SerialControl.stopDone(error_t error) {}
-//  event void RadioControl.stopDone(error_t error) {}
-//
-//  uint8_t count = 0;
-//
-//  message_t* ONE receive(message_t* ONE msg, void* payload, uint8_t len);
-//  
-//  event message_t *RadioSnoop.receive[am_id_t id](message_t *msg,
-//						    void *payload,
-//						    uint8_t len) {
-//    return receive(msg, payload, len);
-//  }
-//  
-//  event message_t *RadioReceive.receive[am_id_t id](message_t *msg,
-//						    void *payload,
-//						    uint8_t len) {
-//    return receive(msg, payload, len);
-//  }
-//
-//  message_t* receive(message_t *msg, void *payload, uint8_t len) {
-//    message_t *ret = msg;
-//
-//    atomic {
-//      if (!uartFull)
-//	{
-//	  ret = uartQueue[uartIn];
-//	  uartQueue[uartIn] = msg;
-//
-//	  uartIn = (uartIn + 1) % UART_QUEUE_LEN;
-//	
-//	  if (uartIn == uartOut)
-//	    uartFull = TRUE;
-//
-//	  if (!uartBusy)
-//	    {
-//	      post uartSendTask();
-//	      uartBusy = TRUE;
-//	    }
-//	}
-//      else
-//	dropBlink();
-//    }
-//    
-//    return ret;
-//  }
-//
-//  uint8_t tmpLen;
-//  
-//  task void uartSendTask() {
-//    uint8_t len;
-//    am_id_t id;
-//    am_addr_t addr, src;
-//    message_t* msg;
-//    atomic
-//      if (uartIn == uartOut && !uartFull)
-//	{
-//	  uartBusy = FALSE;
-//	  return;
-//	}
-//
-//    msg = uartQueue[uartOut];
-//    tmpLen = len = call RadioPacket.payloadLength(msg);
-//    id = call RadioAMPacket.type(msg);
-//    addr = call RadioAMPacket.destination(msg);
-//    src = call RadioAMPacket.source(msg);
-//    call UartPacket.clear(msg);
-//    call UartAMPacket.setSource(msg, src);
-//
-//    if (call UartSend.send[id](addr, uartQueue[uartOut], len) == SUCCESS)
-//      call Leds.led1Toggle();
-//    else
-//      {
-//	failBlink();
-//	post uartSendTask();
-//      }
-//  }
-//
-//  event void UartSend.sendDone[am_id_t id](message_t* msg, error_t error) {
-//    if (error != SUCCESS)
-//      failBlink();
-//    else
-//      atomic
-//	if (msg == uartQueue[uartOut])
-//	  {
-//	    if (++uartOut >= UART_QUEUE_LEN)
-//	      uartOut = 0;
-//	    if (uartFull)
-//	      uartFull = FALSE;
-//	  }
-//    post uartSendTask();
-//  }
-//
-//  event message_t *UartReceive.receive[am_id_t id](message_t *msg,
-//						   void *payload,
-//						   uint8_t len) {
-//    message_t *ret = msg;
-//    bool reflectToken = FALSE;
-//
-//    atomic
-//      if (!radioFull)
-//	{
-//	  reflectToken = TRUE;
-//	  ret = radioQueue[radioIn];
-//	  radioQueue[radioIn] = msg;
-//	  if (++radioIn >= RADIO_QUEUE_LEN)
-//	    radioIn = 0;
-//	  if (radioIn == radioOut)
-//	    radioFull = TRUE;
-//
-//	  if (!radioBusy)
-//	    {
-//	      post radioSendTask();
-//	      radioBusy = TRUE;
-//	    }
-//	}
-//      else
-//	dropBlink();
-//
-//    if (reflectToken) {
-//      //call UartTokenReceive.ReflectToken(Token);
-//    }
-//    
-//    return ret;
-//  }
-//
-//  task void radioSendTask() {
-//    uint8_t len;
-//    am_id_t id;
-//    am_addr_t addr,source;
-//    message_t* msg;
-//    
-//    atomic
-//      if (radioIn == radioOut && !radioFull)
-//	{
-//	  radioBusy = FALSE;
-//	  return;
-//	}
-//
-//    msg = radioQueue[radioOut];
-//    len = call UartPacket.payloadLength(msg);
-//    addr = call UartAMPacket.destination(msg);
-//    source = call UartAMPacket.source(msg);
-//    id = call UartAMPacket.type(msg);
-//
-//    call RadioPacket.clear(msg);
-//    call RadioAMPacket.setSource(msg, source);
-//    
-//    if (call RadioSend.send[id](addr, msg, len) == SUCCESS)
-//      call Leds.led0Toggle();
-//    else
-//      {
-//	failBlink();
-//	post radioSendTask();
-//      }
-//  }
-//
-//  event void RadioSend.sendDone[am_id_t id](message_t* msg, error_t error) {
-//    if (error != SUCCESS)
-//      failBlink();
-//    else
-//      atomic
-//	if (msg == radioQueue[radioOut])
-//	  {
-//	    if (++radioOut >= RADIO_QUEUE_LEN)
-//	      radioOut = 0;
-//	    if (radioFull)
-//	      radioFull = FALSE;
-//	  }
-//    
-//    post radioSendTask();
-//  }
-//}

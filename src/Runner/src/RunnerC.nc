@@ -13,9 +13,11 @@ implementation {
   components new AMSenderC(6);
   components new AMReceiverC(6);
   components CC2420ActiveMessageC;
+  components RandomMlcgC;
   
   MainC.Boot <- RunnerP;
   
+  RunnerP.Random -> RandomMlcgC;
   RunnerP.Boot -> MainC;
   RunnerP.Leds -> LedsC;
   RunnerP.Timer0 -> Timer0;

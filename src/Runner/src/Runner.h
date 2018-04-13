@@ -9,13 +9,24 @@ enum {
   ARQ_RETRYCOUNT = 10
 };
 
-typedef nx_struct BlinkToRadioMsg {
+typedef nx_struct RequestMsg {
   		nx_uint16_t nodeid;
+		nx_uint16_t relayNodeid;
  		nx_uint16_t counter;
+		nx_uint16_t seq;
   		nx_int8_t rssi;
   		nx_uint8_t lqi;
   		nx_uint8_t power;
-  		nx_uint16_t seq;
-} BlinkToRadioMsg;
+} RequestMsg;
+
+typedef nx_struct ReplyMsg {
+		nx_uint16_t nodeid;
+ 		nx_uint16_t counter;
+		nx_uint16_t seq;
+		nx_uint16_t data;
+		nx_int8_t rssi;
+  		nx_uint8_t lqi;
+  		nx_uint8_t power;
+} ReplyMsg;
 
 #endif /* RUNNER_H */
