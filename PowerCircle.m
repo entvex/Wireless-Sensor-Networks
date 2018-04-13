@@ -90,8 +90,8 @@ POfficeSouth_W     = Ptx_max.*((d0./dSouthOffice).^gammaOffice);           %Watt
 POfficeSouth_W_min = Ptx_min.*((d0./dSouthminOffice).^gammaOffice);        %Watt
  
 %Combination of stations in dBm
-PAIRCombined         = 10*log10((PAir_W + PAirNorth_W + PAirSouth_W)./0.001);                          
-PAIRCombined_min     = 10*log10((PAir_W_min + PAirNorth_W_min + PAirSouth_W_min)./0.001);              
+PAirCombined         = 10*log10((PAir_W + PAirNorth_W + PAirSouth_W)./0.001);                          
+PAirCombined_min     = 10*log10((PAir_W_min + PAirNorth_W_min + PAirSouth_W_min)./0.001);              
 POfficeCombined      = 10*log10((POffice_W + POfficeNorth_W + POfficeSouth_W)./0.001);                 
 POfficeCombined_min  = 10*log10((POffice_W_min + POfficeNorth_W_min + POfficeSouth_W_min)./0.001); 
 
@@ -158,7 +158,7 @@ hold off
 
 figure(3)
 hold on
-pcolor(x,y,PAIRCombined)
+pcolor(x,y,PAirCombined)
 title({'LOGPATH RECEIVED SIGNAL PLOT';'COMBINED-Stations, AIR, Trx = 0dBm'})
 xlabel('-200m < BaseStation < 200m')
 ylabel('-200m < BaseStation < 200m')
@@ -198,7 +198,7 @@ hold off
 
 figure(5)
 hold on
-pcolor(x(N+1-scale:N+1+scale),y(N+1-scale:N+1+scale),PAIRCombined_min(N+1-scale:N+1+scale,N+1-scale:N+1+scale))
+pcolor(x(N+1-scale:N+1+scale),y(N+1-scale:N+1+scale),PAirCombined_min(N+1-scale:N+1+scale,N+1-scale:N+1+scale))
 title({'LOGPATH RECEIVED SIGNAL PLOT';'COMBINED-Stations, AIR, Trx = -24dBm'})
 xlabel('-25m < BaseStation < 25m')
 ylabel('-25m < BaseStation < 25m')

@@ -48,23 +48,8 @@ PAirSouth   = 10*log10(PAirSouth_W./0.001);      %Watt
 %Combination of stations
 PAirCombined = 10*log10((PAir_W + PAirNorth_W + PAirSouth_W)./0.001); %dBm
 
-% Rounds to run for completing a marathon
-a=198; % horizontal radius of ellipse shaped race track
-b=40;  % vertical radius
-x0=0;  % x0,y0 ellipse centre coordinates
-y0=0;
-t=-pi:0.021:pi;
-x_ellipse=x0+a*cos(t);
-y_ellipse=y0+b*sin(t);
-
-circumference = 2*pi*sqrt((1/2)*(a^(2)+b.^(2))); %897.4624m
-Marathon = 42195; %meters
-Rounds   = round(Marathon/circumference); %47
-P_TrackSignal_All_Rounds_Base = zeros(length(t), Rounds);
-P_TrackSignal_All_Rounds_Combined = zeros(length(t), Rounds);
 %% Fading FF=Fast fading, SF= slow fading  
 %Fast Fading 250ms fast fading effect
-for r=1:Rounds
 mu = 35+30; %+30 from dBW to dBm
 sigma = 5;
 X_ff = normrnd(mu,sigma,[length(x),length(y)]);
@@ -133,65 +118,115 @@ PAirSouth_W_f = 10.^(PAirSouth_f./10);
 PAirCombined_sf = 10*log10((PAir_W_f + PAirNorth_W + PAirSouth_W)./0.001); %dBm
 PAirCombined_sf_All_Noisy = 10*log10((PAir_W_f + PAirNorth_W_f + PAirSouth_W_f)./0.001); %dBm
 
-P_TrackSignal_temp_Base = PAir_f(round(x_ellipse+200),round(y_ellipse+200));
-P_TrackSignal_Base      = diag(P_TrackSignal_temp_Base)';
-P_TrackSignal_All_Rounds_Base(:,r) = P_TrackSignal_Base; 
-
-P_TrackSignal_temp_Combined = PAirCombined_sf(round(x_ellipse+200),round(y_ellipse+200));
-P_TrackSignal_Combined     = diag(P_TrackSignal_temp_Combined)';
-P_TrackSignal_All_Rounds_Combined(:,r) = P_TrackSignal_Combined; 
-end
-
 %% Plotting Signal Range in AIR for 0dBm
 figure(1)
 hold on
 pcolor(x,y,PAir_f)
-title({'LOGPATH RECEIVED SIGNAL PLOT';'BASE-Station, AIR, Trx = 0dBm'})
+title({'LOGPATH RECEIVED SIGNAL PLOT';'BASE-Station, AIR, Trx = 0dBm. Slow and fast fading effects from BASE ONLY'})
 xlabel('-200m < BaseStation < 200m')
 ylabel('-200m < BaseStation < 200m')
 shading interp;
-set(gca, 'clim', [acc_dBm 0]); 
+set(gca, 'clim', [acc_dBm 0]);
 colormap([0 0 0; jet]);
 colorbar;
+
+%Ellipse
+a=N-2; % horizontal radius
+b=N/5; % vertical radius
+x0=0;  % x0,y0 ellipse centre coordinates
+y0=0;
+t=-pi:0.01:pi;
+x_ellipse=x0+a*cos(t); %Try changing to x instead of t "FUN"
+y_ellipse=y0+b*sin(t); %Try changing to y instead of t "FUN"
 plot(x_ellipse,y_ellipse,'r')
 legend('log10 distance path model', 'RaceTrack, "H=80m, L=400m"');
 hold off
 
 figure(2)
 hold on
-Samples = linspace(1,length(t),length(t));
-plot(Samples,P_TrackSignal_Base)
-title({'RECEIVED SIGNAL PER SAMPLE AT TRACK';'BASE-Station, AIR, Trx = 0dBm'})
-xlabel('Number of Samples for ONE track lab')
-ylabel('Signal Strength in dBm')
+pcolor(x,y,PAirCombined_sf)
+title({'LOGPATH RECEIVED SIGNAL PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Slow and fast fading effects from BASE ONLY'})
+xlabel('-200m < BaseStation < 200m') % x-axis label
+ylabel('-200m < BaseStation < 200m') % y-axis label
+shading interp;
+set(gca, 'clim', [acc_dBm 0]);
+colormap([0 0 0; jet]);
+colorbar;
+plot(x_ellipse,y_ellipse,'r')
 legend('log10 distance path model', 'RaceTrack, "H=80m, L=400m"');
 hold off
-
-Samples = linspace(1,length(t),length(t)); %Helpers
-RoundsC = linspace(1,Rounds,Rounds);       %Helpers
 
 figure(3)
 hold on
-surf(Samples,RoundsC,P_TrackSignal_All_Rounds_Base')
-title({'RECEIVED SIGNAL PER SAMPLE AT TRACK';'BASE-Station, AIR, Trx = 0dBm'})
-xlabel('Signal Strength in dBm')
-ylabel('Roundnumber around the track')
+pcolor(x,y,PAirCombined_sf_All_Noisy)
+title({'LOGPATH RECEIVED SIGNAL PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Slow and fast fading effects from ALL STATIONS'})
+xlabel('-200m < BaseStation < 200m') % x-axis label
+ylabel('-200m < BaseStation < 200m') % y-axis label
 shading interp;
-set(gca, 'clim', [acc_dBm 0]); 
+set(gca, 'clim', [acc_dBm 0]);
 colormap([0 0 0; jet]);
 colorbar;
+plot(x_ellipse,y_ellipse,'r')
 legend('log10 distance path model', 'RaceTrack, "H=80m, L=400m"');
 hold off
 
+%% Plotting Deep Fading Binary plots
+DF_PAir = zeros(length(PAir_f)); %Deep Fade Power AIR
+DFCoor1_PAir = PAir_f>acc_dBm;
+DFCoor2_PAir = PAir_f<=acc_dBm;
+DF_PAir(DFCoor1_PAir) = -9999;
+DF_PAir(DFCoor2_PAir) = 0;
+
 figure(4)
 hold on
-surf(Samples,RoundsC,P_TrackSignal_All_Rounds_Combined')
-title({'RECEIVED SIGNAL PER SAMPLE AT TRACK';'COMBINED-Station, AIR, Trx = 0dBm'})
-xlabel('Signal Strength in dBm')
-ylabel('Roundnumber around the track')
+pcolor(x,y,DF_PAir)
+title({'BINARY DEEP FADING PLOT';'BASE-Station, AIR, Trx = 0dBm. Slow and fast fading effects from BASE ONLY'})
+xlabel('-200m < BaseStation < 200m')
+ylabel('-200m < BaseStation < 200m')
 shading interp;
-set(gca, 'clim', [acc_dBm 0]); 
+set(gca, 'clim', [-1 0]);
 colormap([0 0 0; jet]);
 colorbar;
+plot(x_ellipse,y_ellipse,'b')
+legend('log10 distance path model', 'RaceTrack, "H=80m, L=400m"');
+hold off
+
+DF_PAir_COMB = zeros(length(PAirCombined_sf));
+DFCoor1_PAir_COMB = PAirCombined_sf>acc_dBm;
+DFCoor2_PAir_COMB = PAirCombined_sf<=acc_dBm;
+DF_PAir_COMB(DFCoor1_PAir_COMB) = -9999;
+DF_PAir_COMB(DFCoor2_PAir_COMB) = 0;
+
+figure(5)
+hold on
+pcolor(x,y,DF_PAir_COMB)
+title({'BINARY DEEP FADING PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Slow and fast fading effects from BASE ONLY'})
+xlabel('-200m < BaseStation < 200m')
+ylabel('-200m < BaseStation < 200m')
+shading interp;
+set(gca, 'clim', [-1 0]);
+colormap([0 0 0; jet]);
+colorbar;
+plot(x_ellipse,y_ellipse,'b')
+legend('log10 distance path model', 'RaceTrack, "H=80m, L=400m"');
+hold off
+
+DF_PAir_COMB_noisy = zeros(length(PAirCombined_sf_All_Noisy));
+DFCoor1_PAir_COMB_Noisy = PAirCombined_sf_All_Noisy>acc_dBm;
+DFCoor2_PAir_COMB_Noisy = PAirCombined_sf_All_Noisy<=acc_dBm;
+DF_PAir_COMB_noisy(DFCoor1_PAir_COMB_Noisy) = -9999;
+DF_PAir_COMB(DFCoor2_PAir_COMB_Noisy) = 0;
+
+figure(6)
+hold on
+pcolor(x,y,DF_PAir_COMB_noisy)
+title({'BINARY DEEP FADING PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Slow and fast fading effects from ALL STATIONS'})
+xlabel('-200m < BaseStation < 200m')
+ylabel('-200m < BaseStation < 200m')
+shading interp;
+set(gca, 'clim', [-1 0]);
+colormap([0 0 0; jet]);
+colorbar;
+plot(x_ellipse,y_ellipse,'b')
 legend('log10 distance path model', 'RaceTrack, "H=80m, L=400m"');
 hold off
