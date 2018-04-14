@@ -52,13 +52,9 @@ implementation
 	void sendAck(uint16_t receiveId) {
 		ackMessage* ackMessagePtr;
     	
-    	if(receivedCounter == sentCounter) {
-    		sentCounter++;
-    	}
-
     	if(!busy) {
     		ackMessagePtr = (ackMessage*)(call Packet.getPayload(&pkt, sizeof(ackMessage)));
-    		printf("Preparing to send packet with counter: %d\n", sentCounter);
+    		printf("Preparing to send ACK packet\n");
     		printfflush();
     	
     		if(ackMessagePtr != NULL) {
@@ -69,11 +65,10 @@ implementation
 				
 				call CC2420Packet.setPower(&pkt, SET_POWER);
 				
-				if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(requestMessage)) == SUCCESS) {
+				if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(ackMessage)) == SUCCESS) {
 					busy = TRUE;
 					setLedBlue();
-					call Timer1.startOneShot(500);
-					printf("Sucessfully sent packet\n");
+					printf("Sucessfully sent ACK packet\n");
 					printfflush();
 				}
     		}
