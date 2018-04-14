@@ -9,19 +9,22 @@ enum {
   ARQ_RETRYCOUNT = 10
 };
 
+
+
+
 typedef nx_struct requestMessage {
   		nx_uint16_t nodeid;
 		nx_uint16_t relayNodeid;
- 		nx_uint8_t counter;
+ 		nx_uint16_t counter;
 		nx_uint16_t seq;
-  		nx_uint16_t data;
+  		nx_int16_t data;
 } requestMessage;
 
 typedef nx_struct ackMessage {
   		nx_uint16_t nodeid;
 		nx_uint16_t receiveid;
 		nx_uint16_t seq;
-		nx_uint8_t counter;
+		nx_uint16_t counter;
 } ackMessage;
 
 #endif /* RUNNER_H */

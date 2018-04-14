@@ -14,8 +14,9 @@
 module RunnerP @safe() {
    	uses interface Boot;
 	uses interface Leds;
-	uses interface Timer<TMilli> as Timer0;
-	uses interface Timer<TMilli> as Timer1;
+	uses interface Timer<TMilli> as Timer0; //Handles timeouts.
+	uses interface Timer<TMilli> as Timer1; //Handles leds.
+	uses interface Timer<TMilli> as Timer2; //Send data
 	uses interface Packet;
 	uses interface AMPacket;
 	uses interface AMSend;
@@ -32,6 +33,8 @@ implementation
 	uint8_t sentCounter = 0;
 	uint8_t receivedCounter = 0;
 	uint8_t errorCount = 0;
+	
+	nx_uint16_t nodeidToSendTo;
 		
 	void setLedRed() {
 		call Leds.led0On();
@@ -51,8 +54,6 @@ implementation
     	
     	if(!busy) {
     		ackptr = (ackMessage*)(call Packet.getPayload(&pkt, sizeof(ackMessage)));
-    		printf("Preparing to send ACK packet ...\n");
-    		printfflush();
     	
     		if(ackptr != NULL) {
     			ackptr->nodeid = TOS_NODE_ID;
@@ -62,10 +63,10 @@ implementation
 				
 				call CC2420Packet.setPower(&pkt, SET_POWER);
 				
-				if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(requestMessage)) == SUCCESS) {
+				if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(ackMessage)) == SUCCESS) {
 					busy = TRUE;
 					setLedBlue();
-					printf("Sucessfully sent ACK packet\n");
+					printf("Sending ACK to moteId %d\n", ackptr->receiveid);
 					printfflush();
 				}
     		}
@@ -74,6 +75,8 @@ implementation
 		}
 	
 	void sendResponse(uint16_t nodeid) {
+		
+		printf("data to: %d \n", nodeid);
 		
 		if(receivedCounter == sentCounter) {
     		sentCounter++;
@@ -89,14 +92,12 @@ implementation
 			requestpkt->nodeid = TOS_NODE_ID;
 			requestpkt->counter = sentCounter;
 			requestpkt->seq = sentCounter % 2;
-			requestpkt->data = call Random.rand16();
+			requestpkt->data = 25;
 
 			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(requestMessage)) == SUCCESS) {
 				busy = TRUE;
 				setLedBlue();
-				call Timer0.startOneShot(500);
-				printf("Sucessfully sent REQUEST packet\n");
-				printfflush();
+				call Timer0.startOneShot(1000);
 			}
 		}
 	}
@@ -106,25 +107,19 @@ implementation
 		call AMControl.start();
 	}
 
-	event void Timer0.fired() {
-		// Timer expires
-		if(receivedCounter != sentCounter) {
-    		printf("Did not get a response, resending ...\n");
-    		printfflush();
-    		setLedRed();
-    		errorCount++;
-    	}
-    	else {
-    		printf("Did get a response, all done ...\n");
-    		printfflush();
-    	}
-	}
-	
 	event void Timer1.fired(){
 		call Leds.led0Off();
 		call Leds.led1Off();
 		call Leds.led2Off();
 	}
+
+	event void Timer0.fired() {
+		
+	}
+	
+	event void Timer2.fired(){
+		sendResponse(nodeidToSendTo);
+	}	
 	
 	event void AMControl.startDone(error_t error){
 		if (error == SUCCESS)
@@ -145,32 +140,37 @@ implementation
 
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
 		
-		
 		if(len == sizeof(requestMessage)) {
-			requestMessage* requestpkt = (requestMessage*)payload;			
+			requestMessage* requestpkt = (requestMessage*)payload;
 			errorCount = 0;
-						
+			
+    		printf("Got request from moteID %d \n", requestpkt->nodeid);
+    		printfflush();
+									
 			if(requestpkt != NULL) {
 				if(requestpkt->counter % 2 == requestpkt->seq) {
    					sendAck(requestpkt->nodeid);
-   					sendResponse(requestpkt->nodeid);
+   					nodeidToSendTo = requestpkt->nodeid;
+   					call Timer2.startPeriodicAt(100, TIMER_PERIOD_MILLI);
    				}
 			}
 			
 		} else if (len == sizeof(ackMessage)) {
 			ackMessage* ackpkt = (ackMessage*)payload;
 			errorCount = 0;
-
 			
-			if(ackpkt != NULL) {
+			if(ackpkt->receiveid == TOS_NODE_ID)
+			{
+				
+	    		printf("Got ack from moteID %d \n", ackpkt->nodeid);
+	    		printfflush();
+				
 				if(ackpkt->counter % 2 == ackpkt->seq) {
    					setLedGreen();
-					call Timer0.stop();
+					call Timer2.stop();
    				}
 			}
-		
 		}
-    			
 		return msg;
 	}
 }
