@@ -92,7 +92,7 @@ implementation
     		requestptr = (requestMessage*)(call Packet.getPayload(&pkt, sizeof(requestMessage)));
     		printf("Preparing to send packet with counter: %d and relayNodeId: %d\n", sentCounter, relayNodeid);
     		printfflush();
-    	
+    		
     		if(requestptr != NULL) {
     			requestptr->nodeid = TOS_NODE_ID;
 				requestptr->seq = sentCounter % 2;
@@ -108,7 +108,7 @@ implementation
 					busy = TRUE;
 					setLedBlue();
 					call Timer1.startOneShot(500);
-					printf("Sucessfully sent packet\n");
+					printf("Sucessfully sent packet with length: %d and seq: %d\n", sizeof(pkt), requestptr->seq);
 					printfflush();
 				}
     		}
@@ -196,27 +196,32 @@ implementation
 	}	
 
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
+		
+		printf("Received something with length: %d\n", len);
+		printfflush();
+		
 		if(len == sizeof(ackMessage)) {
 			ackMessage* ackMsg = (ackMessage*)payload;
 			errorCount = 0;
+			call Timer1.stop();
 			
 			printf("Received ackMessage!\n");
 			printfflush();
 			
-			if(ackMsg != NULL && receivedCounter == sentCounter)
-				if(ackMsg->seq == sentCounter % 2) {
-					printf("Ack received! Seq no. match!\n");
+			if(ackMsg != NULL) {
+				if(ackMsg->seq == ackMsg->counter % 2) {
+					printf("Ack received! Seq no. match!. Seq no: %d\n", ackMsg->seq);
 					printfflush();
 					setLedGreen();
 					receivedCounter++;
-					call Timer1.stop();
 				}
-			}
-		else if (len == sizeof(requestMessage)) {
+			} 
+		} else if (len == sizeof(requestMessage)) {
 			requestMessage* requestMsg = (requestMessage*)payload;
 			errorCount = 0;
+			call Timer1.stop();
 			
-			printf("Received requestMessage!\n");
+			printf("Received requestMessage with data: %d\n", requestMsg->data);
 			printfflush();
 			
 			if(requestMsg != NULL) {
