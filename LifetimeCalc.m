@@ -1,7 +1,7 @@
 clc; clear;
 
 max_datarate   = 250*1000*8;                 %250k-byte Telos_B datasheet
-packagesize    = 128*1000*8;                 %128k-byte WSN Problem Description
+packagesize    = 128*8;                 %128k-byte WSN Problem Description
 TransmitPeriod = packagesize/max_datarate;   %Second
 
 time       = 1;                              %Second
@@ -34,11 +34,11 @@ f = os_Top * exp(-((x-os_center).^(2)/0.0001));
 fun = @(x) os_Top * exp(-((x-os_center).^(2)/0.0001));
 OS_power = integral(fun,0,os_time);
 
-figure(1)
-plot(x,f);
-title('Gaussian distribution of a voltage peak after node wakeup')
-xlabel('time(sec)') % x-axis label
-ylabel('Voltage over 1 Ohm ') % y-axis label
+% figure(1)
+% plot(x,f);
+% title('Gaussian distribution of a voltage peak after node wakeup')
+% xlabel('time(sec)') % x-axis label
+% ylabel('Voltage over 1 Ohm ') % y-axis label
 
 % AA Battery https://en.wikipedia.org/wiki/AA_battery "RAM"
 V  = 1.5;

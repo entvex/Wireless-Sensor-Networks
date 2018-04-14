@@ -146,6 +146,9 @@ filename = 'ToHopOrNotToHop.mat';
 save(filename);
 
 %% Plotting Signal Range in AIR for 0dBm
+Samples = linspace(1,length(t),length(t)); %Helpers
+RoundsC = linspace(1,Rounds,Rounds);       %Helpers
+
 figure(1)
 hold on
 pcolor(x,y,PAir_f)
@@ -168,9 +171,6 @@ xlabel('Number of Samples for ONE track lab')
 ylabel('Signal Strength in dBm')
 legend('log10 distance path model', 'RaceTrack, "H=80m, L=400m"');
 hold off
-
-Samples = linspace(1,length(t),length(t)); %Helpers
-RoundsC = linspace(1,Rounds,Rounds);       %Helpers
 
 figure(3)
 hold on
