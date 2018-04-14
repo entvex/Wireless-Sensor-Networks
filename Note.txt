@@ -1,0 +1,22 @@
+simulated fast fade(10-1000ms)(30-40dB signal strength fluctuations)
+	Random function duration, between boundaries, of random amplitude, between boundaries
+	"Deep Fade is when a package is lost due to fast fade!"
+
+simulated slow fade(2-120s)(30-40dB gaussian signal strength fluctuations)
+	Random function duration, between boundaries of random amplitude, between boundaries
+	"Deep Fade is when a package is lost due to fast fade!"
+
+maybe some measured noise in building for estimations to simulations
+
+ACK parameters algorithm based on simulations and distance
+	Relay transmissions before retransmission of direct signal, "s" for steps
+	Times failed at direct transmission before turning to relaying, "t" for times
+
+Deep fading plots!
+
+Nameing and Comments in Code!
+Size of graph!
+Center of stations!
+Office_min plots!
+Plots Legends, x and y labels and title
+Write Report
