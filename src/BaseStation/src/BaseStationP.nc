@@ -54,7 +54,6 @@ implementation
     	
     	if(receivedCounter == sentCounter) {
     		sentCounter++;
-    		errorCount = 0;
     	}
 
     	if(!busy) {
@@ -87,18 +86,18 @@ implementation
     	
     	if(receivedCounter == sentCounter) {
     		sentCounter++;
-    		errorCount = 0;
     	}
 
     	if(!busy) {
     		requestptr = (requestMessage*)(call Packet.getPayload(&pkt, sizeof(requestMessage)));
-    		printf("Preparing to send packet with counter: %d\n", sentCounter);
+    		printf("Preparing to send packet with counter: %d and relayNodeId: %d\n", sentCounter, relayNodeid);
     		printfflush();
     	
     		if(requestptr != NULL) {
     			requestptr->nodeid = TOS_NODE_ID;
 				requestptr->seq = sentCounter % 2;
 				requestptr->counter = sentCounter;
+				requestptr->data = 0;
 
 				if(relayNodeid != 0)
 					requestptr->relayNodeid = relayNodeid;
@@ -127,10 +126,16 @@ implementation
 		// Main loop
 		// Runs every time timer is fired
 		
-		printf("Timer0 fired\n");
+		printf("Relayposition: %d\n", relayPosition);
 		printfflush();
-			
-		if(errorCount < 3 && relayPosition == 0) {
+		
+		if(relayPosition == 0)
+			sendRequest(0);
+		else
+			sendRequest(1);
+		
+		/*
+		if(relayPosition == 0) {
 			sendRequest(0);
 		} 
 		else if (relayPosition == 1) 
@@ -143,6 +148,7 @@ implementation
 		else if (relayPosition == 3) {
 			sendRequest(1);
 		}
+		*/
 	}
 	
 	event void Timer1.fired() {
@@ -153,7 +159,7 @@ implementation
     		errorCount++;
     		
     		// Runner is out of reach, increment position
-    		if(errorCount > 3) {
+    		if(errorCount >= 3) {
     			relayPosition++;
     		}
     	}
@@ -173,7 +179,7 @@ implementation
 		if (error == SUCCESS) {
 			printf("Starting timer0\n");
 			printfflush();
-			call Timer0.startPeriodic(1500);
+			call Timer0.startPeriodic(5000);
 		}
 		else
 			call AMControl.start();
@@ -192,10 +198,14 @@ implementation
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
 		if(len == sizeof(ackMessage)) {
 			ackMessage* ackMsg = (ackMessage*)payload;
+			errorCount = 0;
+			
+			printf("Received ackMessage!\n");
+			printfflush();
 			
 			if(ackMsg != NULL && receivedCounter == sentCounter)
 				if(ackMsg->seq == sentCounter % 2) {
-					printf("Ack received! Seq no. match!");
+					printf("Ack received! Seq no. match!\n");
 					printfflush();
 					setLedGreen();
 					receivedCounter++;
@@ -204,13 +214,17 @@ implementation
 			}
 		else if (len == sizeof(requestMessage)) {
 			requestMessage* requestMsg = (requestMessage*)payload;
-	
+			errorCount = 0;
+			
+			printf("Received requestMessage!\n");
+			printfflush();
+			
 			if(requestMsg != NULL) {
 				if(requestMsg->seq == sentCounter % 2) {
-					printf("Request received. Seq no. match!");
+					printf("Request received. Seq no. match!\n");
 					printfflush();
 					setLedGreen();
-					if(requestMsg->data == 0) {
+					if(requestMsg->data == -1) {
 						relayPosition++;
 					}
 					sendAck(requestMsg->nodeid);

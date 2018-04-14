@@ -15,6 +15,7 @@ module RunnerP @safe() {
    	uses interface Boot;
 	uses interface Leds;
 	uses interface Timer<TMilli> as Timer0;
+	uses interface Timer<TMilli> as Timer1;
 	uses interface Packet;
 	uses interface AMPacket;
 	uses interface AMSend;
@@ -28,37 +29,74 @@ implementation
 {	
 	bool busy = FALSE;
 	message_t pkt;
-	
-	void setLeds(uint16_t val) {
-    if (val & 0x01)
-      call Leds.led0On();
-    else 
-      call Leds.led0Off();
-    if (val & 0x02)
-      call Leds.led1On();
-    else
-      call Leds.led1Off();
-    if (val & 0x04)
-      call Leds.led2On();
-    else
-      call Leds.led2Off();
-  	}
-	
-	void sendResponse(nx_uint16_t seq) {		
-		if (!busy) {
-			ReplyMsg* replypkt = (ReplyMsg*)(call Packet.getPayload(&pkt, sizeof(ReplyMsg)));
+	uint8_t sentCounter = 0;
+	uint8_t receivedCounter = 0;
+	uint8_t errorCount = 0;
+		
+	void setLedRed() {
+		call Leds.led0On();
+		call Timer1.startOneShot(100);
+	}
+	void setLedGreen() {
+		call Leds.led1On();
+		call Timer1.startOneShot(100);
+	}
+	void setLedBlue() {
+		call Leds.led2On();
+		call Timer1.startOneShot(100);
+	}
+		
+	void sendAck(uint16_t nodeid) {
+		ackMessage* ackptr;
+    	
+    	if(!busy) {
+    		ackptr = (ackMessage*)(call Packet.getPayload(&pkt, sizeof(ackMessage)));
+    		printf("Preparing to send ACK packet ...\n");
+    		printfflush();
+    	
+    		if(ackptr != NULL) {
+    			ackptr->nodeid = TOS_NODE_ID;
+				ackptr->seq = sentCounter % 2;
+				ackptr->counter = sentCounter;
+				ackptr->receiveid = nodeid;
+				
+				call CC2420Packet.setPower(&pkt, SET_POWER);
+				
+				if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(requestMessage)) == SUCCESS) {
+					busy = TRUE;
+					setLedBlue();
+					printf("Sucessfully sent ACK packet\n");
+					printfflush();
+				}
+    		}
+    	}
 
-			if (replypkt == NULL) {
+		}
+	
+	void sendResponse(uint16_t nodeid) {
+		
+		if(receivedCounter == sentCounter) {
+    		sentCounter++;
+    	}
+				
+		if (!busy) {
+			requestMessage* requestpkt = (requestMessage*)(call Packet.getPayload(&pkt, sizeof(requestMessage)));
+
+			if (requestpkt == NULL) {
 				return;
 			}		
 			
-			replypkt->nodeid = TOS_NODE_ID;
-			replypkt->seq = seq;
-			replypkt->data = call Random.rand16();
+			requestpkt->nodeid = TOS_NODE_ID;
+			requestpkt->counter = sentCounter;
+			requestpkt->seq = sentCounter % 2;
+			requestpkt->data = call Random.rand16();
 
-			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(ReplyMsg)) == SUCCESS) {
+			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(requestMessage)) == SUCCESS) {
 				busy = TRUE;
-				setLeds(replypkt->counter);
+				setLedBlue();
+				call Timer0.startOneShot(500);
+				printf("Sucessfully sent REQUEST packet\n");
+				printfflush();
 			}
 		}
 	}
@@ -69,9 +107,25 @@ implementation
 	}
 
 	event void Timer0.fired() {
-		// Main loop. Runs every time timer is fired
+		// Timer expires
+		if(receivedCounter != sentCounter) {
+    		printf("Did not get a response, resending ...\n");
+    		printfflush();
+    		setLedRed();
+    		errorCount++;
+    	}
+    	else {
+    		printf("Did get a response, all done ...\n");
+    		printfflush();
+    	}
 	}
-
+	
+	event void Timer1.fired(){
+		call Leds.led0Off();
+		call Leds.led1Off();
+		call Leds.led2Off();
+	}
+	
 	event void AMControl.startDone(error_t error){
 		if (error == SUCCESS)
 			call Timer0.startPeriodic(TIMER_PERIOD_MILLI);
@@ -90,11 +144,33 @@ implementation
 	}	
 
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
-    	RequestMsg* requestpkt = (RequestMsg*)payload;
-   		
-   		if(requestpkt->counter % 2 == requestpkt->seq)
-   			sendResponse(requestpkt->seq);
 		
+		
+		if(len == sizeof(requestMessage)) {
+			requestMessage* requestpkt = (requestMessage*)payload;			
+			errorCount = 0;
+						
+			if(requestpkt != NULL) {
+				if(requestpkt->counter % 2 == requestpkt->seq) {
+   					sendAck(requestpkt->nodeid);
+   					sendResponse(requestpkt->nodeid);
+   				}
+			}
+			
+		} else if (len == sizeof(ackMessage)) {
+			ackMessage* ackpkt = (ackMessage*)payload;
+			errorCount = 0;
+
+			
+			if(ackpkt != NULL) {
+				if(ackpkt->counter % 2 == ackpkt->seq) {
+   					setLedGreen();
+					call Timer0.stop();
+   				}
+			}
+		
+		}
+    			
 		return msg;
 	}
 }
