@@ -3,31 +3,26 @@
 
 enum {
   AM_BLINKTORADIO = 6,
-  TIMER_PERIOD_MILLI = 3000,
   AM_DATA_MSG = 3,
-  SET_POWER = 31,
-  ARQ_RETRYCOUNT = 10,
-  RELAY_NODE_ID = 2
+  SET_POWER = 1,
+  ARQ_RETRYCOUNT = 3,
+  RELAY_NODE_ID = 2,
+  RUNNER_NODE_ID = 4,
 };
 
-typedef nx_struct RequestMsg {
+typedef nx_struct requestMessage {
   		nx_uint16_t nodeid;
 		nx_uint16_t relayNodeid;
- 		nx_uint16_t counter;
+ 		nx_uint8_t counter;
 		nx_uint16_t seq;
-  		nx_int8_t rssi;
-  		nx_uint8_t lqi;
-  		nx_uint8_t power;
-} RequestMsg;
+  		nx_uint16_t data;
+} requestMessage;
 
-typedef nx_struct ReplyMsg {
-		nx_uint16_t nodeid;
- 		nx_uint16_t counter;
+typedef nx_struct ackMessage {
+  		nx_uint16_t nodeid;
+		nx_uint16_t receiveid;
 		nx_uint16_t seq;
-		nx_uint16_t data;
-		nx_int8_t rssi;
-  		nx_uint8_t lqi;
-  		nx_uint8_t power;
-} ReplyMsg;
+		nx_uint8_t counter;
+} ackMessage;
 
 #endif /* BASE_STATION_H */
