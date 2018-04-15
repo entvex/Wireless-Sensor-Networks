@@ -156,12 +156,14 @@ implementation
     		printf("Did not get a response, resending ...\n");
     		printfflush();
     		setLedRed();
-    		errorCount++;
     		
     		// Runner is out of reach, increment position
     		if(errorCount >= 3) {
     			relayPosition++;
-    		}
+				errorCount = 0;
+    		} else {
+				errorCount++;
+			}
     	}
     	else {
     		printf("Did get a response, all done ...\n");
