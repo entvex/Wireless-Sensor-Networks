@@ -15,8 +15,7 @@ implementation {
   components new AMSenderC(6);
   components new AMReceiverC(6);
   components CC2420ActiveMessageC;
-  components new QueueC(uint8_t, 10) as DataQueue;
-  components new QueueC(uint8_t, 10) as RssiQueue;
+  components new QueueC(int8_t, 10) as RssiQueue;
   
   MainC.Boot <- BaseStationP;
   
