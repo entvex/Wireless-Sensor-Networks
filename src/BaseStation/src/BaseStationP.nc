@@ -73,11 +73,9 @@ implementation
 			
 			call CC2420Packet.setPower(&pkt, SET_POWER);
 				
-			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(requestMessage)) == SUCCESS) {
+			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(ackMessage)) == SUCCESS) {
 				busy = TRUE;
 				setLedBlue();
-				call Timer1.startOneShot(500);
-				
 				if(DEBUG)
 					print("Sucessfully sent packet\n");
     		}
@@ -111,7 +109,7 @@ implementation
 				call Timer1.startOneShot(500);
 				
 				if(DEBUG)
-					print("Sucessfully sent packet with length: " + sizeof(pkt) + " and seq: " + requestptr->seq + "\n");
+					print("Sucessfully sent packet with length: " + sizeof(requestMessage) + " and seq: " + requestptr->seq + "\n");
 			}
     	}
     }
