@@ -114,7 +114,7 @@ implementation
     	}
     }
     
-    bool isMovingOutOfRange() {
+    bool isOutOfRange() {
     	int16_t previousPositions = 0;
     	int16_t lastPosition = call RssiQueue.head();
     	uint8_t i;
@@ -143,9 +143,7 @@ implementation
 			print("Relayposition: " + relayPosition + "\n");
 		
 		if(relayPosition == 0) {
-			if(!isMovingOutOfRange()) {
-				sendRequest(0);
-			}
+			sendRequest(0);
 		}
 		else {
 			sendRequest(1);
