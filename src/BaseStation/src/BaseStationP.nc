@@ -79,7 +79,7 @@ implementation
 				}
     		}
     	}
-l	}
+	}
 	
     void sendRequest(uint16_t relayNodeid) {
     	requestMessage* requestptr;
@@ -100,6 +100,8 @@ l	}
 
 			if(relayNodeid != 0)
 				requestptr->relayNodeid = relayNodeid;
+			else
+				requestptr->relayNodeid = 0;
 			
 			call CC2420Packet.setPower(&pkt, SET_POWER);
 			
