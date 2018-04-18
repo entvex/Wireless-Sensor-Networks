@@ -1,7 +1,7 @@
 \makeatletter
-\def\input@path{{../DecisionSupportSystems/}}
+\def\input@path{{../report/}}
 \makeatother
-\documentclass[a4paper,11pt,twoside,openright]{memoir}
+\documentclass[a4paper,11pt,oneside]{memoir}
 \input{preamble/preamble}
 
 %Debugging
@@ -10,7 +10,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \title{Wireless Sensor Networks \\ Gang of Three}
-\author{Repport \\ Aarhus University, Science and Technology \\ Lectors: Qi Zhang, Michael Alrøe, John Rohde }
+\author{Report \\ Aarhus University, Science and Technology \\ Lectors: Qi Zhang, Michael Alrøe, John Rohde }
 \date{\today}
 \begin{document}
 \fancyhf{} %Clear all header/footers
@@ -23,16 +23,17 @@
 %	\includegraphics[scale=1, trim=125 110 120 650, clip=true]{../fig/forside_rapport_underskrevet}
 %\end{figure}
 
+
 \begin{table} [h]
 	\centering
 	\begin{tabular}{|l|r|l|}
-	\hline 
-	\textbf{Name} 				& \textbf{Study number} & \textbf{Signature~~~~~~~~~~~~~~~~~~~~} 	\\ \hline
-	David Jensen 				& 11229 	& \\ && 												\\ \hline
-	Henrik Bagger Jensen 		& 201304157 & \\ && 												\\ \hline
-	Christian M. Lillelund 		& 201408354 & \\ && 												\\ \hline
-	Troels Thomsen 				& 09641		& \\ && 												\\ \hline
-
+		\hline 
+		\textbf{Name} 				& \textbf{Study number} & \textbf{Signature~~~~~~~~~~~~~~~~~~~~} 	\\ \hline
+		David Jensen 				& 11229 	& \\ && 												\\ \hline
+		Henrik Bagger Jensen 		& 201304157 & \\ && 												\\ \hline
+		Christian M. Lillelund 		& 201408354 & \\ && 												\\ \hline
+		Troels Thomsen 				& 09641		& \\ && 												\\ \hline
+		
 	\end{tabular}
 \end{table}
 
@@ -52,12 +53,13 @@
 \fancyfoot[CO,CE]{\nouppercase{\rightmark}}
 \fancyfoot[LE,RO]{\thepage}
 
-\include{introduction/introduction}								    \cleartorightpage
-\include{discussion/discussion}								        \cleartorightpage
-\include{conclusion/conclusion}										\cleartorightpage
-\include{perspectives/perspectives}									\cleartorightpage
-\include{bibliography/bibliography}									\cleartorightpage
-
+\begin{multicols}{2}
+\include{introduction/introduction}								    \clearpage
+\include{discussion/discussion}								        \clearpage
+\include{conclusion/conclusion}										\clearpage
+\include{perspectives/perspectives}									\clearpage
+\include{bibliography/bibliography}									\clearpage
+\end{multicols}
 %etc...
 
 \end{document}
