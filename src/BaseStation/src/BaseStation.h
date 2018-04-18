@@ -8,6 +8,8 @@ enum {
   ARQ_RETRYCOUNT = 3,
   RELAY_NODE_ID = 1,
   RUNNER_NODE_ID = 3,
+  THRESHOLD = -40,
+  DEBUG = TRUE
 };
 
 typedef nx_struct requestMessage {
