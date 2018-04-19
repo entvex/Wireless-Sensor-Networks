@@ -10,8 +10,8 @@ implementation
   components new TimerMilliC() as Timer1;
   components new TimerMilliC() as Timer2;
   components ActiveMessageC;
-  components new AMSenderC(AM_BLINKTORADIO);
-  components new AMReceiverC(AM_BLINKTORADIO);
+  components new AMSenderC(AM_CHANNEL);
+  components new AMReceiverC(AM_CHANNEL);
   components CC2420ActiveMessageC;
   
   
