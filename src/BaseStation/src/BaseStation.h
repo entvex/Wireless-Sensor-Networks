@@ -8,7 +8,8 @@ enum {
   ARQ_RETRYCOUNT = 3,
   RELAY_NODE_ID = 1,
   RUNNER_NODE_ID = 3,
-  THRESHOLD = -35,
+  THRESHOLD = 35,
+  QUEUE_MAX_SIZE = 5,
   DEBUG = TRUE
 };
 

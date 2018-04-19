@@ -120,40 +120,28 @@ implementation
     }
     
     bool isOutOfRange() {
-    	int16_t average, previousPositions = 0;
+    	int16_t avgPreviousPositions, previousPositions, lastPosition = 0;
     	uint8_t i;
+		
+		if(call RssiQueue.size() < QUEUE_MAX_SIZE) {
+			return FALSE;
+		}
     	
-    	for(i = 0; i < 5; i++) {	
+    	for(i = 0; i < QUEUE_MAX_SIZE; i++) {	
 			previousPositions += call RssiQueue.element(i);
 		}
-		average = previousPositions/5;
+		lastPosition = RssiQueue.head();
+		avgPreviousPositions = previousPositions/QUEUE_MAX_SIZE;
+		newPosition = (lastPosition*0.5)+(avgPreviousPositions*0.5)
 		
-		printf("Head of queue is: %d\n", call RssiQueue.head());
-		printf("Average of queue is: %d\n", average);
-    	printfflush();
-    	
-    	if(abs(average) > abs(THRESHOLD))
+		if(DEBUG) {
+			printf("New estimated position of runner node: %d", newPosition);
+			printfflush();	
+		}
+
+    	if(newPosition > THRESHOLD)
     		return TRUE;
     	return FALSE;
-    	
-    	/*
-    	int16_t avgPreviousPositions, previousPositions = 0;
-    	int16_t lastPosition = call RssiQueue.head();
-    	uint8_t i;
-    	
-    	if(call RssiQueue.empty())
-    		return FALSE;
-    	
-    	for(i = 1; i <= call RssiQueue.size() - 1; i++) {	
-			previousPositions += call RssiQueue.element(i);
-		}
-		
-		avgPreviousPositions = previousPositions/(call RssiQueue.size()-1);	
-    	
-    	if (lastPosition <= avgPreviousPositions && lastPosition < THRESHOLD)
-			return TRUE;
-		return FALSE;
-		*/
     }
 		    
     event void Boot.booted() {
@@ -161,7 +149,7 @@ implementation
     	int i = 0;
 		call AMControl.start();
 		
-		// Init queue
+		// Init rssi queue with default values
 		for(i = 0; i < call RssiQueue.size(); i++) {
 			call RssiQueue.enqueue(-30);
 		}
@@ -173,7 +161,8 @@ implementation
 	event void Timer0.fired() {
 		// Main loop
 		// Runs every time timer is fired
-		bool outOfRange = FALSE;
+		bool isOutOfRange = FALSE;
+		isOutOfRange = isOutOfRange();
 		
 		if(DEBUG) {
 			printf("Relayposition: %d\n", relayPosition);
@@ -181,37 +170,30 @@ implementation
 			printfflush();
 		}
 		
-		outOfRange = isOutOfRange();		
-		if(!outOfRange) {
-			if(relayPosition == 0 || relayPosition == 2) {
-				printf("Sending direct message!\n");
-				printfflush();
-				sendRequest(0);
-			}
+		// Adjust relay position if node is out of range
+		// and we are sending directly
+		if(isOutOfRange && relayPosition == 0 || relayPosition == 2) {
+			relayPosition++;
+    		errorCount = 0;
+    	}
+		
+		if(relayPosition == 0 || relayPosition == 2) {
+			printf("Sending message direct!\n");
+			printfflush();
+			sendRequest(0);
 		}
-		else {
-			if(relayPosition >= 3) {
-				relayPosition = 0;
-				errorCount = 0;
-			}
-			else {
-				relayPosition++;
-				errorCount = 0;
-			}
-			if (relayPosition == 1) 
-			{
-				printf("Relaying message to relay 1\n");
-				printfflush();
-				sendRequest(1); 
-			}
-			if (relayPosition == 3) {
-				printf("Relaying message to relay 2\n");
-				printfflush();
-				sendRequest(2);
-			}
+		else if(relayPosition == 1){
+			printf("Relaying message to relay node 1\n");
+			printfflush();
+			sendRequest(2);
+		}
+		else if(relayPosition == 3) {
+			printf("Relaying message to relay node 2\n");
+			printfflush();
+			sendRequest(1);
 		}
 	}
-	
+		
 	event void Timer1.fired() {
     	if(receivedCounter != sentCounter) {
     		if(DEBUG) {
@@ -299,12 +281,12 @@ implementation
 					printfflush();
 				}
 				setLedGreen();
-					
+				
 				if(requestMsg->relayNodeid == 0 ||  UINT_MAX) {
 					printf("RelayNodeid is zero, so saving the RSSI\n");
 					printfflush();
 					call RssiQueue.dequeue();
-					call RssiQueue.enqueue(call CC2420Packet.getRssi(msg));
+					call RssiQueue.enqueue(abs(call CC2420Packet.getRssi(msg)));
 				}
 				
 				if(requestMsg->data != 0) {
