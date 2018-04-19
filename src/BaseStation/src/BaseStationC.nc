@@ -12,20 +12,20 @@ implementation {
   components new TimerMilliC() as Timer1;
   components new TimerMilliC() as Timer2;
   components ActiveMessageC;
-  components new AMSenderC(6);
-  components new AMReceiverC(6);
+  components new AMSenderC(AM_CHANNEL);
+  components new AMReceiverC(AM_CHANNEL);
   components CC2420ActiveMessageC;
-  components new QueueC(int8_t, 10) as RssiQueue;
+  components new QueueC(int8_t, 5) as RssiQueue;
   
   MainC.Boot <- BaseStationP;
   
   BaseStationP.Boot -> MainC;
   BaseStationP.Leds -> LedsC;
+  BaseStationP.RssiQueue -> RssiQueue;
   BaseStationP.Timer0 -> Timer0;
   BaseStationP.Timer1 -> Timer1;
   BaseStationP.Timer2 -> Timer2;
   BaseStationP.Packet -> AMSenderC;
-  //  BaseStationP.AMPacket -> AMSenderC;
   BaseStationP.AMControl -> ActiveMessageC;
   BaseStationP.AMSend -> AMSenderC;
   BaseStationP.Receive -> AMReceiverC;
