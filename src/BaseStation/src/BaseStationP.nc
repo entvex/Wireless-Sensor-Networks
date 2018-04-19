@@ -286,7 +286,7 @@ implementation
 					printf("RelayNodeid is zero, so saving the RSSI\n");
 					printfflush();
 					call RssiQueue.dequeue();
-					call RssiQueue.enqueue(abs(call CC2420Packet.getRssi(msg)));
+					call RssiQueue.enqueue(call CC2420Packet.getRssi(msg));
 				}
 				
 				if(requestMsg->data != 0) {
