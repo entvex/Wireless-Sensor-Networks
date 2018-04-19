@@ -15,8 +15,7 @@ module RunnerP @safe() {
    	uses interface Boot;
 	uses interface Leds;
 	uses interface Timer<TMilli> as Timer0; //Handles leds.
-	uses interface Timer<TMilli> as Timer1; //handle AMControl start.
-	uses interface Timer<TMilli> as Timer2; //Send Delay between sending ack and data
+	uses interface Timer<TMilli> as Timer2; //Send Delay between sending ack and data.
 	uses interface Packet;
 	uses interface AMPacket;
 	uses interface AMSend;
@@ -28,8 +27,8 @@ module RunnerP @safe() {
 
 implementation
 {	
-
 	void sendAcknowledge(requestMessage*);
+	void sendData(uint16_t nodeid);
 	void setLedRed();
 	void setLedGreen();
 	void setLedBlue();
@@ -39,11 +38,15 @@ implementation
 
 	bool busy = FALSE;
 	message_t pkt;
-	uint8_t sentCounter = 0;
-	uint8_t receivedCounter = 0;
-	uint8_t errorCount = 0;
 	
+	//Number of resends
+	uint8_t resendCounter = 0;
+	
+	//Used for data transmit
 	nx_uint16_t nodeidToSendTo;
+	nx_uint16_t counterToSendTo;
+	nx_uint16_t seqToSendTo;
+	nx_uint16_t relaynodeIdToSendTo;	
 		
 	void setLedRed() {
 		call Leds.led0On();
@@ -82,12 +85,14 @@ implementation
     	printfflush();
 	}
 	
-	event void Timer1.fired(){
-		
+	void printSendingData(requestMessage* responsemsg){
+		printf("Sending data with size: %d should be %d nodeid: %d relaynodeid: %d seq: %d counter: %d data: %d\n", sizeof(*responsemsg), sizeof(requestMessage), responsemsg->nodeid, responsemsg->relayNodeid, responsemsg->seq, responsemsg->counter, responsemsg->data);
+    	printfflush();
 	}
 	
 	event void Timer2.fired(){
-		
+		//Send The data
+		sendData(nodeidToSendTo);
 	}
 	
     event void Boot.booted() {
@@ -100,9 +105,7 @@ implementation
 	}
 	
 	event void AMControl.startDone(error_t error){
-		if (error == SUCCESS)
-			call Timer1.startPeriodic(TIMER_PERIOD_MILLI);
-		else
+		if (error != SUCCESS)
 			call AMControl.start();
 	}
 	
@@ -136,21 +139,34 @@ implementation
 		return;
 	}
 	
-		
 	void sendData(uint16_t nodeid) {
 				
 		if (!busy) {
-			requestMessage* requestpkt = (requestMessage*)(call Packet.getPayload(&pkt, sizeof(requestMessage)));
+			requestMessage* responsepkt = (requestMessage*)(call Packet.getPayload(&pkt, sizeof(requestMessage)));
 			
-			requestpkt->nodeid = TOS_NODE_ID;
-			requestpkt->counter = sentCounter;
-			requestpkt->data = 25;
-
+			responsepkt->nodeid      = TOS_NODE_ID;
+			responsepkt->seq         = seqToSendTo;
+			responsepkt->counter     = counterToSendTo;
+			responsepkt->relayNodeid = relaynodeIdToSendTo;
+			responsepkt->data        = 55;
+			
+       		if(PRINT)
+			{
+				printSendingData(responsepkt);
+			}
+			
 			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(requestMessage)) == SUCCESS) {
 				busy = TRUE;
+				resendCounter++;
 				setLedBlue();
 			}
+		}		
+		
+		if(resendCounter >= TRIES_TO_RESEND){
+			call Timer2.stop();
+			resendCounter = 0;		
 		}
+		
 	}
 	
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
@@ -159,15 +175,36 @@ implementation
 		//Got a request
 		if(len == sizeof(requestMessage)) {
 			requestMessage* requestpkt = (requestMessage*)payload;
-			errorCount = 0;
 			    		
     		//Check if the request is for me and if it is send sendAcknowledge.
-    		if (requestpkt->nodeid == requestpkt->relayNodeid && requestpkt->data == 0) {			
-				printGotReq(requestpkt);
-    			sendAcknowledge(requestpkt);    			
-    			call Timer2.startPeriodic(100);
+    		if (requestpkt->nodeid == requestpkt->relayNodeid && requestpkt->data == 0) {
+    			
+	       		if(PRINT)
+				{
+					printGotReq(requestpkt);
+				}
+				
+    			sendAcknowledge(requestpkt);
+    			
+    			//Save data needed for data response
+    			nodeidToSendTo      = requestpkt->nodeid;
+    			counterToSendTo     = requestpkt->counter;
+    			seqToSendTo         = requestpkt->seq;
+    			relaynodeIdToSendTo = requestpkt->relayNodeid;
+    			
+    			call Timer2.startPeriodic(TIMER_PERIOD_MILLI);
     		}
-		}
+		} else if (len == sizeof(ackMessage)){
+			ackMessage* ackpkt = (ackMessage*)payload;
+			
+    		//Check if the ack is for me and if it is stop sending data.
+    		if (ackpkt->receiveid == TOS_NODE_ID ) {
+    			call Timer2.stop();
+    			resendCounter = 0;
+    		}
+						
+			}
+				
 	return msg;
 	}	
 }

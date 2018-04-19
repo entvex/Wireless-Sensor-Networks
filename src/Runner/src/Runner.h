@@ -2,9 +2,10 @@
 #define RUNNER_H
 
 enum {
-  PRINT = 1,
-  AM_BLINKTORADIO = 6,
-  TIMER_PERIOD_MILLI = 460,
+  PRINT = 0,
+  AM_CHANNEL = 10,
+  TIMER_PERIOD_MILLI = 100,
+  TRIES_TO_RESEND = 3,
   AM_DATA_MSG = 3,
   SET_POWER = 31,
   ARQ_RETRYCOUNT = 10,
@@ -12,9 +13,6 @@ enum {
   SIGNAL_STRENGTH_MID = 16,
   SIGNAL_STRENGTH_HIGH = 31	//   0 dB
 };
-
-
-
 
 typedef nx_struct requestMessage {
   		nx_uint16_t nodeid;
