@@ -123,9 +123,8 @@ implementation
     	int16_t avgPreviousPositions, previousPositions, lastPosition = 0;
     	uint8_t i;
 		
-		if(call RssiQueue.size() < QUEUE_MAX_SIZE) {
+		if(!call RssiQueue.full())
 			return FALSE;
-		}
     	
     	for(i = 0; i < QUEUE_MAX_SIZE; i++) {	
 			previousPositions += call RssiQueue.element(i);
@@ -143,6 +142,12 @@ implementation
     		return TRUE;
     	return FALSE;
     }
+	
+	void clearRssiQueue() {
+		while(!call RssiQueue.empty()) {
+			call RssiQueue.dequeue();
+		}
+	}
 		    
     event void Boot.booted() {
     	// Call stuff when booted
@@ -173,6 +178,7 @@ implementation
 		// Adjust relay position if node is out of range
 		// and we are sending directly
 		if(isOutOfRange && relayPosition == 0 || relayPosition == 2) {
+			clearRssiQueue();
 			relayPosition++;
     		errorCount = 0;
     	}
@@ -205,6 +211,7 @@ implementation
     		
     		// Runner is out of reach, increment position
     		if(errorCount >= 3) {
+				clearRssiQueue();
     			if(relayPosition >= 3) {
     				relayPosition = 0;
     				errorCount = 0;
@@ -292,9 +299,11 @@ implementation
 				if(requestMsg->data != 0) {
 					sendAck(requestMsg->nodeid);
 					if(requestMsg->data == -1) {
+						clearRssiQueue();
 						if(relayPosition >= 3)
 							relayPosition = 0;
 						else
+							
 							relayPosition++;
 					}
 				}
