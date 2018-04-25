@@ -120,18 +120,19 @@ implementation
     }
     
     bool isOutOfRange() {
-    	int16_t avgPreviousPositions, previousPositions, lastPosition = 0;
+    	double avgPreviousPositions, previousPositions, lastPosition, newPosition = 0;
     	uint8_t i;
 		
-		if(!call RssiQueue.full())
+		if(call RssiQueue.size() < call RssiQueue.maxSize())
 			return FALSE;
     	
-    	for(i = 0; i < QUEUE_MAX_SIZE; i++) {	
+    	for(i = 0; i < QUEUE_MAX_SIZE-1; i++) {	
 			previousPositions += call RssiQueue.element(i);
 		}
-		lastPosition = RssiQueue.head();
+		
+		lastPosition = call RssiQueue.element(QUEUE_MAX_SIZE-1);
 		avgPreviousPositions = previousPositions/QUEUE_MAX_SIZE;
-		newPosition = (lastPosition*0.5)+(avgPreviousPositions*0.5)
+		newPosition = (lastPosition*0.9)+(avgPreviousPositions*0.1);
 		
 		if(DEBUG) {
 			printf("New estimated position of runner node: %d", newPosition);
@@ -165,22 +166,22 @@ implementation
 	
 	event void Timer0.fired() {
 		// Main loop
-		// Runs every time timer is fired
-		bool isOutOfRange = FALSE;
-		isOutOfRange = isOutOfRange();
-		
+		// Runs every time timer is fired		
 		if(DEBUG) {
 			printf("Relayposition: %d\n", relayPosition);
 			printf("Overall packet loss: %d\n", overallPacketLoss);
 			printfflush();
 		}
 		
-		// Adjust relay position if node is out of range
-		// and we are sending directly
-		if(isOutOfRange && relayPosition == 0 || relayPosition == 2) {
-			clearRssiQueue();
-			relayPosition++;
-    		errorCount = 0;
+		// Increase error count if node is out of range
+		// and we are sending directly. If too many errors then increase relayPosition
+		if(isOutOfRange() && (relayPosition == 0 || relayPosition == 2)) {
+			if(errorCount >= ARQ_ERRORCOUNT) {
+				relayPosition++;
+    			errorCount = 0;
+			} else {
+			errorCount++;
+			}
     	}
 		
 		if(relayPosition == 0 || relayPosition == 2) {
@@ -209,8 +210,8 @@ implementation
     		}
     		setLedRed();
     		
-    		// Runner is out of reach, increment position
-    		if(errorCount >= 3) {
+    		// Handle packet loss
+    		if(errorCount >= ARQ_ERRORCOUNT) {
 				clearRssiQueue();
     			if(relayPosition >= 3) {
     				relayPosition = 0;
@@ -289,8 +290,12 @@ implementation
 				}
 				setLedGreen();
 				
-				if(requestMsg->relayNodeid == 0 ||  UINT_MAX) {
-					printf("RelayNodeid is zero, so saving the RSSI\n");
+				if(requestMsg->relayNodeid == 1 || requestMsg->relayNodeid == 2) {
+					printf("Msg has been relayed, so not adding RSSI to queue\n");
+					printfflush();
+				}
+				else {
+					printf("Msg has not been relayed, so saving the RSSI\n");
 					printfflush();
 					call RssiQueue.dequeue();
 					call RssiQueue.enqueue(call CC2420Packet.getRssi(msg));
@@ -299,12 +304,13 @@ implementation
 				if(requestMsg->data != 0) {
 					sendAck(requestMsg->nodeid);
 					if(requestMsg->data == -1) {
+						printf("Received data with -1, so back to sending direct\n");
+						printfflush();
 						clearRssiQueue();
 						if(relayPosition >= 3)
 							relayPosition = 0;
 						else
-							
-							relayPosition++;
+							relayPosition = 2;
 					}
 				}
 			}
