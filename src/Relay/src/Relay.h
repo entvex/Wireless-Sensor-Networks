@@ -2,7 +2,7 @@
 #define RELAY_H
 
 enum {
-	PRINT = 0,					// Print flag, set 0 if no prints are needed
+	DEBUG = 0,					// Debug flag, set 0 if no prints are needed
 	AM_CHANNEL = 10,			// AM Channel
 	TIMER0_PERIOD_MILLI = 200,	// Timer used for request towards Runner 
 	TIMER1_PERIOD_MILLI = 200,	// Timer used for request towards BaseStation
@@ -10,9 +10,9 @@ enum {
 	TRIES_TO_RESEND = 3,		// Amount of retries before a request is shut down
 	BASESTATION_ID = 0,			// ID of BaseStation
 	RUNNER_ID = 3,				// ID of Runner
-	SIGNAL_STRENGTH_LOW = 1,	// -25 dBm
-	SIGNAL_STRENGTH_MID = 16,
-	SIGNAL_STRENGTH_HIGH = 31	//   0 dBm
+	SIGNAL_STRENGTH_LOW = 1,	// -25.0 dBm
+	SIGNAL_STRENGTH_MID = 16,	// -12.5 dBm
+	SIGNAL_STRENGTH_HIGH = 31	//   0.0 dBm
 };
 
 typedef nx_struct requestMessage {

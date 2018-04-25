@@ -1869,7 +1869,7 @@ TMicro;
 typedef uint8_t resource_client_id_t;
 # 4 "/opt/tinyos-2.1.1/apps/Relay/src/Relay.h"
 enum __nesc_unnamed4294 {
-  PRINT = 0, 
+  DEBUG = 0, 
   AM_CHANNEL = 10, 
   TIMER0_PERIOD_MILLI = 200, 
   TIMER1_PERIOD_MILLI = 200, 
@@ -6969,7 +6969,9 @@ static inline void RelayC__setLedRed(void );
 
 
 
+
 static inline void RelayC__setLedGreen(void );
+
 
 
 
@@ -6979,7 +6981,6 @@ static inline void RelayC__setLedBlue(void );
 
 
 static inline void RelayC__printAck(ackMessage *ackmsg);
-
 
 
 
@@ -15703,9 +15704,9 @@ inline static void RelayC__Leds__led1On(void ){
 #line 61
 }
 #line 61
-# 215 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
+# 216 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
 static inline void RelayC__setLedGreen(void )
-#line 215
+#line 216
 {
   RelayC__Leds__led1On();
   RelayC__Timer2__startOneShot(TIMER2_PERIOD_MILLI);
@@ -15733,9 +15734,9 @@ inline static void RelayC__CC2420Packet__setPower(message_t *p_msg, uint8_t powe
 #line 56
 }
 #line 56
-# 224 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
+# 226 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
 static inline void RelayC__printAck(ackMessage *ackmsg)
-#line 224
+#line 226
 {
   printf("Sending acknowledge with size: %d should be %d\n nodeid: %d\n receiveid: %d\n counter: %d\n seq: %d\n", sizeof  (*ackmsg), sizeof(ackMessage ), __nesc_ntoh_uint16(ackmsg->nodeid.data), __nesc_ntoh_uint16(ackmsg->receiveid.data), __nesc_ntoh_uint16(ackmsg->counter.data), __nesc_ntoh_uint16(ackmsg->seq.data));
   printfflush();
@@ -15791,7 +15792,7 @@ static inline void RelayC__sendAcknowledge(requestMessage *reqmsg)
       __nesc_hton_uint16(ackmsg->seq.data, __nesc_ntoh_uint16(reqmsg->seq.data));
       __nesc_hton_uint16(ackmsg->counter.data, __nesc_ntoh_uint16(reqmsg->counter.data));
 
-      if (PRINT) 
+      if (DEBUG) 
         {
           RelayC__printAck(ackmsg);
         }
@@ -15810,7 +15811,7 @@ static inline void RelayC__sendAcknowledge(requestMessage *reqmsg)
 static inline message_t *RelayC__Receive__receive(message_t *msg, void *payload, uint8_t len)
 #line 66
 {
-  if (PRINT) 
+  if (DEBUG) 
     {
       printf("Aquired a package with length: %d\n", len);
       printfflush();
@@ -15819,7 +15820,7 @@ static inline message_t *RelayC__Receive__receive(message_t *msg, void *payload,
   if (len == sizeof(requestMessage )) {
       requestMessage *reqmsg = (requestMessage *)payload;
 
-      if (PRINT) 
+      if (DEBUG) 
         {
           int RSSI = RelayC__CC2420Packet__getRssi(msg);
 
@@ -15848,7 +15849,7 @@ static inline message_t *RelayC__Receive__receive(message_t *msg, void *payload,
     if (len == sizeof(ackMessage )) {
         ackMessage *ackmsg = (ackMessage *)payload;
 
-        if (PRINT) 
+        if (DEBUG) 
           {
             int RSSI = RelayC__CC2420Packet__getRssi(msg);
 
@@ -19470,9 +19471,9 @@ inline static void RelayC__Leds__led2On(void ){
 #line 78
 }
 #line 78
-# 219 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
+# 221 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
 static inline void RelayC__setLedBlue(void )
-#line 219
+#line 221
 {
   RelayC__Leds__led2On();
   RelayC__Timer2__startOneShot(TIMER2_PERIOD_MILLI);
@@ -19491,7 +19492,7 @@ static inline void RelayC__Timer0__fired(void )
 
       RelayC__CC2420Packet__setPower(&RelayC__pkt, SIGNAL_STRENGTH_LOW);
 
-      if (PRINT) 
+      if (DEBUG) 
         {
           RelayC__printReq(reqmsg);
         }
@@ -19585,7 +19586,7 @@ static inline void RelayC__Timer1__fired(void )
 
       RelayC__CC2420Packet__setPower(&RelayC__pkt, SIGNAL_STRENGTH_LOW);
 
-      if (PRINT) 
+      if (DEBUG) 
         {
           RelayC__printReq(reqmsg);
         }
@@ -21090,7 +21091,7 @@ static inline void RelayC__Boot__booted(void )
 #line 36
 {
 
-  if (PRINT) 
+  if (DEBUG) 
     {
       printf("Hello from Relay with ID: %d\n", TOS_NODE_ID);
       printfflush();
@@ -25975,9 +25976,9 @@ static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__fireTimers(u
   /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__updateFromTimer__postTask();
 }
 
-# 230 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
+# 231 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
 static void RelayC__printReq(requestMessage *reqmsg)
-#line 230
+#line 231
 {
   printf("Sending request with size: %d should be %d\n nodeid: %d\n relaynodeid: %d\n counter: %d\n seq: %d\n data: %d\n", sizeof  (*reqmsg), sizeof(requestMessage ), __nesc_ntoh_uint16(reqmsg->nodeid.data), __nesc_ntoh_uint16(reqmsg->relayNodeid.data), __nesc_ntoh_uint16(reqmsg->counter.data), __nesc_ntoh_uint16(reqmsg->seq.data), __nesc_ntoh_int16(reqmsg->data.data));
   printfflush();
