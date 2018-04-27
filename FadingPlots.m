@@ -2,7 +2,8 @@ clc; clear; close all;
 
 %-94dBm is antenna receiver sensitivity
 %-84dBm is chosen to give room for unexpected noise sources!
-acc_dBm = -84;            %Accepted received power
+% -84dBm = -129 RSSI
+acc_dBm = -84;            %Accepted received power 
 
 R = 1;                    %Measurement Shunt-Resistance
 I_tx_max = 1*10.^(-3);    %Transmit current
@@ -21,8 +22,6 @@ y = linspace(-N,N,N*2+1);
 %% 0dBm = max power, -24dBm = min power, Runner running at 12km/h ? 1m/333ms
 %  AIR = 2
 gammaAIR = 2;
-% Office = 5.5 (2% of the distance) for every 5m one wall of thickness 30cm exist! 
-gammaOffice = (2*94+5.5*6)/100; %2.21
 
 %BaseStation
 d = sqrt(X.^(2)+Y.^(2));    %euclidean distance
@@ -49,9 +48,9 @@ PAirSouth   = 10*log10(PAirSouth_W./0.001);      %Watt
 PAirCombined = 10*log10((PAir_W + PAirNorth_W + PAirSouth_W)./0.001); %dBm
 
 %% Fading FF=Fast fading, SF= slow fading  
-%Fast Fading 250ms fast fading effect
+%Fast Fading 333ms fast fading effect
 mu = 35+30; %+30 from dBW to dBm
-sigma = 5;
+sigma = 2.22;
 X_ff = normrnd(mu,sigma,[length(x),length(y)]);
 X_randff = rand(length(x),length(y)) < 0.1;
 ff = -(X_randff.*X_ff);
@@ -66,7 +65,7 @@ X_ff_south = normrnd(mu,sigma,[length(x),length(y)]);
 X_randff_south = rand(length(x),length(y)) < 0.1;
 ff_south = -(X_randff_south.*X_ff);
 
-%Slow Fading 10sec effect
+%Slow Fading 14sec effect
 X_sf = normrnd(mu,sigma,[length(x),length(y)]);
 X_randsf = rand(length(x),length(y)) < 0.1;
 X_Coor = find(X_randsf > 0.5);
@@ -77,7 +76,7 @@ for i=1:length(X_Coor)
    end
 end
 
-X_randsf(X_Coor-21:X_Coor+21)=1; %10sec slow fading effect
+X_randsf(X_Coor-21:X_Coor+21)=1; %14sec slow fading effect
 sf = -(X_randsf.*X_sf);
 
 %NORTH
@@ -91,7 +90,7 @@ for i=1:length(X_Coor_north)
    end
 end
 
-X_sf_north(X_Coor_north-21:X_Coor_north+21)=1; %10sec slow fading effect
+X_sf_north(X_Coor_north-21:X_Coor_north+21)=1; %14sec slow fading effect
 sf_north = -(X_sf_north.*X_sf_north);
 
 %SOUTH
@@ -105,7 +104,7 @@ for i=1:length(X_Coor_south)
    end
 end
 
-X_sf_south(X_Coor_south-21:X_Coor_south+21)=1; %10sec slow fading effect
+X_sf_south(X_Coor_south-21:X_Coor_south+21)=1; %14sec slow fading effect
 sf_south = -(X_sf_south.*X_sf_south);
 
 PAir_f = PAir + sf + ff;
@@ -122,7 +121,7 @@ PAirCombined_sf_All_Noisy = 10*log10((PAir_W_f + PAirNorth_W_f + PAirSouth_W_f).
 figure(1)
 hold on
 pcolor(x,y,PAir_f)
-title({'LOGPATH RECEIVED SIGNAL PLOT';'BASE-Station, AIR, Trx = 0dBm. Slow and fast fading effects from BASE ONLY'})
+title({'LOGPATH RECEIVED SIGNAL PLOT';'BASE-Station, AIR, Trx = 0dBm. Fading effects from BASE ONLY'})
 xlabel('-200m < BaseStation < 200m')
 ylabel('-200m < BaseStation < 200m')
 shading interp;
@@ -145,7 +144,7 @@ hold off
 figure(2)
 hold on
 pcolor(x,y,PAirCombined_sf)
-title({'LOGPATH RECEIVED SIGNAL PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Slow and fast fading effects from BASE ONLY'})
+title({'LOGPATH RECEIVED SIGNAL PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Fading effects from BASE ONLY'})
 xlabel('-200m < BaseStation < 200m') % x-axis label
 ylabel('-200m < BaseStation < 200m') % y-axis label
 shading interp;
@@ -159,7 +158,7 @@ hold off
 figure(3)
 hold on
 pcolor(x,y,PAirCombined_sf_All_Noisy)
-title({'LOGPATH RECEIVED SIGNAL PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Slow and fast fading effects from ALL STATIONS'})
+title({'LOGPATH RECEIVED SIGNAL PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Fading effects from ALL STATIONS'})
 xlabel('-200m < BaseStation < 200m') % x-axis label
 ylabel('-200m < BaseStation < 200m') % y-axis label
 shading interp;
@@ -180,7 +179,7 @@ DF_PAir(DFCoor2_PAir) = 0;
 figure(4)
 hold on
 pcolor(x,y,DF_PAir)
-title({'BINARY DEEP FADING PLOT';'BASE-Station, AIR, Trx = 0dBm. Slow and fast fading effects from BASE ONLY'})
+title({'BINARY DEEP FADING PLOT';'BASE-Station, AIR, Trx = 0dBm. Fading effects from BASE ONLY'})
 xlabel('-200m < BaseStation < 200m')
 ylabel('-200m < BaseStation < 200m')
 shading interp;
@@ -200,7 +199,7 @@ DF_PAir_COMB(DFCoor2_PAir_COMB) = 0;
 figure(5)
 hold on
 pcolor(x,y,DF_PAir_COMB)
-title({'BINARY DEEP FADING PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Slow and fast fading effects from BASE ONLY'})
+title({'BINARY DEEP FADING PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Fading effects from BASE ONLY'})
 xlabel('-200m < BaseStation < 200m')
 ylabel('-200m < BaseStation < 200m')
 shading interp;
@@ -220,7 +219,7 @@ DF_PAir_COMB(DFCoor2_PAir_COMB_Noisy) = 0;
 figure(6)
 hold on
 pcolor(x,y,DF_PAir_COMB_noisy)
-title({'BINARY DEEP FADING PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Slow and fast fading effects from ALL STATIONS'})
+title({'BINARY DEEP FADING PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Fading effects from ALL STATIONS'})
 xlabel('-200m < BaseStation < 200m')
 ylabel('-200m < BaseStation < 200m')
 shading interp;
