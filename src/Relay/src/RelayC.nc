@@ -35,7 +35,7 @@ implementation{
 		
 	event void Boot.booted(){
 		
-		if(PRINT)
+		if(DEBUG)
 		{
 			printf("Hello from Relay with ID: %d\n", TOS_NODE_ID);
     		printfflush();
@@ -64,7 +64,7 @@ implementation{
 	}
 	
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
-		if(PRINT)
+		if(DEBUG)
 		{
 			printf("Aquired a package with length: %d\n", len);
     		printfflush();
@@ -73,9 +73,10 @@ implementation{
 		if (len == sizeof(requestMessage)) {
 			requestMessage* reqmsg = (requestMessage*) payload;
 			
-			if(PRINT)
+			if(DEBUG)
 			{
-				printf("Payload is a request message with following data:\n nodeid: %d\n relaynodeid: %d\n counter: %d\n seq: %d\n data: %d\n", reqmsg->nodeid, reqmsg->relayNodeid, reqmsg->counter, reqmsg->seq, reqmsg->data);
+				int RSSI = call CC2420Packet.getRssi(msg);
+				printf("Payload is a request message with following data:\n nodeid: %d\n relaynodeid: %d\n counter: %d\n seq: %d\n data: %d\n RSSI: %d\n", reqmsg->nodeid, reqmsg->relayNodeid, reqmsg->counter, reqmsg->seq, reqmsg->data, RSSI);
     			printfflush(); 
 			}
 			
@@ -99,9 +100,10 @@ implementation{
 		else if (len == sizeof(ackMessage)) {
 			ackMessage* ackmsg = (ackMessage*) payload;
 			
-			if(PRINT)
+			if(DEBUG)
 			{
-				printf("Payload is a acknowldge message with following data:\n nodeid: %d\n receiveid: %d\n counter: %d\n seq: %d\n", ackmsg->nodeid, ackmsg->receiveid, ackmsg->counter, ackmsg->seq);
+				int RSSI = call CC2420Packet.getRssi(msg);
+				printf("Payload is a acknowldge message with following data:\n nodeid: %d\n receiveid: %d\n counter: %d\n seq: %d\n RSSI: %d\n", ackmsg->nodeid, ackmsg->receiveid, ackmsg->counter, ackmsg->seq, RSSI);
     			printfflush(); 
 			}
 			
@@ -128,7 +130,7 @@ implementation{
        
        		call CC2420Packet.setPower(&pkt, SIGNAL_STRENGTH_LOW); // sets package size and signal strength	
        
-       		if(PRINT)
+       		if(DEBUG)
 			{
        			printReq(reqmsg);
        		}
@@ -159,7 +161,7 @@ implementation{
        
        		call CC2420Packet.setPower(&pkt, SIGNAL_STRENGTH_LOW); // sets package size and signal strength	
        		
-       		if(PRINT)
+       		if(DEBUG)
 			{
        			printReq(reqmsg);
        		}
@@ -191,7 +193,7 @@ implementation{
         	ackmsg->seq 		= reqmsg->seq;
         	ackmsg->counter 	= reqmsg->counter;
        		
-       		if(PRINT)
+       		if(DEBUG)
 			{
        			printAck(ackmsg);
        		}
@@ -208,25 +210,26 @@ implementation{
 	
 	void setLedRed() {
 		call Leds.led0On();
-		call Timer2.startOneShot(100);
+		call Timer2.startOneShot(TIMER2_PERIOD_MILLI);
 	}
+	
 	void setLedGreen() {
 		call Leds.led1On();
-		call Timer2.startOneShot(100);
+		call Timer2.startOneShot(TIMER2_PERIOD_MILLI);
 	}
+	
 	void setLedBlue() {
 		call Leds.led2On();
-		call Timer2.startOneShot(100);
+		call Timer2.startOneShot(TIMER2_PERIOD_MILLI);
 	}
 	
 	void printAck(ackMessage* ackmsg){
-		printf("Sending acknowledge with size: %d should be %d\n nodeid: %d\n receiveid: %d\n seq: %d\n counter: %d\n", sizeof(*ackmsg), sizeof(ackMessage), ackmsg->nodeid, ackmsg->receiveid, ackmsg->seq, ackmsg->counter);
+		printf("Sending acknowledge with size: %d should be %d\n nodeid: %d\n receiveid: %d\n counter: %d\n seq: %d\n", sizeof(*ackmsg), sizeof(ackMessage), ackmsg->nodeid, ackmsg->receiveid, ackmsg->counter, ackmsg->seq);
     	printfflush();
 	}
-
 	
 	void printReq(requestMessage* reqmsg){
-		printf("Sending request with size: %d should be %d\n nodeid: %d\n relaynodeid: %d\n seq: %d\n counter: %d\n data: %d\n", sizeof(*reqmsg), sizeof(requestMessage), reqmsg->nodeid, reqmsg->relayNodeid, reqmsg->seq, reqmsg->counter, reqmsg->data);
+		printf("Sending request with size: %d should be %d\n nodeid: %d\n relaynodeid: %d\n counter: %d\n seq: %d\n data: %d\n", sizeof(*reqmsg), sizeof(requestMessage), reqmsg->nodeid, reqmsg->relayNodeid, reqmsg->counter, reqmsg->seq, reqmsg->data);
     	printfflush();
 	}
 		
