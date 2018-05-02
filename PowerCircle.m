@@ -13,8 +13,7 @@ Ptx_max = I_tx_max*R^(2); %Transmit Power
 Ptx_min = I_tx_min*R^(2); %Transmit Power
 
 % Antennasize = 2.7cm and freq = 2.401GHz
-  
-d0     = 0.01167;    %(meter) estimation of the Far Field distance for the TelosB antenna
+d0       = 0.01167;    %(meter) estimation of the Far Field distance for the TelosB antenna
 
 % f      = 2.4*10^(9); %2.4GHz
 % c      = 3*10^(8);   %Speed of light

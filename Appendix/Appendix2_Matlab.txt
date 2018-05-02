@@ -1,0 +1,843 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%PowerCircle.m%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clc; clear; close all;
+
+%-94dBm is antenna receiver sensitivity
+%-84dBm is chosen to give room for unexpected noise sources!
+acc_dBm = -84;            %Accepted received power
+
+R = 1;                    %Measurement Shunt-Resistance
+
+I_tx_max = 1*10.^(-3);    %Transmit current
+I_tx_min = 4*10.^(-6);    %I_tx_max - 24dBm
+
+Ptx_max = I_tx_max*R^(2); %Transmit Power
+Ptx_min = I_tx_min*R^(2); %Transmit Power
+
+% Antennasize = 2.7cm and freq = 2.401GHz
+d0       = 0.01167;    %(meter) estimation of the Far Field distance for the TelosB antenna
+
+% f      = 2.4*10^(9); %2.4GHz
+% c      = 3*10^(8);   %Speed of light
+% lambda = c/f;        %Wavelength of 2.4GHz
+% area   = (4*pi)^(2); %Isotropic lossless antenna
+% L      = 1;          %Lossless electronics assumption
+% Gt     = 1;          %Gt and Gr are based on the antenna structure and
+                       %how directional the antenna is. Throughout
+                       %the rest of the calculations the antenna will be
+                       %treaded as a omnidirectional antenna!
+%                      %Calculated based on the 100m free space range from the Telos_B datasheet!
+% Gr     = Gt;         %Same antenna
+% Prcvd_max = (Ptx_Antenna*Gt*Gr*lambda^(2))/(area*d0^(2)*L); %Recieved signal power at   0dBm Ptx
+% Prcvd_min = (Ptx_Antenna_min*Gt*Gr*lambda^(2))/(area*d0^(2)*L); %Recieved signal power at -24dBm Ptx
+
+ToHop_N   = 0; %40
+ToHop     =  0; % 8
+ToHop_min =  0; % 1
+
+N = 200 + ToHop_N; %meter from the base station "half of a racetrack width"
+meter = 200;
+x = linspace(-meter,meter,N*2);  
+y = linspace(-meter,meter,N*2);  
+[X,Y] = meshgrid(x,y);
+%% 0dBm = max power, -24dBm = min power
+%  AIR = 2
+gammaAIR = 2;
+
+%BaseStation
+d = sqrt(X.^(2)+Y.^(2));    %euclidean distance
+d((N*2)/2+1,(N*2)/2+1) = 1; %to avoid inf number in the center!
+
+PAir_W     = Ptx_max.*((d0./d).^gammaAIR); %Watt
+PAir       = 10*log10(PAir_W/0.001);       %dBm
+PAir_W_min = Ptx_min.*((d0./d).^gammaAIR); %Watt
+PAir_min   = 10*log10(PAir_W_min/0.001);   %dBm
+
+%NorthStation
+%NorthStation placed half a track height away from basestation
+dNorth = sqrt((X-40-ToHop).^(2)+Y.^(2));      %euclidean distance     
+%dNorth((N*2)/2+1,(N*2)/2+41+ToHop) = 1;       %to avoid inf number in the center!       
+dNorthmin = sqrt((X-5-ToHop_min).^(2)+Y.^(2));     
+%dNorthmin((N*2)/2+1,(N*2)/2+6+ToHop_min) = 1;              
+
+PAirNorth       = 10*log10((Ptx_max.*((d0./dNorth).^gammaAIR)./0.001)); %dBm
+PAirNorth_W     = Ptx_max.*((d0./dNorth).^gammaAIR);                    %Watt
+PAirNorth_W_min = Ptx_min.*((d0./dNorthmin).^gammaAIR);                 %Watt
+
+%SouthStation
+%SouthStation placed half a track height away from basestation
+dSouth = sqrt((X+40+ToHop).^(2)+Y.^(2));       %euclidean distance
+%dSouth((N*2)/2+1,(N*2)/2-39-ToHop) = 1;        %to avoid inf number in the center!
+dSouthmin = sqrt((X+5+ToHop_min).^(2)+Y.^(2));     
+%dSouthmin((N*2)/2+1,(N*2)/2-4-ToHop_min) = 1;      
+
+PAirSouth          = 10*log10((Ptx_max.*((d0./dSouth).^gammaAIR)./0.001)); %dBm
+PAirSouth_W        = Ptx_max.*((d0./dSouth).^gammaAIR);                    %Watt
+PAirSouth_W_min    = Ptx_min.*((d0./dSouthmin).^gammaAIR);                 %Watt
+ 
+%Combination of stations in dBm
+PAirCombined         = 10*log10((PAir_W + PAirNorth_W + PAirSouth_W)./0.001);                          
+PAirCombined_min     = 10*log10((PAir_W_min + PAirNorth_W_min + PAirSouth_W_min)./0.001);              
+
+filename = 'PowerCircle.mat';
+save(filename);
+
+%% Plotting Signal Range in AIR for 0dBm
+figure(1)
+hold on
+pcolor(x,y,PAir)
+title({'LOGPATH RECEIVED SIGNAL PLOT';'BASE-Station, AIR, Trx = 0dBm'})
+xlabel('-200m < BaseStation < 200m')
+ylabel('-200m < BaseStation < 200m')
+shading interp;
+set(gca, 'clim', [acc_dBm 0]); 
+colormap([0 0 0; jet]);
+colorbar;
+
+%Ellipse
+a=198; % horizontal radius
+b=40;  % vertical radius
+x0=0;  % x0,y0 ellipse centre coordinates
+y0=0;
+t=-pi:0.01:pi;
+x_ellipse=x0+a*cos(t);
+y_ellipse=y0+b*sin(t);
+plot(x_ellipse,y_ellipse,'r')
+legend('log10 distance path model', 'RaceTrack, "H=80m, L=400m"');
+hold off
+
+figure(2)
+subplot(3,1,1)
+hold on
+pcolor(x,y,PAirSouth)
+title({'LOGPATH RECEIVED SIGNAL PLOT';'SOUTH-Station, AIR, Trx = 0dBm'})
+xlabel('-200m < BaseStation < 200m') % x-axis label
+ylabel('-200m < BaseStation < 200m') % y-axis label
+shading interp;
+set(gca, 'clim', [acc_dBm 0]);
+colormap([0 0 0; jet]);
+plot(x_ellipse,y_ellipse,'r')
+hold off
+
+subplot(3,1,2)
+hold on
+pcolor(x,y,PAir)
+title({'LOGPATH RECEIVED SIGNAL PLOT';'BASE-Station, AIR, Trx = 0dBm'})
+xlabel('-200m < BaseStation < 200m')
+ylabel('-200m < BaseStation < 200m')
+shading interp;
+set(gca, 'clim', [acc_dBm 0]);
+colormap([0 0 0; jet]);
+plot(x_ellipse,y_ellipse,'r')
+hold off
+
+subplot(3,1,3)
+hold on
+pcolor(x,y,PAirNorth)
+title({'LOGPATH RECEIVED SIGNAL PLOT';'NORTH-Station, AIR, Trx = 0dBm'})
+xlabel('-200m < BaseStation < 200m')
+ylabel('-200m < BaseStation < 200m')
+shading interp;
+set(gca, 'clim', [acc_dBm 0]);
+colormap([0 0 0; jet]);
+plot(x_ellipse,y_ellipse,'r')
+hold off
+
+figure(3)
+hold on
+pcolor(x,y,PAirCombined)
+title({'LOGPATH RECEIVED SIGNAL PLOT';'COMBINED-Stations, AIR, Trx = 0dBm'})
+xlabel('-200m < BaseStation < 200m')
+ylabel('-200m < BaseStation < 200m')
+shading interp;
+set(gca, 'clim', [acc_dBm 0]);
+colormap([0 0 0; jet]);
+colorbar;
+plot(x_ellipse,y_ellipse,'r')
+legend('log10 distance path model', 'RaceTrack, "H=80m, L=400m"');
+hold off
+
+
+%% Plotting Signal Range in AIR for -24dBm
+scale = 25;
+figure(4)
+hold on
+pcolor(x(N+1-scale:N+1+scale),y(N+1-scale:N+1+scale),PAir_min(N+1-scale:N+1+scale,N+1-scale:N+1+scale))
+title({'LOGPATH RECEIVED SIGNAL PLOT';'BASE-Station, AIR, Trx = -24dBm'})
+xlabel('-25m < BaseStation < 25m')
+ylabel('-25m < BaseStation < 25m')
+shading interp;
+set(gca, 'clim', [acc_dBm 0]);
+colormap([0 0 0; jet]);
+colorbar;
+
+%Ellipse
+a=15; % horizontal radius
+b=3;  % vertical radius 
+x0=0; % x0,y0 ellipse centre coordinates
+y0=0;
+t=-pi:0.01:pi;
+x_ellipse=x0+a*cos(t);
+y_ellipse=y0+b*sin(t);
+plot(x_ellipse,y_ellipse,'r')
+legend('log10 distance path model', 'RaceTrack, "H=6m, L=30m"');
+hold off
+
+figure(5)
+hold on
+pcolor(x(N+1-scale:N+1+scale),y(N+1-scale:N+1+scale),PAirCombined_min(N+1-scale:N+1+scale,N+1-scale:N+1+scale))
+title({'LOGPATH RECEIVED SIGNAL PLOT';'COMBINED-Stations, AIR, Trx = -24dBm'})
+xlabel('-25m < BaseStation < 25m')
+ylabel('-25m < BaseStation < 25m')
+shading interp;
+set(gca, 'clim', [acc_dBm 0]);
+colormap([0 0 0; jet]);
+colorbar;
+plot(x_ellipse,y_ellipse,'r')
+legend('log10 distance path model', 'RaceTrack, "H=6m, L=30m"');
+hold off
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%PowerCircleOffice.m%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clc; clear; close all;
+
+%-94dBm is antenna receiver sensitivity
+%-84dBm is chosen to give room for unexpected noise sources!
+acc_dBm = -84;            %Accepted received power
+
+R = 1;                    %Measurement Shunt-Resistance
+
+I_tx_max = 1*10.^(-3);    %Transmit current
+I_tx_min = 4*10.^(-6);    %I_tx_max - 24dBm
+
+Ptx_max = I_tx_max*R^(2); %Transmit Power
+Ptx_min = I_tx_min*R^(2); %Transmit Power
+
+% Antennasize = 2.7cm and freq = 2.4GHz 
+d0     = 0.01167;    %(meter) estimation of the Far Field distance for the TelosB antenna
+
+% f      = 2.4*10^(9); %2.4GHz
+% c      = 3*10^(8);   %Speed of light
+% lambda = c/f;        %Wavelength of 2.4GHz
+% area   = (4*pi)^(2); %Isotropic lossless antenna
+% L      = 1;          %Lossless electronics assumption
+% Gt     = 1;          %Gt and Gr are based on the antenna structure and
+                       %how directional the antenna is. Throughout
+                       %the rest of the calculations the antenna will be
+                       %treaded as a omnidirectional antenna!
+%                      %Calculated based on the 100m free space range from the Telos_B datasheet!
+% Gr     = Gt;         %Same antenna
+% Prcvd_max = (Ptx_Antenna*Gt*Gr*lambda^(2))/(area*d0^(2)*L); %Recieved signal power at   0dBm Ptx
+% Prcvd_min = (Ptx_Antenna_min*Gt*Gr*lambda^(2))/(area*d0^(2)*L); %Recieved signal power at -24dBm Ptx
+
+N = 100; %meter from the base station "half of a racetrack width"
+Meter = 100;
+x = linspace(-Meter, Meter, N*2+1);  
+y = linspace(-Meter, Meter, N*2+1);  
+[X,Y] = meshgrid(x,y);
+
+N_min = 25; %meter from the base station "half of a racetrack width"
+Meter = 0.25;
+x_min = linspace(-Meter, Meter, N_min*2+1);  
+y_min = linspace(-Meter, Meter, N_min*2+1);  
+[X_min,Y_min] = meshgrid(x_min,y_min);
+
+%% 0dBm = max power, -24dBm = min power
+% Office = 5.5 (2% of the distance) for every 5m one wall of thickness 30cm exist! 
+gammaOffice     = (2*94+5.5*6)/100; %2.21
+gammaOffice_min = 5.5;
+
+%BaseStation
+d = sqrt(X.^(2)+Y.^(2));    %euclidean distance
+d((N*2)/2+1,(N*2)/2+1) = 0.5; %to avoid inf number in the center!
+d_min = sqrt(X_min.^(2)+Y_min.^(2));    %euclidean distance
+d_min((N_min*2)/2+1,(N_min*2)/2+1) = 0.01; %to avoid inf number in the center!
+
+POffice_W     = Ptx_max.*((d0./d).^gammaOffice); %Watt
+POffice       = 10*log10(POffice_W/0.001);       %dBm
+POffice_W_min = Ptx_min.*((d0./d_min).^gammaOffice_min); %Watt
+POffice_min   = 10*log10(POffice_W_min/0.001);   %dBm
+
+%NorthStation
+%NorthStation placed half a track height away from basestation  
+dNorthOffice = sqrt((X-20).^(2)+Y.^(2)); 
+dNorthOffice((N*2)/2+1,(N*2)/2+21) = 0.5;   
+dNorthOfficemin = sqrt((X_min-0.1).^(2)+Y_min.^(2));
+dNorthOfficemin((N_min*2)/2+1,(N_min*2)/2+11) = 0.01;
+
+POfficeNorth_W  = Ptx_max.*((d0./dNorthOffice).^gammaOffice);           %Watt
+POfficeNorth_W_min  = Ptx_min.*((d0./dNorthOfficemin).^gammaOffice_min);    %Watt
+
+%SouthStation
+%SouthStation placed half a track height away from basestation
+dSouthOffice = sqrt((X+20).^(2)+Y.^(2)); 
+dSouthOffice((N*2)/2+1,(N*2)/2-19) = 0.5;    
+dSouthminOffice = sqrt((X_min+0.1).^(2)+Y_min.^(2));
+dSouthminOffice((N_min*2)/2+1,(N_min*2)/2-9) = 0.01;
+
+POfficeSouth_W     = Ptx_max.*((d0./dSouthOffice).^gammaOffice);           %Watt
+POfficeSouth_W_min = Ptx_min.*((d0./dSouthminOffice).^gammaOffice_min);        %Watt
+ 
+%Combination of stations in dBm
+POfficeCombined      = 10*log10((POffice_W + POfficeNorth_W + POfficeSouth_W)./0.001);                 
+POfficeCombined_min  = 10*log10((POffice_W_min + POfficeNorth_W_min + POfficeSouth_W_min)./0.001); 
+
+%% Plotting Signal Range in Shannon Engineering Building for 0dBm
+figure(6)
+hold on
+pcolor(x,y,POffice)
+title({'LOGPATH RECEIVED SIGNAL PLOT';'BASE-Station, OFFICE, Trx = 0dBm'})
+xlabel('-100m < BaseStation < 100m')
+ylabel('-100m < BaseStation < 100m')
+shading interp;
+set(gca, 'clim', [acc_dBm 0]);
+colormap([0 0 0; jet]);
+colorbar;
+
+%Ellipse
+a =100; % horizontal radius
+b = 20; % vertical radius
+x0=  0; % x0,y0 ellipse centre coordinates
+y0=  0;
+t=-pi:0.01:pi;
+x_ellipse=x0+a*cos(t);
+y_ellipse=y0+b*sin(t);
+plot(x_ellipse,y_ellipse,'r')
+legend('log10 distance path model', 'RaceTrack, "H=40m, L=100m"');
+hold off
+
+figure(7)
+hold on
+pcolor(x,y,POfficeCombined)
+title({'LOGPATH RECEIVED SIGNAL PLOT';'COMBINED-Stations, OFFICE, Trx = 0dBm'})
+xlabel('-100m < BaseStation < 100m')
+ylabel('-100m < BaseStation < 100m')
+shading interp;
+set(gca, 'clim', [acc_dBm 0]);
+colormap([0 0 0; jet]);
+colorbar;
+plot(x_ellipse,y_ellipse,'r')
+legend('log10 distance path model', 'RaceTrack, "H=40m, L=100m"');
+hold off
+
+%% Plotting Signal Range in Shannon Engineering Building for -24dBm
+scale = N_min;
+figure(8)
+hold on
+pcolor(x_min(N_min+1-scale:N_min+1+scale),y_min(N_min+1-scale:N_min+1+scale),POffice_min(N_min+1-scale:N_min+1+scale,N_min+1-scale:N_min+1+scale))
+title({'LOGPATH RECEIVED SIGNAL PLOT';'BASE-Station, OFFICE, Trx = -24dBm'})
+xlabel('-0.25m < BaseStation < 0.25m')
+ylabel('-0.25m < BaseStation < 0.25m')
+shading interp;
+set(gca, 'clim', [acc_dBm 0]);
+colormap([0 0 0; jet]);
+colorbar;
+
+%Ellipse
+a =0.2; % horizontal radius
+b = 0.05; % vertical radius
+x0=0; % x0,y0 ellipse centre coordinates
+y0=0;
+t=-pi:0.01:pi;
+x_ellipse=x0+a*cos(t);
+y_ellipse=y0+b*sin(t);
+plot(x_ellipse,y_ellipse,'r')
+legend('log10 distance path model', 'RaceTrack, "H=5cm, L=20cm"');
+hold off
+
+figure(9)
+hold on
+pcolor(x_min(N_min+1-scale:N_min+1+scale),y_min(N_min+1-scale:N_min+1+scale),POfficeCombined_min(N_min+1-scale:N_min+1+scale,N_min+1-scale:N_min+1+scale))
+title({'LOGPATH RECEIVED SIGNAL PLOT';'COMBINED-Stations, OFFICE, Trx = -24dBm'})
+xlabel('-0.25m < BaseStation < 0.25m')
+ylabel('-0.25m < BaseStation < 0.25m')
+shading interp;
+set(gca, 'clim', [acc_dBm 0]);
+colormap([0 0 0; jet]);
+colorbar;
+plot(x_ellipse,y_ellipse,'r')
+legend('log10 distance path model', 'RaceTrack, "H=5cm, L=50cm"');
+hold off
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%FadingPlots.m%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clc; clear; close all;
+
+%-94dBm is antenna receiver sensitivity
+%-84dBm is chosen to give room for unexpected noise sources!
+% -84dBm = -129 RSSI
+acc_dBm = -84;            %Accepted received power 
+
+R = 1;                    %Measurement Shunt-Resistance
+I_tx_max = 1*10.^(-3);    %Transmit current
+I_tx_min = 4*10.^(-6);    %I_tx_max - 24dBm
+Ptx_max = I_tx_max*R^(2); %Transmit Power
+Ptx_min = I_tx_min*R^(2); %Transmit Power
+
+% Antennasize = 2.7cm and freq = 2.4GHz
+% https://www.everythingrf.com/rf-calculators/antenna-near-field-distance-calculator  
+d0     = 0.01167;    %(meter) estimation of the Far Field distance for the TelosB antenna
+
+N = 200; %meter from the base station "half of a racetrack width"
+x = linspace(-N,N,N*2+1);  
+y = linspace(-N,N,N*2+1);  
+[X,Y] = meshgrid(x,y);
+%% 0dBm = max power, -24dBm = min power, Runner running at 12km/h ? 1m/333ms
+%  AIR = 2
+gammaAIR = 2;
+
+%BaseStation
+d = sqrt(X.^(2)+Y.^(2));    %euclidean distance
+d((N*2)/2+1,(N*2)/2+1) = 1; %to avoid inf number in the center!
+
+PAir_W = Ptx_max.*((d0./d).^gammaAIR); %Watt
+PAir   = 10*log10(PAir_W/0.001);       %dBm
+
+%NorthSation
+dNorth = sqrt((X-40).^(2)+Y.^(2)); %euclidean distance     
+dNorth((N*2)/2+1,(N*2)/2+41) = 1;  %to avoid inf number in the center!  
+
+PAirNorth_W = Ptx_max.*((d0./dNorth).^gammaAIR); %Watt
+PAirNorth   = 10*log10(PAirNorth_W./0.001);      %dBm
+
+%SouthStation
+dSouth = sqrt((X+40).^(2)+Y.^(2));  %euclidean distance
+dSouth((N*2)/2+1,(N*2)/2-39) = 1;   %to avoid inf number in the center!
+
+PAirSouth_W = Ptx_max.*((d0./dSouth).^gammaAIR); %dBm
+PAirSouth   = 10*log10(PAirSouth_W./0.001);      %Watt         
+                         
+%Combination of stations
+PAirCombined = 10*log10((PAir_W + PAirNorth_W + PAirSouth_W)./0.001); %dBm
+
+%% Fading FF=Fast fading, SF= slow fading  
+%Fast Fading 333ms fast fading effect
+mu = 35+30; %+30 from dBW to dBm
+sigma = 2.22;
+X_ff = normrnd(mu,sigma,[length(x),length(y)]);
+X_randff = rand(length(x),length(y)) < 0.1;
+ff = -(X_randff.*X_ff);
+
+%North
+X_ff_north = normrnd(mu,sigma,[length(x),length(y)]);
+X_randff_north = rand(length(x),length(y)) < 0.1;
+ff_north = -(X_randff_north.*X_ff);
+
+%South
+X_ff_south = normrnd(mu,sigma,[length(x),length(y)]);
+X_randff_south = rand(length(x),length(y)) < 0.1;
+ff_south = -(X_randff_south.*X_ff);
+
+%Slow Fading 14sec effect
+X_sf = normrnd(mu,sigma,[length(x),length(y)]);
+X_randsf = rand(length(x),length(y)) < 0.1;
+X_Coor = find(X_randsf > 0.5);
+
+for i=1:length(X_Coor)
+   if X_Coor(i) < 22
+      X_Coor(i) = 22;
+   end
+end
+
+X_randsf(X_Coor-21:X_Coor+21)=1; %14sec slow fading effect
+sf = -(X_randsf.*X_sf);
+
+%NORTH
+X_sf_north = normrnd(mu,sigma,[length(x),length(y)]);
+X_randsf_north = rand(length(x),length(y)) < 0.1;
+X_Coor_north = find(X_randsf_north > 0.5);
+
+for i=1:length(X_Coor_north)
+   if X_Coor_north(i) < 22
+      X_Coor_north(i) = 22;
+   end
+end
+
+X_sf_north(X_Coor_north-21:X_Coor_north+21)=1; %14sec slow fading effect
+sf_north = -(X_sf_north.*X_sf_north);
+
+%SOUTH
+X_sf_south = normrnd(mu,sigma,[length(x),length(y)]);
+X_randsf_south = rand(length(x),length(y)) < 0.1;
+X_Coor_south = find(X_randsf_south > 0.5);
+
+for i=1:length(X_Coor_south)
+   if X_Coor_south(i) < 22
+      X_Coor_south(i) = 22;
+   end
+end
+
+X_sf_south(X_Coor_south-21:X_Coor_south+21)=1; %14sec slow fading effect
+sf_south = -(X_sf_south.*X_sf_south);
+
+PAir_f = PAir + sf + ff;
+PAirNorth_f = PAirNorth + sf_north + ff_north;
+PAirSouth_f = PAirSouth + sf_south + ff_south;
+PAir_W_f      = 10.^(PAir_f./10);
+PAirNorth_W_f = 10.^(PAirNorth_f./10);
+PAirSouth_W_f = 10.^(PAirSouth_f./10);
+
+PAirCombined_sf = 10*log10((PAir_W_f + PAirNorth_W + PAirSouth_W)./0.001); %dBm
+PAirCombined_sf_All_Noisy = 10*log10((PAir_W_f + PAirNorth_W_f + PAirSouth_W_f)./0.001); %dBm
+
+%% Plotting Signal Range in AIR for 0dBm
+figure(1)
+hold on
+pcolor(x,y,PAir_f)
+title({'LOGPATH RECEIVED SIGNAL PLOT';'BASE-Station, AIR, Trx = 0dBm. Fading effects from BASE ONLY'})
+xlabel('-200m < BaseStation < 200m')
+ylabel('-200m < BaseStation < 200m')
+shading interp;
+set(gca, 'clim', [acc_dBm 0]);
+colormap([0 0 0; jet]);
+colorbar;
+
+%Ellipse
+a=N-2; % horizontal radius
+b=N/5; % vertical radius
+x0=0;  % x0,y0 ellipse centre coordinates
+y0=0;
+t=-pi:0.01:pi;
+x_ellipse=x0+a*cos(t); %Try changing to x instead of t "FUN"
+y_ellipse=y0+b*sin(t); %Try changing to y instead of t "FUN"
+plot(x_ellipse,y_ellipse,'r')
+legend('log10 distance path model', 'RaceTrack, "H=80m, L=400m"');
+hold off
+
+figure(2)
+hold on
+pcolor(x,y,PAirCombined_sf)
+title({'LOGPATH RECEIVED SIGNAL PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Fading effects from BASE ONLY'})
+xlabel('-200m < BaseStation < 200m') % x-axis label
+ylabel('-200m < BaseStation < 200m') % y-axis label
+shading interp;
+set(gca, 'clim', [acc_dBm 0]);
+colormap([0 0 0; jet]);
+colorbar;
+plot(x_ellipse,y_ellipse,'r')
+legend('log10 distance path model', 'RaceTrack, "H=80m, L=400m"');
+hold off
+
+figure(3)
+hold on
+pcolor(x,y,PAirCombined_sf_All_Noisy)
+title({'LOGPATH RECEIVED SIGNAL PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Fading effects from ALL STATIONS'})
+xlabel('-200m < BaseStation < 200m') % x-axis label
+ylabel('-200m < BaseStation < 200m') % y-axis label
+shading interp;
+set(gca, 'clim', [acc_dBm 0]);
+colormap([0 0 0; jet]);
+colorbar;
+plot(x_ellipse,y_ellipse,'r')
+legend('log10 distance path model', 'RaceTrack, "H=80m, L=400m"');
+hold off
+
+%% Plotting Deep Fading Binary plots
+DF_PAir = zeros(length(PAir_f)); %Deep Fade Power AIR
+DFCoor1_PAir = PAir_f>acc_dBm;
+DFCoor2_PAir = PAir_f<=acc_dBm;
+DF_PAir(DFCoor1_PAir) = -9999;
+DF_PAir(DFCoor2_PAir) = 0;
+
+figure(4)
+hold on
+pcolor(x,y,DF_PAir)
+title({'BINARY DEEP FADING PLOT';'BASE-Station, AIR, Trx = 0dBm. Fading effects from BASE ONLY'})
+xlabel('-200m < BaseStation < 200m')
+ylabel('-200m < BaseStation < 200m')
+shading interp;
+set(gca, 'clim', [-1 0]);
+colormap([0 0 0; jet]);
+colorbar;
+plot(x_ellipse,y_ellipse,'b')
+legend('log10 distance path model', 'RaceTrack, "H=80m, L=400m"');
+hold off
+
+DF_PAir_COMB = zeros(length(PAirCombined_sf));
+DFCoor1_PAir_COMB = PAirCombined_sf>acc_dBm;
+DFCoor2_PAir_COMB = PAirCombined_sf<=acc_dBm;
+DF_PAir_COMB(DFCoor1_PAir_COMB) = -9999;
+DF_PAir_COMB(DFCoor2_PAir_COMB) = 0;
+
+figure(5)
+hold on
+pcolor(x,y,DF_PAir_COMB)
+title({'BINARY DEEP FADING PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Fading effects from BASE ONLY'})
+xlabel('-200m < BaseStation < 200m')
+ylabel('-200m < BaseStation < 200m')
+shading interp;
+set(gca, 'clim', [-1 0]);
+colormap([0 0 0; jet]);
+colorbar;
+plot(x_ellipse,y_ellipse,'b')
+legend('log10 distance path model', 'RaceTrack, "H=80m, L=400m"');
+hold off
+
+DF_PAir_COMB_noisy = zeros(length(PAirCombined_sf_All_Noisy));
+DFCoor1_PAir_COMB_Noisy = PAirCombined_sf_All_Noisy>acc_dBm;
+DFCoor2_PAir_COMB_Noisy = PAirCombined_sf_All_Noisy<=acc_dBm;
+DF_PAir_COMB_noisy(DFCoor1_PAir_COMB_Noisy) = -9999;
+DF_PAir_COMB(DFCoor2_PAir_COMB_Noisy) = 0;
+
+figure(6)
+hold on
+pcolor(x,y,DF_PAir_COMB_noisy)
+title({'BINARY DEEP FADING PLOT';'COMBINED-Stations, AIR, Trx = 0dBm. Fading effects from ALL STATIONS'})
+xlabel('-200m < BaseStation < 200m')
+ylabel('-200m < BaseStation < 200m')
+shading interp;
+set(gca, 'clim', [-1 0]);
+colormap([0 0 0; jet]);
+colorbar;
+plot(x_ellipse,y_ellipse,'b')
+legend('log10 distance path model', 'RaceTrack, "H=80m, L=400m"');
+hold off
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%ToHopOrNotToHop.m%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clc; clear; close all;
+load('PowerCircle.mat');
+
+% Rounds to run for completing a marathon
+a=200; % horizontal radius of ellipse shaped race track
+b=40;  % vertical radius
+x0=0;  % x0,y0 ellipse centre coordinates
+y0=0;
+circumference = 2*pi*sqrt((1/2)*(a^(2)+b.^(2))); %906.1739m
+Marathon = 42195; %meters
+Rounds   = round(Marathon/circumference); %47
+
+% 12km/h = 3.333m/s
+% 4 packages/sec => 0.833m/package
+% 897.4624m / 0.417m = 1.077*10^3 packages
+% 2pi / 1.077*10^3 = 5.834*10^-3
+% Interval giving a package signal strength measurement at each package
+t=-pi:0.005778:pi;
+x_ellipse=x0+a*cos(t);
+y_ellipse=y0+b*sin(t);
+
+P_TrackSignal_All_Rounds_Base = zeros(length(t), Rounds);
+P_TrackSignal_All_Rounds_Combined = zeros(length(t), Rounds);
+%% Fading FF=Fast fading, SF= slow fading  
+%Fast Fading 250ms fast fading effect
+for r=1:Rounds
+mu = 35+30; %+30 from dBW to dBmW
+sigma = 2.22;
+X_ff = normrnd(mu,sigma,[length(x),length(y)]);
+X_randff = rand(length(x),length(y)) < 0.1;
+ff = -(X_randff.*X_ff);
+
+%North
+X_ff_north = normrnd(mu,sigma,[length(x),length(y)]);
+X_randff_north = rand(length(x),length(y)) < 0.1;
+ff_north = -(X_randff_north.*X_ff);
+
+%South
+X_ff_south = normrnd(mu,sigma,[length(x),length(y)]);
+X_randff_south = rand(length(x),length(y)) < 0.1;
+ff_south = -(X_randff_south.*X_ff);
+
+%Slow Fading 10sec effect
+X_sf = normrnd(mu,sigma,[length(x),length(y)]);
+X_randsf = rand(length(x),length(y)) < 0.1;
+X_Coor = find(X_randsf > 0.5);
+
+for i=1:length(X_Coor)
+   if X_Coor(i) < 22
+      X_Coor(i) = 22;
+   end
+end
+
+X_randsf(X_Coor-21:X_Coor+21)=1; %10sec slow fading effect
+sf = -(X_randsf.*X_sf);
+
+%NORTH
+X_sf_north = normrnd(mu,sigma,[length(x),length(y)]);
+X_randsf_north = rand(length(x),length(y)) < 0.1;
+X_Coor_north = find(X_randsf_north > 0.5);
+
+for i=1:length(X_Coor_north)
+   if X_Coor_north(i) < 22
+      X_Coor_north(i) = 22;
+   end
+end
+
+X_sf_north(X_Coor_north-21:X_Coor_north+21)=1; %10sec slow fading effect
+sf_north = -(X_sf_north.*X_sf_north);
+
+%SOUTH
+X_sf_south = normrnd(mu,sigma,[length(x),length(y)]);
+X_randsf_south = rand(length(x),length(y)) < 0.1;
+X_Coor_south = find(X_randsf_south > 0.5);
+
+for i=1:length(X_Coor_south)
+   if X_Coor_south(i) < 22
+      X_Coor_south(i) = 22;
+   end
+end
+
+X_sf_south(X_Coor_south-21:X_Coor_south+21)=1; %10sec slow fading effect
+sf_south = -(X_sf_south.*X_sf_south);
+
+PAir_f = PAir + sf + ff;
+PAirNorth_f = PAirNorth + sf_north + ff_north;
+PAirSouth_f = PAirSouth + sf_south + ff_south;
+PAir_W_f      = 10.^(PAir_f./10);
+PAirNorth_W_f = 10.^(PAirNorth_f./10);
+PAirSouth_W_f = 10.^(PAirSouth_f./10);
+
+PAirCombined_sf = 10*log10((PAir_W_f + PAirNorth_W + PAirSouth_W)./0.001); %dBm
+PAirCombined_sf_All_Noisy = 10*log10((PAir_W_f + PAirNorth_W_f + PAirSouth_W_f)./0.001); %dBm
+
+P_TrackSignal_temp_Base = PAir_f(round(x_ellipse+N+1),round(y_ellipse+N+1));
+P_TrackSignal_Base      = diag(P_TrackSignal_temp_Base)';
+P_TrackSignal_Base      = [P_TrackSignal_Base(272:length(P_TrackSignal_Base-1)) P_TrackSignal_Base(1:271)]; 
+P_TrackSignal_All_Rounds_Base(:,r) = P_TrackSignal_Base; 
+
+P_TrackSignal_temp_Combined = PAirCombined_sf(round(x_ellipse+N),round(y_ellipse+N));
+P_TrackSignal_Combined      = diag(P_TrackSignal_temp_Combined)';
+P_TrackSignal_Combined      = [P_TrackSignal_Combined(272:length(P_TrackSignal_Combined-1)) P_TrackSignal_Combined(1:271)]; 
+P_TrackSignal_All_Rounds_Combined(:,r) = P_TrackSignal_Combined; 
+end
+
+filename = 'ToHopOrNotToHop.mat';
+save(filename);
+
+%% Plotting Signal Range in AIR for 0dBm
+Samples = linspace(1,length(t),length(t)); %Helpers
+RoundsC = linspace(1,Rounds,Rounds);       %Helpers
+
+figure(1)
+hold on
+plot(Samples,P_TrackSignal_Base)
+title({'RECEIVED SIGNAL PER SAMPLE AT TRACK';'BASE-Station, AIR, Trx = 0dBm'})
+xlabel('Number of Samples for ONE track lab')
+ylabel('Signal Strength in dBm')
+legend('RSSI at each package along ONE track round','Location','southwest');
+hold off
+
+figure(2)
+hold on
+surf(Samples,RoundsC,P_TrackSignal_All_Rounds_Base')
+title({'RECEIVED SIGNAL PER SAMPLE AT TRACK';'BASE-Station, AIR, Trx = 0dBm'})
+xlabel('Signal Strength in dBm')
+ylabel('Roundnumber around the track')
+shading interp;
+set(gca, 'clim', [acc_dBm 0]); 
+colormap([0 0 0; jet]);
+colorbar;
+legend('RSSI at each package along 47 track rounds','Location','southwest');
+hold off
+
+figure(3)
+hold on
+surf(Samples,RoundsC,P_TrackSignal_All_Rounds_Combined')
+title({'RECEIVED SIGNAL PER SAMPLE AT TRACK';'COMBINED-Station, AIR, Trx = 0dBm'})
+xlabel('Signal Strength in dBm')
+ylabel('Roundnumber around the track')
+shading interp;
+set(gca, 'clim', [acc_dBm 0]); 
+colormap([0 0 0; jet]);
+colorbar;
+legend('RSSI at each package along 47 track rounds','Location','southwest');
+hold off
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Protocol_Decision.m%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clc; clear; close all;
+load('ToHopOrNotToHop.mat');
+
+% It has to predict if the next package is a fail or a direct hit "STATECHANGE"!
+dist_one_round  = sqrt(abs(x_ellipse).^(2) + abs(y_ellipse).^(2));
+distance        = repmat(dist_one_round, Rounds, 1);   %Predictor 1
+signalstrengh   = P_TrackSignal_All_Rounds_Base';      %Predictor 2
+directFails     = ones(size(distance));                %Predictor 3
+directFailsCoor = signalstrengh<=acc_dBm;
+directFails(directFailsCoor) = 0;
+dDirectFails    = diff(directFails,1,2);
+zeros_temp      = zeros(Rounds,1);
+STATECHANGE     = [zeros_temp, diff(directFails,1,2)]; %Estimator 
+
+Samples = linspace(1,length(t)/2,length(t)/2); %Helpers
+RoundsC = linspace(1,Rounds,Rounds);           %Helpers
+
+figure(1)
+hold on
+surf(Samples, RoundsC, directFails(:,1:544))
+title({'RECEIVED SIGNAL PER SAMPLE AT TRACK';'BASE-Station, AIR, Trx = 0dBm'})
+xlabel('Signal Strength in dBm')
+ylabel('Roundnumber around the track')
+hold off
+
+figure(2)
+hold on
+surf(Samples(1:544), RoundsC, STATECHANGE(:,1:544))
+title({'RECEIVED SIGNAL PER SAMPLE AT TRACK';'BASE-Station, AIR, Trx = 0dBm'})
+xlabel('Signal Strength in dBm')
+ylabel('Roundnumber around the track')
+hold off
+
+startNorthStart = 211;
+endNorthEnd     = 332;
+midWayPoint     = 544;
+startSouthStart = 816;
+startSouthEnd   = 938;
+x1  = distance(:,1:startNorthStart);
+x11 = distance(:,endNorthEnd:midWayPoint);
+%x111= distance(:,startSouthEnd:length(distance));
+x1  = [x1 x11];
+x1  = x1(:);
+
+x2  = signalstrengh(:,1:startNorthStart);
+x22 = signalstrengh(:,endNorthEnd:midWayPoint);
+% x222= signalstrengh(:,startSouthEnd:length(signalstrengh));
+x2  = [x2 x22];
+x2  = x2(:);
+
+x3  = directFails(:,1:startNorthStart);
+x33 = directFails(:,endNorthEnd:midWayPoint);
+% x333= directFails(:,startSouthEnd:length(directFails));
+x3  = [x3 x33];
+
+y1  = STATECHANGE(:,1:startNorthStart);
+y11 = STATECHANGE(:,endNorthEnd:midWayPoint);
+% y111= STATECHANGE(:,startSouthEnd:length(STATECHANGE));
+y  = [y1 y11];
+
+Samples = linspace(1,length(y),length(y)); %Helpers
+
+figure(3)
+hold on
+surf(Samples, RoundsC, x3)
+title({'Received IN RANGE Signal per package at half a track';'BASE-Station, AIR, Trx = 0dBm'})
+xlabel('Signal Strength in dBm')
+ylabel('Roundnumber around the track')
+hold off
+
+y = y(:);
+y = circshift(y',[0,1])';
+x3 = x3(:);
+
+X1 = [x1 x2];
+b1  = regress(y,X1);
+
+X2 = [x2 x3];
+b2  = regress(y,X2);
+
+X3 = [x1 x3];
+b3  = regress(y,X2);
+
+X4 = [x1 x2 x3];
+b4 = regress(y,X4)
+
+x = linspace(min(x1(:,1)),max(x1(:,1)),length(x1));
+y = linspace(min(x2(:,1)),max(x2(:,1)),length(x2));
+z = linspace(0,1,length(x3));
+d = b4(1)*x + b4(2)*y + b4(3)*z;
+
+figure(4)
+hold on
+scatter3(x1,x2,x3,'filled')
+xlabel('Distance')
+ylabel('Signal Strength')
+zlabel('Direct Package Bool')
+view(50,60)
+plot3(x,y,d);grid on;
+legend('Simulation points', 'y = 0+0x + 0y + 0.0102z','Location','northwest');
+hold off
+
