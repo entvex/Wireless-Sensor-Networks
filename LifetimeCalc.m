@@ -14,8 +14,8 @@ sleep_Period    = 1-packagePeriod*timesPerSecond;  %Sleep period for one package
 sleep_Period_OS = sleep_Period-os_time*timesPerSecond;
 R = 1;                                        %Measurement Shunt-Resistance
 
-I_tx_max  = 18.3*10.^(-3);                    %Transmit current
-I_tx_min  = I_tx_max-(1*10.^(-3)-4*10.^(-6)); %I_tx_max - 24dBm
+I_tx_max  = 17.5*10.^(-3);                    %Transmit current
+I_tx_min  = 8*10.^(-3);                       %I_tx_max - 24dBm
 I_rx      = 23.0*10.^(-3);                    %Receive Current
 I_sleep   = 1*10.^(-6);                       %Sleep current
 
