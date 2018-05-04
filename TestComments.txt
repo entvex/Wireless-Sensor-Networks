@@ -1,16 +1,37 @@
-QI Comments: Energy Consumption and NOT power consumption!
+(Troels): QI Comments: Energy Consumption and NOT power consumption!
 Explain better the choice of half battery lifetime as indicator vs other indicators
 Conclude on the doppler effect that we do not consider it, because we run around the basestation and not towards it!
-Explain shortly the math behind doppler effect plus extention of wavelength (HENRIK)!
+Explain shortly the math behind doppler effect 
+(HENRIK) plus the extention of wavelength!
 No RSSI in the report or plots
 
-Test scenario:
+(Coding Team): Test scenario:
+(Henrik): Introduction "The Track"
+We have tested the measurable distance in Shannon.
 Four nodes, 1 selfdriving toytrain, -24dBm, Building
-Two different channel sets (0,1) (10,11 WIFI)
-Two different Timeouts (????ms, ????ms)
-Two different Threshold levels in dBm (-84dBm, SINR threshold)
-Total Energy Consumption for each scenario calculated on number of relays
-Package loss graphs
+Height:21cm
+LengthLong:47.5cm
+speed of train = 3.25 round/min
+LenghtSmall:33cm
+speed of train = 5 round/min
+Total Packages per round = 1087
+47 round = 51089 packages
 
+(David and Christian)
+Two different channel sets (0,1) (10,11 WIFI) - Some reference to how we know that channel 11 is the wifi channel!
+Two different Timeouts (????ms, ????ms)
+Two different Threshold levels in dBm (-84dBm, SINR threshold) - Some setup which gives us a measured Threshold? Maybe a preliminary lab around the track!
+
+Results:
+(Coding Team):
+   Number of time outs at the base station
+   Number of packages received at the individual relay stations
+   (ALL) Short description on how this can be
+(Christian): Package loss graph and new estimated multi linear regression line!
+(Henrik): Total Energy Consumption for each scenario calculated on number of relays - maybe shown in a powertable!
+
+(ALL) Conclusion!
+
+Extra Considerations:
 David: Network Processing!
-CSMA maybe!
+Christian: CSMA maybe!
