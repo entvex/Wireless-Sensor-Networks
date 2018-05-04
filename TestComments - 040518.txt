@@ -37,3 +37,5 @@ Results:
 Extra Considerations:
 David: Network Processing!
 Christian: CSMA maybe!
+Henrik: Energy Harvesting (Solar for Base Station, Pizo for Runner!)
+Troels: Snak med Qi om køb af materialer og udstilling af projeketet, plus skriv til BRIO om gratis legetøj pga. reklame)
