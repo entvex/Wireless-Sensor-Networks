@@ -17,6 +17,7 @@ speed of train = 5 round/min
 Total Packages per round = 1087
 47 round = 51089 packages
 (EXTRA IF TIME) - Blinking diode on relays when transmitting relays (Nice Visual Effect for the video)
+(EXTRA IF TIME) - Save error count on FLASH, so no cable needed to base station!
 
 (David and Christian)
 Two different channel sets (0,1) (10,11 WIFI) - Some reference to how we know that channel 11 is the wifi channel!
