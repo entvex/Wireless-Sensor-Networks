@@ -17,6 +17,7 @@ module BaseStationP @safe() {
 	uses interface Timer<TMilli> as Timer0;
 	uses interface Timer<TMilli> as Timer1;
 	uses interface Timer<TMilli> as Timer2;
+	uses interface Timer<TMilli> as Timer3;
 	uses interface Packet;
 	uses interface AMPacket;
 	uses interface AMSend;
@@ -30,11 +31,16 @@ implementation
 {	
 	bool busy = FALSE;
 	message_t pkt;
-	uint8_t receivedCounter = 0;
-	uint8_t sentCounter = 0;
+	uint32_t receivedCounter = 0;
+	uint32_t sentCounter = 0;
 	uint8_t errorCount = 0;
 	uint8_t relayPosition = 0;
-	uint8_t overallPacketLoss = 0;
+	uint32_t overallPacketLoss = 0;
+	uint32_t overallPacketsRelayed = 0;
+	uint32_t overallPacketsSent = 0;
+	uint32_t dataPacketsReceived = 0;
+	uint32_t overallPacketsRelayedNodeOne = 0;
+	uint32_t overallPacketsRelayedNodeTwo = 0;
 	
 	void setLedRed() {
 		call Leds.led0On();
@@ -49,7 +55,7 @@ implementation
 		call Timer2.startOneShot(100);
 	}
 		
-	void sendAck(uint16_t receiveId) {
+	void sendAck(uint32_t receiveId) {
 		ackMessage* ackMessagePtr;
     	
     	if(!busy) {
@@ -69,8 +75,8 @@ implementation
 				
 			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(ackMessage)) == SUCCESS) {
 				busy = TRUE;
-				setLedBlue();
 				if(DEBUG) {
+					setLedBlue();
 					printf("Sucessfully sent packet\n");
 					printfflush();
 				}
@@ -87,8 +93,11 @@ implementation
 
     	if(!busy) {
     		requestptr = (requestMessage*)(call Packet.getPayload(&pkt, sizeof(requestMessage)));
-    		printf("Preparing to send packet with counter: %d\n",  sentCounter);
-    		printfflush();
+    		
+    		if(DEBUG) {
+    			printf("Preparing to send packet with counter: %d\n",  sentCounter);
+    			printfflush();	
+    		}
     		
     		requestptr->nodeid = TOS_NODE_ID;
 			requestptr->seq = sentCounter % 2;
@@ -96,8 +105,16 @@ implementation
 			requestptr->data = 0;
 
 			if(relayNodeid != 0) {
-				printf("Message will be relayed!\n");
-				printfflush();
+				overallPacketsRelayed++;
+				if(relayNodeid == 1)
+					overallPacketsRelayedNodeOne++;
+				if(relayNodeid == 2)
+					overallPacketsRelayedNodeTwo++;
+					
+				if(DEBUG) {
+					printf("Message will be relayed!\n");
+					printfflush();
+				}
 				requestptr->relayNodeid = relayNodeid;
 			}
 			else {
@@ -108,10 +125,11 @@ implementation
 			
 			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(requestMessage)) == SUCCESS) {
 				busy = TRUE;
-				setLedBlue();
-				call Timer1.startOneShot(200);
+				overallPacketsSent++;
+				call Timer1.startOneShot(20);
 				
 				if(DEBUG) {
+					setLedBlue();
 					printf("Sucessfully sent packet with length and seq: %d, %d\n", sizeof(requestptr), requestptr->seq);
 					printfflush();
 				}
@@ -143,12 +161,26 @@ implementation
     		return TRUE;
     	return FALSE;
     }
-	
-	void clearRssiQueue() {
+    
+   void clearRssiQueue() {
 		while(!call RssiQueue.empty()) {
 			call RssiQueue.dequeue();
 		}
 	}
+    
+    void checkData(requestMessage* requestMsg) {
+    	if(requestMsg->data == -1) {
+			clearRssiQueue();
+			if(relayPosition >= 3)
+				relayPosition = 0;
+			else
+				relayPosition = 2;
+			return;
+		}
+    	if(requestMsg->data != 0) {
+			dataPacketsReceived++;
+		}
+    }
 		    
     event void Boot.booted() {
     	// Call stuff when booted
@@ -185,30 +217,39 @@ implementation
     	}
 		
 		if(relayPosition == 0 || relayPosition == 2) {
-			printf("Sending message direct!\n");
-			printfflush();
+			if(DEBUG) {
+				printf("Sending message direct!\n");
+				printfflush();
+			}
 			sendRequest(0);
 		}
 		else if(relayPosition == 1){
-			printf("Relaying message to relay node 1\n");
-			printfflush();
+			if(DEBUG) {
+				printf("Relaying message to relay node 1\n");
+				printfflush();
+			}
 			sendRequest(2);
 		}
 		else if(relayPosition == 3) {
-			printf("Relaying message to relay node 2\n");
-			printfflush();
+			if(DEBUG) {
+				printf("Relaying message to relay node 2\n");
+				printfflush();
+			}
 			sendRequest(1);
 		}
 	}
 		
 	event void Timer1.fired() {
+    	overallPacketLoss++;
     	if(receivedCounter != sentCounter) {
     		if(DEBUG) {
-    			overallPacketLoss++;
-    			printf("Did not get a response, keeping counter at: %d\n", sentCounter);
-    			printfflush();
+    			if(DEBUG) {
+    				printf("Did not get a response, keeping counter at: %d\n", sentCounter);
+    				printfflush();
+    			}
     		}
-    		setLedRed();
+    		if(DEBUG)
+    			setLedRed();
     		
     		// Handle packet loss
     		if(errorCount >= ARQ_ERRORCOUNT) {
@@ -239,9 +280,23 @@ implementation
 		call Leds.led2Off();
 	}
 
+   	event void Timer3.fired(){
+		if(RELEASE) {
+			printf("------------ PRINTING STATS -----------------\n");
+			printf("Number of packets sent: %d\n", overallPacketsSent);
+			printf("Number of packets relayed to NODE 1: %d\n", overallPacketsRelayedNodeOne);
+			printf("Number of packets relayed to NODE 2: %d\n", overallPacketsRelayedNodeTwo);
+			printf("Number of packets ACK's received: %d\n", receivedCounter);
+			printf("Number of packets DAT's received: %d\n", dataPacketsReceived);
+			printf("Number of lost packets: %d\n" , overallPacketLoss);
+    		printfflush();
+		}
+	}
+
 	event void AMControl.startDone(error_t error){
 		if (error == SUCCESS) {
-			call Timer0.startPeriodic(2000);
+			call Timer0.startPeriodic(70); // Main loop
+			call Timer3.startPeriodic(60000); // Stats
 		}
 		else
 			call AMControl.start();
@@ -258,60 +313,38 @@ implementation
 	event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
 		if(len == sizeof(ackMessage)) {
 			ackMessage* ackMsg = (ackMessage*)payload;
-			errorCount = 0;
-			call Timer1.stop();
 			
 			if(DEBUG) {
 				printf("Received ackMessage with counter, seq and nodeid: %d, %d, %d\n", ackMsg->counter, ackMsg->seq, ackMsg->nodeid);
 				printfflush();
 			}
 			
-			if(ackMsg->seq == ackMsg->counter % 2) {
+			if(ackMsg->seq == ackMsg->counter % 2 && ackMsg->receiveid == BASESTATION_NODE_ID) {
+				errorCount = 0;
+				call Timer1.stop();
 				if(DEBUG) {
+					setLedGreen();
 					printf("Ack received! Seq no. match! Incrementing received counter! Rssi: %d\n", call CC2420Packet.getRssi(msg));
 					printfflush();
 				}
-				setLedGreen();
 				receivedCounter++;
 			}
 			 
 		} else if (len == sizeof(requestMessage)) {
 			requestMessage* requestMsg = (requestMessage*)payload;
-			errorCount = 0;
-			call Timer1.stop();
-			
-			printf("Received requestMessage with data: %d\n", requestMsg->data);
-			printfflush();
 			
 			if(requestMsg->seq == sentCounter % 2) {
-				if(DEBUG) {
-					printf("Request received. Seq no. match! Rssi: %d\n", call CC2420Packet.getRssi(msg));
-					printfflush();
-				}
-				setLedGreen();
-				
+				sendAck(requestMsg->nodeid);
+				errorCount = 0;
+				call Timer1.stop();
 				if(requestMsg->relayNodeid == 1 || requestMsg->relayNodeid == 2) {
-					printf("Msg has been relayed, so not adding RSSI to queue\n");
-					printfflush();
-				}
-				else {
-					printf("Msg has not been relayed, so saving the RSSI\n");
-					printfflush();
+					if(requestMsg->nodeid == requestMsg->relayNodeid) {
+						checkData(requestMsg);
+					} 			
+				} else {
 					call RssiQueue.dequeue();
 					call RssiQueue.enqueue(call CC2420Packet.getRssi(msg));
-				}
-				
-				if(requestMsg->data != 0) {
-					sendAck(requestMsg->nodeid);
-					if(requestMsg->data == -1) {
-						printf("Received data with -1, so back to sending direct\n");
-						printfflush();
-						clearRssiQueue();
-						if(relayPosition >= 3)
-							relayPosition = 0;
-						else
-							relayPosition = 2;
-					}
+					checkData(requestMsg);
 				}
 			}
 		}
