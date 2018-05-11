@@ -1,23 +1,72 @@
 \chapter{Results}\label{ch:results}
 
-Using the test setup and mechanics described in \ref{ch:testAndPerformance}, we conducted a experiment of four different scenarios. We wanted to see whether the hopping frequency would increase, when we increased the circumference of the track, evaluate the package sent/loss ratio and measure the overall perception of data. The test results would indicate if our hopping algorithm, the implemented stop-and-wait ARQ protocol and distance measurements were correct and working. All results are gathered from the base station.
+Using the test setup and mechanics described in \ref{ch:testAndPerformance}, we conducted a experiment of four different scenarios. We wanted to see whether the hopping frequency would increase, when we increased the circumference of the track, evaluate the packet sent/loss ratio and measure the overall perception of data. The test results would indicate if our hopping algorithm, the implemented stop-and-wait ARQ protocol and distance measurements were correct and working. All results are gathered from the base station.
 
 \noindent To quickly examine the parameters measured in the test runs:
 
-\noindent \textbf{\textit{n} request packages sent ($p_1$):} Number of packages sent from the base station over the course of the test. These include retries due to ARQ timers expiring. View this number as "the times we have asked for data".
+\noindent \textbf{\textit{n} request packets sent ($p_1$):} Number of packets sent from the base station over the course of the test. These include retries due to ARQ timers expiring. View this number as "the times we have asked for data".
 
-\noindent \textbf{\textit{n} packages relayed ($p_2$):} Number of packages relayed to each relay station. Packages are relayed when running is out of range.
+\noindent \textbf{\textit{n} packets relayed to node 1 ($p_2$):} Number of packets relayed to relay station 1 (north).
 
-\noindent \textbf{\textit{n} ACK's received ($p_3$):} Number of acknowledgments received by the ARQ protocol. The closer this number is to the packages sent, the more stable the data link connection between our endpoints is.
+\noindent \textbf{\textit{n} packets relayed to node 2 ($p_3$):} Number of packets relayed to relay station 2 (south).
 
-\noindent \textbf{\textit{n} DAT's received ($p_4$):} Number of data packages received. Ideally, this should be close to the packages sent as well. If $p_4$<$p_1$, then $p_1$-$p_4$ requests are presumably lost.
+\noindent \textbf{\textit{n} ACK's received ($p_4$):} Number of acknowledgments received by the ARQ protocol. The closer this number is to the packets sent, the more stable the data link connection between our endpoints is.
 
-\noindent \textbf{\textit{n} packages not acknowledged in time ($p_5$):} Number of packages not acknowledged before the ARQ timer ran out. This is strongly related to the timers on the base station and heavily influenced by interference and signal noise. Also in our test set-up we tried to get as much data from the runner as possible, so timers were strict.
+\noindent \textbf{\textit{n} DATA's received ($p_5$):} Number of data packets received. Ideally, this should be close to the packets sent as well. If $p_5$<$p_1$, then $p_1$-$p_5$ request packet.
+
+\noindent \textbf{\textit{n} packets not acknowledged in time ($p_6$):} Number of packets not acknowledged before the ARQ timer ran out. This is strongly related to the timers on the base station and heavily influenced by interference and signal noise. Also in our test set-up we tried to get as much data from the runner as possible, so timers were strict.
+
+\noindent Table \ref{table:datascenarios} shows the final result of each completed scenario lasting 48 minutes each, which equals about 144 runs with the train. Each minute we recorded parameters $p_1$ to $p_6$. All are initially set to zero. We decided not to change the RSSI threshold in each scenario.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|l|l|l|l|l|} \hline
+		Sn. & \pbox{18cm}{$p_1$} & \pbox{18cm}{$p_2$} & \pbox{18cm}{$p_3$} & \pbox{18cm}{$p_4$} & \pbox{18cm}{$p_5$} & \pbox{18cm}{$p_6$} \\ \hline
+		1 & 29148 & 4066 & 3512 & 22169 & 34167 & 20700 \\ \hline
+		2 & 29838 & 8115 & 8499 & 17880 & 23563 & 21111 \\ \hline
+		3 & 29258 & 3706 & 4021 & 21944 & 32830 & 21244 \\ \hline
+		4 & 30523 & 1232 & 8425 & 19137 & 28874 & 23188 \\ \hline
+	\end{tabular}
+	\label{table:datascenarios}
+	\caption{Data from scenarios one-four completed with 144 runs.}
+\end{table}
+
+\noindent As expected, the results vary depending on the track length and the channel used. When using a length of 56 centimeters (scenario two and four), we see $p5$=<$p_1$, meaning the base station received the same or less data packets than requested. In scenario four they are even fairly close. If $p5$>$p_1$, it could be due to fading or missed timers. Also worth noting is the increased use of relays ($p_2$ and $p_3$) when the length is 56 centimeters. Changing channels between 11 and 4 does not seem to increase the amount of data packets received or lower the number not acknowledged in time.
+
+\noindent Figure \ref{fig:noackreceived} shows the correlation between the number of ACK's received at the base station per packet sent from it. We would seek these values to approximate each other. Scenario 2 received a large number of ACK's around the 24408 packet sent mark, perhaps due to deep fading.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\linewidth]{results/NoAckReceived}
+	\caption[No. ACK's received per packet sent.]{}
+	\label{fig:noackreceived}
+\end{figure}
+
+\noindent asdasdasdasd asd sa
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\linewidth]{results/NoDataReceived}
+	\caption[No. DATA's received per packet sent]{}
+	\label{fig:nodatareceived}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\linewidth]{results/NoPacketsRelayed}
+	\caption[No. packets relayed per packet sent.]{}
+	\label{fig:nopacketsrelayed}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\linewidth]{results/NoPacketsNotACKInTime}
+	\caption[No. packets not ACK'ed in time.]{}
+	\label{fig:nopacketsnotackintime}
+\end{figure}
 
 
 
 
-// n packeges sent vs. ACK's received
-// n packages sent vs. DAT's received.
-// n packages relayed for each scenario (node 1 or 2 or total)
-// n packages not ACK in time
+
+
