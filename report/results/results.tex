@@ -1,3 +1,23 @@
 \chapter{Results}\label{ch:results}
 
-Using the test setup and mechanics described in \ref{ch:testAndPerformance}, we conducted a experiment of four different scenarios. We wanted to see whether the hopping frequency would increase, when we increased the circumference of the track, evaluate the package sent/loss ratio and measure the overall perception of data. The test results would indicate if our hopping algorithm, the implemented ARQ protocol and distance measurements were correct and working. The four scenarios are described in chapter \ref{ch:testAndPerformance}.
+Using the test setup and mechanics described in \ref{ch:testAndPerformance}, we conducted a experiment of four different scenarios. We wanted to see whether the hopping frequency would increase, when we increased the circumference of the track, evaluate the package sent/loss ratio and measure the overall perception of data. The test results would indicate if our hopping algorithm, the implemented stop-and-wait ARQ protocol and distance measurements were correct and working. All results are gathered from the base station.
+
+\noindent To quickly examine the parameters measured in the test runs:
+
+\noindent \textbf{\textit{n} request packages sent ($p_1$):} Number of packages sent from the base station over the course of the test. These include retries due to ARQ timers expiring. View this number as "the times we have asked for data".
+
+\noindent \textbf{\textit{n} packages relayed ($p_2$):} Number of packages relayed to each relay station. Packages are relayed when running is out of range.
+
+\noindent \textbf{\textit{n} ACK's received ($p_3$):} Number of acknowledgments received by the ARQ protocol. The closer this number is to the packages sent, the more stable the data link connection between our endpoints is.
+
+\noindent \textbf{\textit{n} DAT's received ($p_4$):} Number of data packages received. Ideally, this should be close to the packages sent as well. If $p_4$<$p_1$, then $p_1$-$p_4$ requests are presumably lost.
+
+\noindent \textbf{\textit{n} packages not acknowledged in time ($p_5$):} Number of packages not acknowledged before the ARQ timer ran out. This is strongly related to the timers on the base station and heavily influenced by interference and signal noise. Also in our test set-up we tried to get as much data from the runner as possible, so timers were strict.
+
+
+
+
+// n packeges sent vs. ACK's received
+// n packages sent vs. DAT's received.
+// n packages relayed for each scenario (node 1 or 2 or total)
+// n packages not ACK in time
