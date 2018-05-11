@@ -28,7 +28,7 @@ Using the test setup and mechanics described in \ref{ch:testAndPerformance}, we 
 		4 & 30523 & 1232 & 8425 & 19137 & 28874 & 23188 \\ \hline
 	\end{tabular}
 	\label{table:datascenarios}
-	\caption{Data from scenarios one-four completed with 144 runs.}
+	\caption{Data from scenarios 1-4 completed with 144 runs.}
 \end{table}
 
 \noindent As expected, the results vary depending on the track length and the channel used. When using a length of 56 centimeters (scenario two and four), we see $p5$=<$p_1$, meaning the base station received the same or less data packets than requested. In scenario four they are even fairly close. If $p5$>$p_1$, it could be due to fading or missed timers. Also worth noting is the increased use of relays ($p_2$ and $p_3$) when the length is 56cm. Changing channels between 11 and 4 does not seem to increase the amount of data packets received or lower the number not acknowledged in time.
@@ -38,16 +38,16 @@ Using the test setup and mechanics described in \ref{ch:testAndPerformance}, we 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\linewidth]{results/NoAckReceived}
-	\caption[No. ACK's received per packet sent.]{}
+	\caption{No. ACK's received per packet sent.}
 	\label{fig:noackreceived}
 \end{figure}
 
-\noindent Figure \ref{fig:nodatareceived} shows the number of data packets received , $p_5$, from the runner node either direct or via one of the relays per packet sent. Scenario 1 and 3 (length=43.5cm) follows each other, which means that changing channel from 11 to 4 does not have a impact on the received number of data packets when using length=43.5. However changing the length from 43.5cm to 56cm does. Scenario 4 looks to be the most successful one, as the number of data packets received is close to the number of packets (requests for data) sent.
+\noindent Figure \ref{fig:nodatareceived} shows the number of data packets received , $p_5$, from the runner node either direct or via one of the relays per packet sent. Scenario 1 and 3 (length=43.5cm) follows each other, which means that changing channel from 11 to 4 does not have a impact on the received number of data packets when using length=43.5. However changing the length from 43.5cm to 56cm does. Scenario 4 looks to be the most successful one, as the number of data packets received is close to the number of packets sent. Scenario 1 and 3 sees more data packets being received than requested, a probable reason is multipath propagation.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\linewidth]{results/NoDataReceived}
-	\caption[No. DATA's received per packet sent]{}
+	\caption{No. DATA's received per packet sent.}
 	\label{fig:nodatareceived}
 \end{figure}
 
@@ -56,7 +56,7 @@ Using the test setup and mechanics described in \ref{ch:testAndPerformance}, we 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\linewidth]{results/NoPacketsRelayed}
-	\caption[No. packets relayed per packet sent.]{}
+	\caption{No. packets relayed per packet sent.}
 	\label{fig:nopacketsrelayed}
 \end{figure}
 
@@ -65,23 +65,23 @@ Using the test setup and mechanics described in \ref{ch:testAndPerformance}, we 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\linewidth]{results/NoPacketsNotACKInTime}
-	\caption[No. packets not ACK'ed in time.]{}
+	\caption{No. packets not acknowledged in time.}
 	\label{fig:nopacketsnotackintime}
 \end{figure}
 
-\noindent Figure \ref{fig:nopacketsrelayedscenario2} and \ref{fig:nopacketsrelayedscenario4} show how the two scenarios that relay the most packets (2 and 4) distribute the data among our two relay station per packet relayed.
+\noindent Figure \ref{fig:nopacketsrelayedscenario2} and \ref{fig:nopacketsrelayedscenario4} show how the two scenarios that relay the most packets (2 and 4) distribute the data among our two relay stations (north and south) per packet relayed. A bit strange is the sudden drop of packets relayed to the north station in scenario 4, figure  \ref{fig:nopacketsrelayedscenario4}. A explanation may again be deep fading.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\linewidth]{results/NoPacketsRelayedScenario2}
-	\caption[No. packets relayed to north and south node in sceario 2]{}
+	\caption{No. packets relayed to north and south node in scenario 2.}
 	\label{fig:nopacketsrelayedscenario2}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\linewidth]{results/NoPacketsRelayedScenario4}
-	\caption[No. packets relayed to north and south node in sceario 4]{}
+	\caption{No. packets relayed to north and south node in scenario 4.}
 	\label{fig:nopacketsrelayedscenario4}
 \end{figure}
 
