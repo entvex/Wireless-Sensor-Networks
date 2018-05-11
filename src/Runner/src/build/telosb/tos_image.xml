@@ -1,11 +1,11 @@
 <tos_image>
   <ident>
-    <uidhash>6061CC1CL</uidhash>
+    <uidhash>83A7D6CFL</uidhash>
     <hostname>ubuntu</hostname>
     <username>tinyos</username>
-    <appname>BaseStationC</appname>
+    <appname>/home/tinyos/wo</appname>
     <userhash>29AC8746L</userhash>
-    <timestamp>5A7CA9DCL</timestamp>
+    <timestamp>5A982CE5L</timestamp>
     <deluge_support>no</deluge_support>
     <platform>telosb</platform>
   </ident>
@@ -231,7 +231,7 @@
 :104DA0001E00EFD20000FFD040000000FFD0200026
 :104DB0000000B012E858824FD411D2421C11B41135
 :104DC000C243B511F2401F008812F2401A000115CB
-:104DD000C2438E11C243E217C243B711C2438F12BE
+:104DD000D2438E11C243E217D243B711C2438F129E
 :104DE000B0123E4F4F93FC234F4AB012604032D274
 :104DF0004B43394094114F4B0F5F0D4F0D594A4BA8
 :104E00007C403400B012767B0F4E3F5004158D4F1E
