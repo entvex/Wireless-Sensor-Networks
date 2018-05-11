@@ -1,6 +1,13 @@
 \section{Runner}\label{sc:runner}
-The runner nodes task in our wireless sensor network is to respond to RequestMessages that can be sent from basetation or the relay nodes. As seen in the sequence digram shown in figure \ref{fig:tohopornotarqsequence}. The data it respond with is the pluse from the runner and in this scenario we just return a constant value. We
+The runner nodes task in our wireless sensor network is to respond to RequestMessages that can be sent from basetation or the relay nodes. As seen in the sequence digram shown in figure \ref{fig:tohopornotarqsequence}. The node various 
 
+When the runner node recives a packet it will check if the packet was ment for it and if that is the case it will send a acknowledge to the requester and get ready to send the data to the requester.
 \begin{lstlisting}[language=Python]
-
+Receive.receive(Message pkt){
+if(pkt == requestMessage) {
+//Check if the request is for me and if it is send sendAcknowledge.
+if (pkt.nodeid == requestpkt.relayNodeid && requestpkt.data == 0) {
+sendAcknowledge();
+Timer.sendDataTorequester(); }
 \end{lstlisting}
+The data it respond with is the pluse from the runner and in this scenario we just return a constant value.
