@@ -1,5 +1,5 @@
 \section{Runner}\label{sc:runner}
-The runner nodes task in our wireless sensor network is to respond to RequestMessages that can be sent from basetation or the relay nodes. As seen in the sequence digram shown in figure \ref{fig:tohopornotarqsequence}. The node various 
+The runner nodes task in our wireless sensor network is to respond to RequestMessages that can be sent from basetation or the relay nodes. As seen in the sequence digram shown in figure \ref{fig:tohopornotarqsequence}. The node various settings that can sat as constants so they are easy to change like the channel and transmit power of the antenna.
 
 When the runner node recives a packet it will check if the packet was ment for it and if that is the case it will send a acknowledge to the requester and get ready to send the data to the requester.
 \begin{lstlisting}[language=Python]
@@ -10,4 +10,15 @@ if (pkt.nodeid == requestpkt.relayNodeid && requestpkt.data == 0) {
 sendAcknowledge();
 Timer.sendDataTorequester(); }
 \end{lstlisting}
-The data it respond with is the pluse from the runner and in this scenario we just return a constant value.
+The data it respond with is the pulse from the runner and in this scenario we just return a constant value. When it is sending the data to the requesting node it will start a timer and if it have not received a acknowledgment within 20ms it will resend the data and this process happens 3 times and then it gives up.
+\begin{lstlisting}[language=Python]
+sendData() {
+if (!AntenaBusy) {
+responsepkt.pulseData = currentpulse();
+if (AMSend.send(responsepkt) == SUCCESS) {
+AntenaBusy = TRUE;
+resendCounter++; } }		
+if(resendCounter >= TRIES_TO_RESEND){
+resendCounter = 0; } }
+\end{lstlisting}
+
