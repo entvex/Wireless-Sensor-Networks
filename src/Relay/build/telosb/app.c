@@ -119,20 +119,7 @@ static __inline uint16_t __nesc_ntoh_leuint16(const void * source)  ;
 
 
 static __inline uint16_t __nesc_hton_leuint16(void * target, uint16_t value)  ;
-
-
-
-
-
-
-static __inline int16_t __nesc_ntoh_int16(const void * source)  ;
-#line 288
-static __inline int16_t __nesc_hton_int16(void * target, int16_t value)  ;
-
-
-
-
-
+#line 294
 static __inline uint32_t __nesc_ntoh_uint32(const void * source)  ;
 
 
@@ -141,6 +128,10 @@ static __inline uint32_t __nesc_ntoh_uint32(const void * source)  ;
 
 
 static __inline uint32_t __nesc_hton_uint32(void * target, uint32_t value)  ;
+#line 326
+static __inline int32_t __nesc_ntoh_int32(const void * source)  ;
+#line 326
+static __inline int32_t __nesc_hton_int32(void * target, int32_t value)  ;
 #line 385
 typedef struct { unsigned char data[1]; } __attribute__((packed)) nx_int8_t;typedef int8_t __nesc_nxbase_nx_int8_t  ;
 typedef struct { unsigned char data[2]; } __attribute__((packed)) nx_int16_t;typedef int16_t __nesc_nxbase_nx_int16_t  ;
@@ -1870,9 +1861,10 @@ typedef uint8_t resource_client_id_t;
 # 4 "/opt/tinyos-2.1.1/apps/Relay/src/Relay.h"
 enum __nesc_unnamed4294 {
   DEBUG = 0, 
-  AM_CHANNEL = 10, 
-  TIMER0_PERIOD_MILLI = 200, 
-  TIMER1_PERIOD_MILLI = 200, 
+  LED_DEBUG = 0, 
+  AM_CHANNEL = 4, 
+  TIMER0_PERIOD_MILLI = 20, 
+  TIMER1_PERIOD_MILLI = 20, 
   TIMER2_PERIOD_MILLI = 100, 
   TRIES_TO_RESEND = 3, 
   BASESTATION_ID = 0, 
@@ -1888,13 +1880,13 @@ enum __nesc_unnamed4294 {
 
 
 
-#line 18
+#line 19
 typedef nx_struct requestMessage {
-  nx_uint16_t nodeid;
-  nx_uint16_t relayNodeid;
-  nx_uint16_t counter;
-  nx_uint16_t seq;
-  nx_int16_t data;
+  nx_uint32_t nodeid;
+  nx_uint32_t relayNodeid;
+  nx_uint32_t counter;
+  nx_uint32_t seq;
+  nx_int32_t data;
 } __attribute__((packed)) requestMessage;
 
 
@@ -1902,12 +1894,12 @@ typedef nx_struct requestMessage {
 
 
 
-#line 26
+#line 27
 typedef nx_struct ackMessage {
-  nx_uint16_t nodeid;
-  nx_uint16_t receiveid;
-  nx_uint16_t seq;
-  nx_uint16_t counter;
+  nx_uint32_t nodeid;
+  nx_uint32_t receiveid;
+  nx_uint32_t seq;
+  nx_uint32_t counter;
 } __attribute__((packed)) ackMessage;
 # 33 "/opt/tinyos-2.1.1/tos/types/Ieee154.h"
 typedef uint16_t ieee154_panid_t;
@@ -3190,11 +3182,11 @@ static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__f
 #line 72
 static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__default__fired(
 # 37 "/opt/tinyos-2.1.1/tos/lib/timer/VirtualizeTimerC.nc"
-uint8_t arg_0x40c4d4f8);
+uint8_t arg_0x40c78030);
 # 53 "/opt/tinyos-2.1.1/tos/lib/timer/Timer.nc"
 static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__startPeriodic(
 # 37 "/opt/tinyos-2.1.1/tos/lib/timer/VirtualizeTimerC.nc"
-uint8_t arg_0x40c4d4f8, 
+uint8_t arg_0x40c78030, 
 # 53 "/opt/tinyos-2.1.1/tos/lib/timer/Timer.nc"
 uint32_t dt);
 
@@ -3207,7 +3199,7 @@ uint32_t dt);
 
 static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__startOneShot(
 # 37 "/opt/tinyos-2.1.1/tos/lib/timer/VirtualizeTimerC.nc"
-uint8_t arg_0x40c4d4f8, 
+uint8_t arg_0x40c78030, 
 # 62 "/opt/tinyos-2.1.1/tos/lib/timer/Timer.nc"
 uint32_t dt);
 
@@ -3216,7 +3208,7 @@ uint32_t dt);
 
 static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__stop(
 # 37 "/opt/tinyos-2.1.1/tos/lib/timer/VirtualizeTimerC.nc"
-uint8_t arg_0x40c4d4f8);
+uint8_t arg_0x40c78030);
 # 71 "/opt/tinyos-2.1.1/tos/lib/timer/Counter.nc"
 static void /*HilTimerMilliC.CounterToLocalTimeC*/CounterToLocalTimeC__0__Counter__overflow(void );
 # 83 "/opt/tinyos-2.1.1/tos/interfaces/SplitControl.nc"
@@ -6954,9 +6946,9 @@ static inline void RelayC__AMSend__sendDone(message_t *msg, error_t error);
 static inline message_t *RelayC__Receive__receive(message_t *msg, void *payload, uint8_t len);
 #line 125
 static inline void RelayC__Timer0__fired(void );
-#line 156
+#line 159
 static inline void RelayC__Timer1__fired(void );
-#line 182
+#line 188
 static inline void RelayC__Timer2__fired(void );
 
 
@@ -6964,7 +6956,7 @@ static inline void RelayC__Timer2__fired(void );
 
 
 static inline void RelayC__sendAcknowledge(requestMessage *reqmsg);
-#line 211
+#line 220
 static inline void RelayC__setLedRed(void );
 
 
@@ -7171,7 +7163,7 @@ static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__TimerFrom__s
 
 static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__fired(
 # 37 "/opt/tinyos-2.1.1/tos/lib/timer/VirtualizeTimerC.nc"
-uint8_t arg_0x40c4d4f8);
+uint8_t arg_0x40c78030);
 #line 60
 enum /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0____nesc_unnamed4344 {
 #line 60
@@ -15498,22 +15490,12 @@ inline static message_t * CC2420ActiveMessageP__Snoop__receive(am_id_t arg_0x412
 #line 67
 }
 #line 67
-# 264 "/usr/lib/ncc/nesc_nx.h"
-static __inline  uint16_t __nesc_ntoh_uint16(const void * source)
-#line 264
+# 326 "/usr/lib/ncc/nesc_nx.h"
+static __inline  int32_t __nesc_ntoh_int32(const void * source)
+#line 326
 {
-  const uint8_t *base = source;
-
-#line 266
-  return ((uint16_t )base[0] << 8) | base[1];
-}
-
-#line 288
-static __inline  int16_t __nesc_ntoh_int16(const void * source)
-#line 288
-{
-#line 288
-  return __nesc_ntoh_uint16(source);
+#line 326
+  return __nesc_ntoh_uint32(source);
 }
 
 # 153 "/opt/tinyos-2.1.1/tos/lib/timer/VirtualizeTimerC.nc"
@@ -15570,18 +15552,6 @@ inline static void RelayC__Timer0__startPeriodic(uint32_t dt){
 #line 53
 }
 #line 53
-# 269 "/usr/lib/ncc/nesc_nx.h"
-static __inline  uint16_t __nesc_hton_uint16(void * target, uint16_t value)
-#line 269
-{
-  uint8_t *base = target;
-
-#line 271
-  base[1] = value;
-  base[0] = value >> 8;
-  return value;
-}
-
 # 53 "/opt/tinyos-2.1.1/tos/lib/timer/Counter.nc"
 inline static /*HilTimerMilliC.AlarmMilli32C.Transform*/TransformAlarmC__0__Counter__size_type /*HilTimerMilliC.AlarmMilli32C.Transform*/TransformAlarmC__0__Counter__get(void ){
 #line 53
@@ -15704,9 +15674,9 @@ inline static void RelayC__Leds__led1On(void ){
 #line 61
 }
 #line 61
-# 216 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
+# 225 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
 static inline void RelayC__setLedGreen(void )
-#line 216
+#line 225
 {
   RelayC__Leds__led1On();
   RelayC__Timer2__startOneShot(TIMER2_PERIOD_MILLI);
@@ -15734,11 +15704,11 @@ inline static void RelayC__CC2420Packet__setPower(message_t *p_msg, uint8_t powe
 #line 56
 }
 #line 56
-# 226 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
+# 235 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
 static inline void RelayC__printAck(ackMessage *ackmsg)
-#line 226
+#line 235
 {
-  printf("Sending acknowledge with size: %d should be %d\n nodeid: %d\n receiveid: %d\n counter: %d\n seq: %d\n", sizeof  (*ackmsg), sizeof(ackMessage ), __nesc_ntoh_uint16(ackmsg->nodeid.data), __nesc_ntoh_uint16(ackmsg->receiveid.data), __nesc_ntoh_uint16(ackmsg->counter.data), __nesc_ntoh_uint16(ackmsg->seq.data));
+  printf("Sending acknowledge with size: %d should be %d\n nodeid: %d\n receiveid: %d\n counter: %d\n seq: %d\n", sizeof  (*ackmsg), sizeof(ackMessage ), __nesc_ntoh_uint32(ackmsg->nodeid.data), __nesc_ntoh_uint32(ackmsg->receiveid.data), __nesc_ntoh_uint32(ackmsg->counter.data), __nesc_ntoh_uint32(ackmsg->seq.data));
   printfflush();
 }
 
@@ -15779,18 +15749,18 @@ inline static void * RelayC__Packet__getPayload(message_t * msg, uint8_t len){
 #line 115
 }
 #line 115
-# 188 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
+# 194 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
 static inline void RelayC__sendAcknowledge(requestMessage *reqmsg)
-#line 188
+#line 194
 {
   if (!RelayC__busy) {
       ackMessage *ackmsg = (ackMessage *)RelayC__Packet__getPayload(&RelayC__pkt, sizeof(ackMessage ));
 
-#line 191
-      __nesc_hton_uint16(ackmsg->nodeid.data, TOS_NODE_ID);
-      __nesc_hton_uint16(ackmsg->receiveid.data, __nesc_ntoh_uint16(reqmsg->nodeid.data));
-      __nesc_hton_uint16(ackmsg->seq.data, __nesc_ntoh_uint16(reqmsg->seq.data));
-      __nesc_hton_uint16(ackmsg->counter.data, __nesc_ntoh_uint16(reqmsg->counter.data));
+#line 197
+      __nesc_hton_uint32(ackmsg->nodeid.data, TOS_NODE_ID);
+      __nesc_hton_uint32(ackmsg->receiveid.data, __nesc_ntoh_uint32(reqmsg->nodeid.data));
+      __nesc_hton_uint32(ackmsg->seq.data, __nesc_ntoh_uint32(reqmsg->seq.data));
+      __nesc_hton_uint32(ackmsg->counter.data, __nesc_ntoh_uint32(reqmsg->counter.data));
 
       if (DEBUG) 
         {
@@ -15801,7 +15771,10 @@ static inline void RelayC__sendAcknowledge(requestMessage *reqmsg)
 
       if (RelayC__AMSend__send(AM_BROADCAST_ADDR, &RelayC__pkt, sizeof(ackMessage )) == SUCCESS) {
           RelayC__busy = TRUE;
-          RelayC__setLedGreen();
+          if (LED_DEBUG) 
+            {
+              RelayC__setLedGreen();
+            }
         }
     }
   return;
@@ -15825,15 +15798,15 @@ static inline message_t *RelayC__Receive__receive(message_t *msg, void *payload,
           int RSSI = RelayC__CC2420Packet__getRssi(msg);
 
 #line 79
-          printf("Payload is a request message with following data:\n nodeid: %d\n relaynodeid: %d\n counter: %d\n seq: %d\n data: %d\n RSSI: %d\n", __nesc_ntoh_uint16(reqmsg->nodeid.data), __nesc_ntoh_uint16(reqmsg->relayNodeid.data), __nesc_ntoh_uint16(reqmsg->counter.data), __nesc_ntoh_uint16(reqmsg->seq.data), __nesc_ntoh_int16(reqmsg->data.data), RSSI);
+          printf("Payload is a request message with following data:\n nodeid: %d\n relaynodeid: %d\n counter: %d\n seq: %d\n data: %d\n RSSI: %d\n", __nesc_ntoh_uint32(reqmsg->nodeid.data), __nesc_ntoh_uint32(reqmsg->relayNodeid.data), __nesc_ntoh_uint32(reqmsg->counter.data), __nesc_ntoh_uint32(reqmsg->seq.data), __nesc_ntoh_int32(reqmsg->data.data), RSSI);
           printfflush();
         }
 
-      if (__nesc_ntoh_uint16(reqmsg->relayNodeid.data) == TOS_NODE_ID) {
+      if (__nesc_ntoh_uint32(reqmsg->relayNodeid.data) == TOS_NODE_ID) {
 
           RelayC__sendAcknowledge(reqmsg);
 
-          if (__nesc_ntoh_int16(reqmsg->data.data) == 0) {
+          if (__nesc_ntoh_int32(reqmsg->data.data) == 0) {
               RelayC__requestFromBase = *reqmsg;
               RelayC__Timer0__startPeriodic(TIMER0_PERIOD_MILLI);
             }
@@ -15854,18 +15827,18 @@ static inline message_t *RelayC__Receive__receive(message_t *msg, void *payload,
             int RSSI = RelayC__CC2420Packet__getRssi(msg);
 
 #line 106
-            printf("Payload is a acknowldge message with following data:\n nodeid: %d\n receiveid: %d\n counter: %d\n seq: %d\n RSSI: %d\n", __nesc_ntoh_uint16(ackmsg->nodeid.data), __nesc_ntoh_uint16(ackmsg->receiveid.data), __nesc_ntoh_uint16(ackmsg->counter.data), __nesc_ntoh_uint16(ackmsg->seq.data), RSSI);
+            printf("Payload is a acknowldge message with following data:\n nodeid: %d\n receiveid: %d\n counter: %d\n seq: %d\n RSSI: %d\n", __nesc_ntoh_uint32(ackmsg->nodeid.data), __nesc_ntoh_uint32(ackmsg->receiveid.data), __nesc_ntoh_uint32(ackmsg->counter.data), __nesc_ntoh_uint32(ackmsg->seq.data), RSSI);
             printfflush();
           }
 
-        if (__nesc_ntoh_uint16(ackmsg->receiveid.data) == TOS_NODE_ID) {
-            if (__nesc_ntoh_uint16(ackmsg->nodeid.data) == BASESTATION_ID) {
+        if (__nesc_ntoh_uint32(ackmsg->receiveid.data) == TOS_NODE_ID) {
+            if (__nesc_ntoh_uint32(ackmsg->nodeid.data) == BASESTATION_ID) {
                 RelayC__Timer1__stop();
                 RelayC__requestBaseCounter = 0;
               }
             else {
 #line 115
-              if (__nesc_ntoh_uint16(ackmsg->nodeid.data) == RUNNER_ID) {
+              if (__nesc_ntoh_uint32(ackmsg->nodeid.data) == RUNNER_ID) {
                   RelayC__Timer0__stop();
                   RelayC__requestRunnerCounter = 0;
                 }
@@ -15893,7 +15866,7 @@ inline static message_t * CC2420ActiveMessageP__Receive__receive(am_id_t arg_0x4
 #line 67
   switch (arg_0x41232e58) {
 #line 67
-    case 10:
+    case 4:
 #line 67
       __nesc_result = RelayC__Receive__receive(msg, payload, len);
 #line 67
@@ -16419,6 +16392,18 @@ inline static PrintfP__Queue__t  PrintfP__Queue__dequeue(void ){
 #line 81
 }
 #line 81
+# 269 "/usr/lib/ncc/nesc_nx.h"
+static __inline  uint16_t __nesc_hton_uint16(void * target, uint16_t value)
+#line 269
+{
+  uint8_t *base = target;
+
+#line 271
+  base[1] = value;
+  base[0] = value >> 8;
+  return value;
+}
+
 # 49 "/opt/tinyos-2.1.1/tos/lib/serial/SerialActiveMessageP.nc"
 static inline serial_header_t * /*SerialActiveMessageC.AM*/SerialActiveMessageP__0__getHeader(message_t * msg)
 #line 49
@@ -16573,6 +16558,16 @@ inline static error_t /*PrintfC.SerialAMSenderC.AMQueueEntryP*/AMQueueEntryP__0_
 #line 64
 }
 #line 64
+# 264 "/usr/lib/ncc/nesc_nx.h"
+static __inline  uint16_t __nesc_ntoh_uint16(const void * source)
+#line 264
+{
+  const uint8_t *base = source;
+
+#line 266
+  return ((uint16_t )base[0] << 8) | base[1];
+}
+
 # 522 "/opt/tinyos-2.1.1/tos/lib/serial/SerialP.nc"
 static inline error_t SerialP__SendBytePacket__startSend(uint8_t b)
 #line 522
@@ -19410,13 +19405,13 @@ static inline void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__updat
     }
 }
 
-# 288 "/usr/lib/ncc/nesc_nx.h"
-static __inline  int16_t __nesc_hton_int16(void * target, int16_t value)
-#line 288
+# 326 "/usr/lib/ncc/nesc_nx.h"
+static __inline  int32_t __nesc_hton_int32(void * target, int32_t value)
+#line 326
 {
-#line 288
-  __nesc_hton_uint16(target, value);
-#line 288
+#line 326
+  __nesc_hton_uint32(target, value);
+#line 326
   return value;
 }
 
@@ -19471,9 +19466,9 @@ inline static void RelayC__Leds__led2On(void ){
 #line 78
 }
 #line 78
-# 221 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
+# 230 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
 static inline void RelayC__setLedBlue(void )
-#line 221
+#line 230
 {
   RelayC__Leds__led2On();
   RelayC__Timer2__startOneShot(TIMER2_PERIOD_MILLI);
@@ -19488,7 +19483,7 @@ static inline void RelayC__Timer0__fired(void )
 
 #line 128
       *reqmsg = RelayC__requestFromBase;
-      __nesc_hton_uint16(reqmsg->nodeid.data, TOS_NODE_ID);
+      __nesc_hton_uint32(reqmsg->nodeid.data, TOS_NODE_ID);
 
       RelayC__CC2420Packet__setPower(&RelayC__pkt, SIGNAL_STRENGTH_LOW);
 
@@ -19500,7 +19495,10 @@ static inline void RelayC__Timer0__fired(void )
       if (RelayC__AMSend__send(AM_BROADCAST_ADDR, &RelayC__pkt, sizeof(requestMessage )) == SUCCESS) {
           RelayC__busy = TRUE;
           RelayC__requestRunnerCounter++;
-          RelayC__setLedBlue();
+
+          if (LED_DEBUG) {
+              RelayC__setLedBlue();
+            }
         }
     }
 
@@ -19508,7 +19506,7 @@ static inline void RelayC__Timer0__fired(void )
       RelayC__Timer0__stop();
       RelayC__requestRunnerCounter = 0;
       RelayC__requestFromRunner = RelayC__requestFromBase;
-      __nesc_hton_int16(RelayC__requestFromRunner.data.data, -1);
+      __nesc_hton_int32(RelayC__requestFromRunner.data.data, -1);
       RelayC__Timer1__startPeriodic(TIMER1_PERIOD_MILLI);
     }
   return;
@@ -19565,24 +19563,24 @@ inline static void RelayC__Leds__led0On(void ){
 #line 45
 }
 #line 45
-# 211 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
+# 220 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
 static inline void RelayC__setLedRed(void )
-#line 211
+#line 220
 {
   RelayC__Leds__led0On();
   RelayC__Timer2__startOneShot(TIMER2_PERIOD_MILLI);
 }
 
-#line 156
+#line 159
 static inline void RelayC__Timer1__fired(void )
-#line 156
+#line 159
 {
   if (!RelayC__busy) {
       requestMessage *reqmsg = (requestMessage *)RelayC__Packet__getPayload(&RelayC__pkt, sizeof(requestMessage ));
 
-#line 159
+#line 162
       *reqmsg = RelayC__requestFromRunner;
-      __nesc_hton_uint16(reqmsg->nodeid.data, TOS_NODE_ID);
+      __nesc_hton_uint32(reqmsg->nodeid.data, TOS_NODE_ID);
 
       RelayC__CC2420Packet__setPower(&RelayC__pkt, SIGNAL_STRENGTH_LOW);
 
@@ -19594,7 +19592,10 @@ static inline void RelayC__Timer1__fired(void )
       if (RelayC__AMSend__send(AM_BROADCAST_ADDR, &RelayC__pkt, sizeof(requestMessage )) == SUCCESS) {
           RelayC__busy = TRUE;
           RelayC__requestBaseCounter++;
-          RelayC__setLedRed();
+
+          if (LED_DEBUG) {
+              RelayC__setLedRed();
+            }
         }
     }
   if (RelayC__requestBaseCounter >= TRIES_TO_RESEND) {
@@ -19655,9 +19656,9 @@ inline static void RelayC__Leds__led0Off(void ){
 #line 50
 }
 #line 50
-# 182 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
+# 188 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
 static inline void RelayC__Timer2__fired(void )
-#line 182
+#line 188
 {
   RelayC__Leds__led0Off();
   RelayC__Leds__led1Off();
@@ -19670,9 +19671,9 @@ static inline void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer
 }
 
 # 72 "/opt/tinyos-2.1.1/tos/lib/timer/Timer.nc"
-inline static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__fired(uint8_t arg_0x40c4d4f8){
+inline static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__fired(uint8_t arg_0x40c78030){
 #line 72
-  switch (arg_0x40c4d4f8) {
+  switch (arg_0x40c78030) {
 #line 72
     case 0U:
 #line 72
@@ -19694,7 +19695,7 @@ inline static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer
 #line 72
     default:
 #line 72
-      /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__default__fired(arg_0x40c4d4f8);
+      /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__Timer__default__fired(arg_0x40c78030);
 #line 72
       break;
 #line 72
@@ -25674,7 +25675,7 @@ uint8_t len)
 #line 47
 {
   /*RelayAppC.AMSenderC.SenderC.AMQueueEntryP*/AMQueueEntryP__1__AMPacket__setDestination(msg, dest);
-  /*RelayAppC.AMSenderC.SenderC.AMQueueEntryP*/AMQueueEntryP__1__AMPacket__setType(msg, 10);
+  /*RelayAppC.AMSenderC.SenderC.AMQueueEntryP*/AMQueueEntryP__1__AMPacket__setType(msg, 4);
   return /*RelayAppC.AMSenderC.SenderC.AMQueueEntryP*/AMQueueEntryP__1__Send__send(msg, len);
 }
 
@@ -25976,11 +25977,11 @@ static void /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__fireTimers(u
   /*HilTimerMilliC.VirtualizeTimerC*/VirtualizeTimerC__0__updateFromTimer__postTask();
 }
 
-# 231 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
+# 240 "/opt/tinyos-2.1.1/apps/Relay/src/RelayC.nc"
 static void RelayC__printReq(requestMessage *reqmsg)
-#line 231
+#line 240
 {
-  printf("Sending request with size: %d should be %d\n nodeid: %d\n relaynodeid: %d\n counter: %d\n seq: %d\n data: %d\n", sizeof  (*reqmsg), sizeof(requestMessage ), __nesc_ntoh_uint16(reqmsg->nodeid.data), __nesc_ntoh_uint16(reqmsg->relayNodeid.data), __nesc_ntoh_uint16(reqmsg->counter.data), __nesc_ntoh_uint16(reqmsg->seq.data), __nesc_ntoh_int16(reqmsg->data.data));
+  printf("Sending request with size: %d should be %d\n nodeid: %d\n relaynodeid: %d\n counter: %d\n seq: %d\n data: %d\n", sizeof  (*reqmsg), sizeof(requestMessage ), __nesc_ntoh_uint32(reqmsg->nodeid.data), __nesc_ntoh_uint32(reqmsg->relayNodeid.data), __nesc_ntoh_uint32(reqmsg->counter.data), __nesc_ntoh_uint32(reqmsg->seq.data), __nesc_ntoh_int32(reqmsg->data.data));
   printfflush();
 }
 

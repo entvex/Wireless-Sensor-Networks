@@ -138,7 +138,10 @@ implementation{
         	if(call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(requestMessage)) == SUCCESS) {
             	busy = TRUE;
             	requestRunnerCounter++;
-            	setLedBlue();
+            	
+            	if(LED_DEBUG){
+            		setLedBlue();
+            	}
             }
             
         }
@@ -169,7 +172,10 @@ implementation{
         	if(call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(requestMessage)) == SUCCESS) {
             	busy = TRUE;
             	requestBaseCounter++;
-            	setLedRed();
+            	
+            	if(LED_DEBUG){
+            		setLedRed();
+            	}
             }
         }
         if(requestBaseCounter >= TRIES_TO_RESEND) {
@@ -202,7 +208,10 @@ implementation{
        
         	if(call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(ackMessage)) == SUCCESS) {
             	busy = TRUE;
-            	setLedGreen();
+            	if(LED_DEBUG)
+            	{
+            		setLedGreen();
+            	}
             }
         }
 		return;
