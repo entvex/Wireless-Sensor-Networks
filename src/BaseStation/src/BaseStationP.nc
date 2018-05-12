@@ -150,13 +150,17 @@ implementation
 		
 		lastPosition = call RssiQueue.element(QUEUE_MAX_SIZE-1);
 		avgPreviousPositions = previousPositions/QUEUE_MAX_SIZE;
-		newPosition = (lastPosition*0.9)+(avgPreviousPositions*0.1);
+		
+		if(lastPosition < avgPreviousPositions)
+			newPosition = (lastPosition*1)+(avgPreviousPositions*0.1);
+		else
+			newPosition = (lastPosition*1)-(avgPreviousPositions*0.1);
 		
 		if(DEBUG) {
 			printf("New estimated position of runner node: %d", newPosition);
 			printfflush();	
 		}
-
+	
     	if(newPosition > THRESHOLD)
     		return TRUE;
     	return FALSE;
