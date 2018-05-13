@@ -3,6 +3,6 @@
 There are a few things that could have been done to improve various parameters in the project. Some of these could be entire projects for them selfs.
 To improve battery life of the relays and the runner nodes there could be implemented another medium access protocol such as the S-MAC. As we know just using the antenna uses a lot of energy and the S-MAC will help mitigate this by using Periodic listen and sleep.
 
-Another approach could be to implem
+Because of the way our case works we have an idea of there the runner is currently. So the runner is at the north area and being covered by the north relay then it makes little sense to have the south relay using energy. A way to optimize this would be to send a message to the relay not in use and make it turn off the antenna and enter sleep and wake up later when the runner is within range again.   
 
-If the software was changed a we could allow for 
+If we made the relay nodes able to relay between each other then that would open of the network to be scale of network. This would make it able to cover a even bigger track. Then we could also make some nodes to enter sleep mode because we would know the runner was on the other side of the track.
