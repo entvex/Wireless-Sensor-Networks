@@ -94,7 +94,7 @@ PAirCombined_sf_All_Noisy = 10*log10((PAir_W_f + PAirNorth_W_f + PAirSouth_W_f).
 
 x1 = [x_ellipse+N];
 P_TrackSignal_temp_Base = PAir_f(round(x_ellipse+N),round(y_ellipse+N));
-P_TrackSignal_Base      = diag(P_TrackSignal_temp_Base)';
+P_TrackSignal_Base      = diag(PAir_f(round(x_ellipse+N),round(y_ellipse+N)))';
 P_TrackSignal_Base      = [P_TrackSignal_Base(272:length(P_TrackSignal_Base-1)) P_TrackSignal_Base(1:271)]; 
 P_TrackSignal_All_Rounds_Base(:,r) = P_TrackSignal_Base; 
 
