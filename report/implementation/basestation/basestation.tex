@@ -1,6 +1,6 @@
 \section{Base station}\label{sc:basestation}
 
-The base station is main catalyst in our setup. It is responsible for three import tasks: Initiating data requests, decide if the runner is out of range and keep track of past events. Figure \ref{fig:tohopornotarqsequence} shows the overall flow of data, but we shall examine the more detailed parts here.
+The base station is master node in our setup. It is responsible for three import tasks: Initiating data requests, decide if the runner is out of range and keep track of past events. Figure \ref{fig:tohopornotarqsequence} shows the overall flow of data, but we shall examine the more detailed parts here.
 
 \noindent The main control loop is started by a timer every $s$ second. It asserts if the runner is deemed out of range by calling a function and uses the feedback (either true or false) to increase an error counter that is used to change destination node. In other words, when a certain number of errors have occurred on the current link, we change request destination (from directly to relaying or vice versa). Listing \ref{lst:basestation1} is an example.
 \noindent
