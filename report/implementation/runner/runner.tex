@@ -1,8 +1,8 @@
 \section{Runner}\label{sc:runner}
-The runner nodes task in our wireless sensor network is to respond to RequestMessages that can be sent from basetation or the relay nodes. As seen in the sequence digram shown in figure \ref{fig:tohopornotarqsequence}. The node various settings that can sat as constants so they are easy to change like the channel and transmit power of the antenna.
 
-When the runner node recives a packet it will check if the packet was ment for it and if that is the case it will send a acknowledge to the requester and get ready to send the data to the requester.
-\begin{lstlisting}[language=Python]
+The runner node's task in our WSN is to respond to data request messages sent from the base station or the relay nodes, as seen in the sequence digram in figure \ref{fig:tohopornotarqsequence}. The node contains various settings that can configured as constants, so they are easy to change eg. the transmit channel and the radiation power of the antenna. When it receives a packet it will check that the packet was intended for the runner and if so it will send an acknowledge (ACK) to the requester and get ready to send the data as a subsequent reply.
+
+\begin{lstlisting}[language=Python, label={lst:runner1}]
 Receive.receive(Message pkt){
 if(pkt == requestMessage) {
 //Check if the request is for me and if it is send sendAcknowledge.
@@ -10,7 +10,9 @@ if (pkt.nodeid == requestpkt.relayNodeid && requestpkt.data == 0) {
 sendAcknowledge();
 Timer.sendDataTorequester(); }
 \end{lstlisting}
-The data it respond with is the pulse from the runner and in this scenario we just return a constant value. When it is sending the data to the requesting node it will start a timer and if it have not received a acknowledgment within 20ms it will resend the data and this process happens 3 times and then it gives up.
+
+The data contains the heart rate of the runner and in this scenario we just return a constant value. When sending data to the requesting node, it will start a timer and if it does not receive an ACK within a fixed time, it will resend the message three times followed by giving up on that reply.
+
 \begin{lstlisting}[language=Python]
 sendData() {
 if (!AntenaBusy) {
