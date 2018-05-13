@@ -8,9 +8,7 @@ To be able to understand the need for relaying, one must first understand the bo
 	\label{fig:invertedAntenna}
 \end{figure}
 
-Telosb software specifies transmission power in dBm and the receiving and transmitting antenna have same characterises, so the need to understand the antenna characteristics beyond the far field distance estimation is not needed for this project. Since the main scope of the project is package control protocol, each antenna is treated as an isotropic antenna being able to broadcast up to $100m$ in each direction as specified in the datasheet. To simulate a real scenario the transmitting antenna could be mounted on a rotational motor following the runner through computer vision hence the main beam, e.g. $153\deg$, of the antenna pattern would always point towards the runner verifying our calculation approach. Giving a far field distance of $0.01167m$ and optimal conditions in air, figure 3 shows the expected received signal strength indication, RSSI, based on the range equation, Equation \ref{eq:rangeEquation} and presumed assumptions.
-
-
+Telosb software specifies transmission power in dBm and the receiving and transmitting antenna have same characterises, so the need to understand the antenna characteristics beyond the far field distance estimation is not needed for this project. Since the main scope of the project is package control protocol, each antenna is treated as an isotropic antenna being able to broadcast up to $100m$ in each direction as specified in the datasheet. To simulate a real scenario the transmitting antenna could be mounted on a rotational motor following the runner through computer vision hence the main beam, e.g. $153\deg$, of the antenna pattern would always point towards the runner verifying our calculation approach. Giving a far field distance of $0.01167m$ and optimal conditions in air, Figure \ref{fig:logpathReceivedSignal_baseStation_air_highSignal} shows the expected received signal strength indication, RSSI, based on the range equation, Equation \ref{eq:rangeEquation} and presumed assumptions.
 
 
 
@@ -36,16 +34,63 @@ Telosb software specifies transmission power in dBm and the receiving and transm
 \end{figure}
 
 %Figure 3
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{theory/pathLoss/fig/logpathReceivedSignal_baseStation_air_highSignal.png}
+	\caption{$-84dBm$ $159.3m$ received signal area of the race track. The antenna cannot cover the entirety of the racetrack.}
+	\label{fig:logpathReceivedSignal_baseStation_air_highSignal}
+\end{figure}
 
 
-Given a racetrack of 400m in width, under optimal conditions, as shown in figure 3, a telosb will not be able to cover the entirety of the race track and two additional relay “hop” stations must be applied to give sufficient cover. The antenna dimension and transmission power gives a natural boundary to which relaying will be the only option. Figure 4 (left) show the RSSI of the two relay stations in comparison to the base station, while figure 4 (right) shows the combined RSSI of the runner node.
+Given a racetrack of $400m$ in width, under optimal conditions, as shown in Figure \ref{fig:logpathReceivedSignal_baseStation_air_highSignal}, a telosb will not be able to cover the entirety of the race track and two additional relay “hop” stations must be applied to give sufficient cover. The antenna dimension and transmission power gives a natural boundary to which relaying will be the only option. Figure \ref{fig:logpathReceivedSignal_eachStation_air_highSignal} show the RSSI of the two relay stations in comparison to the base station, while Figure 4 \ref{fig:logpathReceivedSignal_combinedStations_air_highSignal} shows the combined RSSI of the runner node.
 
 %Figure 4
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{theory/pathLoss/fig/logpathReceivedSignal_eachStation_air_highSignal.png}
+	\caption{Three stations covering the entirety of the racetrack individually.}
+	\label{fig:logpathReceivedSignal_eachStation_air_highSignal}
+\end{figure}
 
-Minimizing the transmission power can lead to extended life time of the individual nodes and the system all together, but at the cost of less coverage area. Figure 5 shows the single and combined RSSI of the runner node with all nodes using transmission power of $-24dBm$. The size of the race track now is only $7.5\%$ of the full power track. 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{theory/pathLoss/fig/logpathReceivedSignal_combinedStations_air_highSignal.png}
+	\caption{Three stations covering the entirety of the racetrack combined.}
+	\label{fig:logpathReceivedSignal_combinedStations_air_highSignal}
+\end{figure}
+
+Minimizing the transmission power can lead to extended life time of the individual nodes and the system all together, but at the cost of less coverage area. Figure \ref{fig:logpathReceivedSignal_baseStation_air_lowSignal} shows the single and Figure \ref{fig:logpathReceivedSignal_combinedStations_air_lowSignal} the combined RSSI of the runner node with all nodes using transmission power of $-24dBm$. The size of the race track now is only $7.5\%$ of the full power track. 
 
 %Figure 5
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{theory/pathLoss/fig/logpathReceivedSignal_baseStation_air_lowSignal.png}
+	\caption{$10.1m$ adequate RSSI for the base station.}
+	\label{fig:logpathReceivedSignal_baseStation_air_lowSignal}
+\end{figure}
 
-Further reduction in RSSI can happen for multiple reasons, e.g. reflection, diffraction, scattering and doppler fading. An easy noise model can be to change $\gamma_{air}$ in equation 1 to $\gamma_{shannon}$, with values taken from page 93 [REF 1]. Figure 6 shows the distance at minimum Ptr and inside Shannon providing a stunning $0.035\%$ of the coverage related to full power in open AIR.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{theory/pathLoss/fig/logpathReceivedSignal_combinedStations_air_lowSignal.png}
+	\caption{$10.1m$ Three stations combined RSSI.}
+	\label{fig:logpathReceivedSignal_combinedStations_air_lowSignal}
+\end{figure}
+
+
+Further reduction in RSSI can happen for multiple reasons, e.g. reflection, diffraction, scattering and doppler fading. An easy noise model can be to change $\gamma_{air}$ in Equation \ref{eq:rangeEquation} to $\gamma_{building}$, with values taken from page 93 [REF 1]. Figure \ref{fig:logpathReceivedSignal_baseStation_office_lowSignal} and \ref{fig:logpathReceivedSignal_combinedStations_office_lowSignal} shows the distance at minimum Ptr and inside Shannon providing a stunning $0.035\%$ of the coverage related to full power in open AIR.
 
 %Figure 6
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{theory/pathLoss/fig/logpathReceivedSignal_baseStation_office_lowSignal.png}
+	\caption{$13.1cm$ adequate RSSI for the base station.}
+	\label{fig:logpathReceivedSignal_baseStation_office_lowSignal}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{theory/pathLoss/fig/logpathReceivedSignal_combinedStations_office_lowSignal.png}
+	\caption{$13.1cm$ Three stations combined RSSI.}
+	\label{fig:logpathReceivedSignal_combinedStations_office_lowSignal}
+\end{figure}
