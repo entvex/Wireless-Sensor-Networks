@@ -1,6 +1,7 @@
-\section{Scenario Introduction}\label{sc:scenarioIntroduction}
+\section{Scenario introduction}\label{sc:scenarioIntroduction}
 % Scenario introduction
-A marathon runner is racing a track shaped as shown in figure 1, while equipped with sensor node A. The sensor node is broadcasting four packages per second tracking the runner’s pulse history. The level of details in the tracking package defines the number of marathons possible for the runner to run before a new battery is required. At one time the track was closed, resulting in the runner racing around the building of her workplace.
+A marathon runner is racing a track shaped as shown in figure \ref{fig:scenarioIntroduction}, while equipped with sensor node A. It broadcasts four packets per second tracking the runner’s heart rate. The level of details in the tracking package defines the number of marathons possible for the runner to run before a new battery is required. At one time the track was closed, resulting in the runner racing around the building of her workplace.
+%TODO: Forstår ikke de sidste to linjer i den.
 
 \begin{figure}[H]
 	\centering
@@ -10,4 +11,5 @@ A marathon runner is racing a track shaped as shown in figure 1, while equipped 
 \end{figure}
 
 \section{Protocol introduction “To hop or not to hop”}\label{sc:protocolIntroduction}
-Node A will be broadcasting with a packet size of 128 Bytes. The base station will collect the data from node A when in range and save the data. The North station will, when in range and the base station is out of range, receive and relay the message to the base station. The same scenario will happen at the south station. Time Synchronization, Localization and Scalability will be considered regarding the protocol design. Each and combined scenarios will be evaluated in relation to signal strength relative to power consumption and data reliability. 
+The base station will be requesting data from the runner node with a packet size of 128 bytes and save it in storage. When the base station is out of range, the north or the south relay station will receive the request and relay it to the runner. Time Synchronization, Localization and Scalability will be considered regarding the protocol design. Each and combined scenarios will be evaluated in relation to signal strength relative to power consumption and data reliability.
+%TODO: Det gør vi vel ikke? Tænker at skrive: We will look at energy costs and signal strentch when deciding to hop or not.
