@@ -1,12 +1,15 @@
 \chapter{Test and Performance}\label{ch:testAndPerformance}
-\input{testAndPerformance/setup/setup}
+
+This chapter describes the test configuration and how we measured the performance of our protocol.
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{testAndPerformance/setup/setup}
-	\caption{The train track withbasestation, north and south relay nodes and the runner. }
+	\caption{A Brio toy train track with the base, north and south relay stations in the center and the runner put on top of the train.}
 	\label{fig:testSetup}
 \end{figure}
 
+\input{testAndPerformance/setup/setup}
 
 \input{testAndPerformance/wifi/wifi}
 We ran 4 tests for 48 minutes each testing our protocol with different channels and track lengths.
@@ -21,5 +24,5 @@ We ran 4 tests for 48 minutes each testing our protocol with different channels 
 		4 & 4 & -40 & 56cm \\ \hline
 	\end{tabular}
 	\label{table:scenarios}
-	\caption{Four test scenarios using channel 11/4 and different track lengths.}
+	\caption{Test scenarios performed.}
 \end{table}
