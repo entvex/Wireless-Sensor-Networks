@@ -1,12 +1,12 @@
 \section{Energy Calculations}\label{sc:energyCalculations}
-In every wireless network system energy consumption is a must to evaluate. Based on measurement, see Section \ref{sc:energylab} Energy Lab, some calculations were made. Since energy consumption is not the main investigation of the project, only lifetime for the base station is done in theory. An assumption of every package is send directly to the sink successfully and immediately a respond is send also successfully. Total latency between the two nodes is set as constant to 12 milliseconds and an overshoot time at powerup from sleep mode is also constant at 50 milliseconds and $40\%$ extra energy related to receiving energy. Overshoot after wakeup is modelled as a gaussian function as shown in Figure \ref{fig:gaussianDistributionsOfVoltagePeak} for max energy wakeup. Table 1 shows the lifetime of the base station at six different scenarios all assuming two full AA-batteries.%TODO reference to https://en.wikipedia.org/wiki/AA_battery "RAM" Mendeley!
+In every wireless network system energy consumption is a must to evaluate. Based on measurement, see Section \ref{sc:energylab} Energy Lab, some calculations were made. Since energy consumption is not the main investigation of the project, only lifetime for the base station is done in theory. An assumption of every package is send directly to the sink successfully and immediately a respond is send also successfully. Total latency between the two nodes is set as constant to $12 ms$ and an overshoot time at powerup from sleep mode is also constant at $50 ms$ and $40\%$ extra energy related to receiving energy. Overshoot after wakeup is modelled as a gaussian function as shown in Figure \ref{fig:gaussianDistributionsOfVoltagePeak} for max energy wakeup. Table \ref{tab:halfLifetimeBaseStation} shows the lifetime of the base station at six different scenarios all assuming two full AA-batteries.%TODO reference to https://en.wikipedia.org/wiki/AA_battery "RAM" Mendeley!
 Scenario 1: Full power at transmission and otherwise always listening for packages.
 Scenario 2: Min power at transmission and otherwise always listening for packages.
 Scenario 3: Full power at transmission, only listening for packages when receiving and no overshoot.
 Scenario 4: Min power at transmission, only listening for packages when receiving and no overshoot.
 Scenario 5: Full power at transmission, only listening for packages when receiving and overshoot at power up.
 Scenario 6: Min power at transmission, only listening for packages when receiving and overshoot at power up.
-Calculations are in appendix ?? and even though it cost to power up from sleep mode, it is still gives longer life time to put the nodes to sleep.
+Calculations are in appendix ?? and even though it cost to power up from sleep mode, it is still gives longer life time to put the nodes to sleep.%TODO create appendix and ref to it!
 
 %Figure 13
 \begin{figure}[H]
@@ -15,3 +15,20 @@ Calculations are in appendix ?? and even though it cost to power up from sleep m
 	\caption{Start up voltage peak after sleep mode.}
 	\label{fig:gaussianDistributionsOfVoltagePeak}
 \end{figure}
+
+\begin{table}[H]
+	\centering
+	\begin{tabularx}{\linewidth}{|l|r|l|X|r|}
+		\hline
+		\#	& Power		& Sleep	& Overshoot	& Lifetime	\\
+		    & [dBm]		& 		& 		& [Hours]	\\ \hline
+		1	& $0.0$		& No	& No	& 176.48	\\ \hline
+		2	& $-25.0$	& No	& No	& 176.52	\\ \hline
+		3	& $0.0$		& Yes	& No	& 13101.00	\\ \hline
+		4	& $-25.0$	& Yes	& No	& 13319.00	\\ \hline
+		5	& $0.0$		& Yes	& Yes	& 796.32	\\ \hline
+		6	& $-25.0$	& Yes	& Yes	& 797.11	\\ \hline
+	\end{tabularx}
+	\caption{Half capacity battery lifetime table for the base station, at different transmission powers and with/without sleep and overshoot.}
+	\label{tab:halfLifetimeBaseStation}
+\end{table}
