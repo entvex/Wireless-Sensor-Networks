@@ -1,0 +1,69 @@
+\subsection{Energy Lab}\label{sc:energylab}
+
+To test the energy consumption of the motes, a laboratory test has been conducted on two TelosB units. on Figure \ref{fig:energyLab_testSetup} the test setup is defined. The test was conducted with the same method as laboratory exercise 5\footnote{\cite{Madsen}}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{implementation/energylab/fig/energyLab_testSetup.png}
+	\caption{Energy lab test setup.}
+	\label{fig:energyLab_testSetup}
+\end{figure}
+
+\noindent The results of the readings can be seen on Figure \ref{fig:radioOn_idle}, \ref{fig:radioOn_sendHighSignal}, \ref{fig:radioOn_sendMidSignal} and \ref{fig:radioOn_sendLowSignal}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{implementation/energylab/fig/radioOn_idle.png}
+	\caption{Voltage drop at resistor $R=10\Omega$ in series with Receiver (yellow), radio on, doing nothing.}
+	\label{fig:radioOn_idle}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{implementation/energylab/fig/radioOn_sendHighSignal.png}
+	\caption{Voltage drop at resistor $R=10\Omega$ in series with Sender (blue) and Receiver (yellow), radio on, sending at $0.0dBm$.}
+	\label{fig:radioOn_sendHighSignal}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{implementation/energylab/fig/radioOn_sendMidSignal.png}
+	\caption{Voltage drop at resistor $R=10\Omega$ in series with Sender (blue) and Receiver (yellow), radio on, sending at $-12.5dBm$.}
+	\label{fig:radioOn_sendMidSignal}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{implementation/energylab/fig/radioOn_sendLowSignal.png}
+	\caption{Voltage drop at resistor $R=10\Omega$ in series with Sender (blue) and Receiver (yellow), radio on, sending at $-25.0dBm$.}
+	\label{fig:radioOn_sendLowSignal}
+\end{figure}
+
+
+\noindent Inspecting the values of the three signal strengths on Figure \ref{fig:radioOn_idle}, \ref{fig:radioOn_sendHighSignal}, \ref{fig:radioOn_sendMidSignal} and \ref{fig:radioOn_sendLowSignal}, and converting these voltages to a current, provides the results found in Table \ref{tab:signalStrengthEnergyConsumption}.
+
+\begin{table}[h]
+	\centering
+	\begin{tabularx}{\linewidth}{|X|X|X|}
+		\hline
+		Radio				& Voltage [mV] at $R=10\Omega$	& Converted Current [mA]	\\ \hline
+		OFF					& $3.32$						& $0.33$					\\ \hline
+		Listening			& $182.24$						& $18.22$					\\ \hline
+		Sending $0.0dBm$	& $172.31$						& $17.23$					\\ \hline
+		Sending $-12.5dBm$	& $123.30$						& $12.33$					\\ \hline
+		Sending $-25.0dBm$	& $87.20$						& $8.72$					\\ \hline
+	\end{tabularx}
+	\caption{Mean current drawn from the TelosB, calculated with voltage drop at resistor $R$.}
+	\label{tab:signalStrengthEnergyConsumption}
+\end{table}
+
+\noindent As can be seen in Table \ref{tab:signalStrengthEnergyConsumption}, there is a big difference in how much current is drawn at different signal strengths. However at further inspection of the TelosB units, it is concluded that turning the radio on, will make a unit automatically start listening for wireless signals. This results in the units always drawing a lot of current whenever the radio is turned on.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{implementation/energylab/fig/radioSwitching.png}
+	\caption{Voltage drop at resistor $R=10\Omega$ in series with TelosB unit (blue) and battery (yellow), radio switching between on and off.}
+	\label{fig:radioSwitching}
+\end{figure}
+
+\noindent As can be seen on Figure \ref{fig:radioSwitching}, turning on the radio is indeed expensive compared to having it turned off. A fast observation will result in a protocol decision that turns off the radio when not needed and on when needed. Of course this will require a protocol with time/clock synchronization of some sort to be implemented, and will not be implemented in this report. An overshoot can be observed at radio turn on, this means that it will cost an extra amount of energy whenever the radio is turned on. This concept have already been talked about in Section \ref{sc:energyCalculations} Energy Calculations, in which the data came from this section.
