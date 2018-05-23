@@ -1,6 +1,6 @@
 \subsection{Protocol Decision Example}\label{sc:protocolDecisionExample}
 %TODO: Fix figur referencer.
-Figure 10 (left) shows the base station's RSSI of a run around the track from start to finish and figure 10 (right) shows it for 47 rounds, which equals a marathon, and each round has different fadings. Figure \ref{fig:recievedSignal_inRange_halfTrack} shows the in-range of the base station packets which needs to be relayed or not.
+Figure 10 (left) shows the base station's RF input power of a run around the track from start to finish and figure 10 (right) shows it for 47 rounds, which equals a marathon, and each round has different fadings. Figure \ref{fig:recievedSignal_inRange_halfTrack} shows the in-range of the base station packets which needs to be relayed or not.
 
 %Figure 10
 %TODO Find matlab document med de to figures i word
@@ -9,16 +9,16 @@ Figure 10 (left) shows the base station's RSSI of a run around the track from st
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\linewidth]{theory/protocolDecisionExample/fig/recievedSignal_inRange_halfTrack.png}
-	\caption{In, half a track, base station RSSI transmitting range ToHopOrNot plot. Blue is relayed packages while yellow is direct package.}
+	\caption{In, half a track, base station RF input power transmitting range ToHopOrNot plot. Blue is relayed packages while yellow is direct package.}
 	\label{fig:recievedSignal_inRange_halfTrack}
 \end{figure}
 
-A multi linear regression was fitted on the simulated data with these predictors: Distance, signal strength and whether the packet has been relayed before. The goal was to determine if the node should the next packet relay or not. Since signal strength and distance are strongly correlated in our simulation, due to antenna approximations and the binary behavior of the fading, they cancel each other out, while the previous packet status shows a $10\%$ likelihood of the next packet needing to be relayed. Again, it is expected since the simulations have fading behavior added as a random variable appearing with a $10\%$ likelihood. A real-life trial would be interesting, but is out of scope. Figure \ref{fig:regressionPlot} shows the regression plot with the linear equation added in a legend box.
+\noindent A multi linear regression was fitted on the simulated data with these predictors: Distance, signal strength and whether the packet has been relayed before. The goal was to determine if the node should the next packet relay or not. Since signal strength and distance are strongly correlated in our simulation, due to antenna approximations and the binary behavior of the fading, they cancel each other out, while the previous packet status shows a $10\%$ likelihood of the next packet needing to be relayed. Again, it is expected since the simulations have fading behavior added as a random variable appearing with a $10\%$ likelihood. A real-life trial would be interesting, but is out of scope. Figure \ref{fig:regressionPlot} shows the regression plot with the linear equation added in a legend box.
 
 %Figure 12
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\linewidth]{theory/protocolDecisionExample/fig/regressionPlot.png}
-	\caption{Regression plot of the three variables: Distance, RSSI and if previous packet was relayed or not. The regression line is representing a change from direct transmission to relaying.}
+	\caption{Regression plot of the three variables: Distance, signal strength and if previous packet was relayed or not. The regression line is representing a change from direct transmission to relaying.}
 	\label{fig:regressionPlot}
 \end{figure}
