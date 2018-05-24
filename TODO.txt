@@ -1,6 +1,5 @@
 - Fix TODO's. (David)
 - Skriv conclusion (Fælles)
-- Skriv abstract (Christian)
 - Ret Davids kode (David)
 - Fix references (David)
   - RSSI is unrealible (Christian)
