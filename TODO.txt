@@ -1,0 +1,8 @@
+- Fix TODO's.
+- Skriv conclusion
+- Skriv abstract
+- Ret Davids kode
+- Fix references
+  - RSSI is unrealible
+Solar power i discussion
+SMAC i discussion

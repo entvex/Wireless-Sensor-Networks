@@ -2,7 +2,8 @@
 
 The runner node's task in our WSN is to respond to data request messages sent from the base station or the relay nodes, as seen in the sequence digram in figure \ref{fig:tohopornotarqsequence}. The node contains various settings that can configured as constants, so they are easy to change eg. the transmit channel and the radiation power of the antenna. When it receives a packet it will check that the packet was intended for the runner and if so it will send an acknowledge (ACK) to the requester and get ready to send the data as a subsequent reply.
 
-\begin{lstlisting}[label={lst:runner1}]
+\begin{minipage}[t]{0.95\linewidth}
+\begin{lstlisting}[label={lst:runner1}, caption={Runner receives requests and responds.}]
 Receive.receive(Message pkt){
 if(pkt == requestMessage) {
 //Check if the request is for me and if it is send sendAcknowledge.
@@ -10,10 +11,12 @@ if (pkt.nodeid == requestpkt.relayNodeid && requestpkt.data == 0) {
 sendAcknowledge();
 Timer.sendDataTorequester(); }
 \end{lstlisting}
+\end{minipage}
 
 The data contains the heart rate of the runner and in this scenario we just return a constant value. When sending data to the requesting node, it will start a timer and if it does not receive an ACK within a fixed time, it will resend the message three times followed by giving up on that reply.
 
-\begin{lstlisting}[label={lst:runner2}]
+\begin{minipage}[t]{0.95\linewidth}
+\begin{lstlisting}[label={lst:runner2}, caption={Runner sends data packet with runner's heart rate.}]
 sendData() {
 	if (!AntenaBusy) {
 		responsepkt.pulseData = currentpulse();
@@ -27,4 +30,4 @@ sendData() {
 	}
 }
 \end{lstlisting}
-
+\end{minipage}
