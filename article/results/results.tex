@@ -1,6 +1,6 @@
 \section{Results}\label{ch:results}
 
-Using the test setup and mechanics described in section \ref{ch:testAndPerformance}, we conducted a experiment of four different scenarios. We wanted to see whether the hopping frequency would increase, when we increased the circumference of the track, evaluate the packet sent/loss ratio and measure the overall perception of data. The test results would indicate if our hopping algorithm, the implemented stop-and-wait ARQ protocol and distance measurements were correct and working. All results are gathered from the base station.
+Using the test setup and mechanics described in section \ref{ch:testAndPerformance}, we conducted a experiment of four different scenarios. We wanted to see whether the hopping frequency would increase, when we increased the circumference of the track, evaluate the packet sent/loss ratio and measure the overall perception of data. The test results would indicate if our relaying algorithm, the implemented stop-and-wait ARQ protocol and distance measurements were correct and working. All results are gathered from the base station.
 
 \noindent To quickly examine the parameters measured in the test runs:
 
@@ -12,7 +12,7 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 
 \noindent \textbf{\textit{n} ACK's received ($p_4$):} Number of acknowledgments received by the ARQ protocol. The closer this number is to the packets sent, the more stable the data link connection between our endpoints is.
 
-\noindent \textbf{\textit{n} DATA's received ($p_5$):} Number of data packets received. Ideally, this should be close to the packets sent as well. If $p_5$<$p_1$, then $p_1$-$p_5$ request packet.
+\noindent \textbf{\textit{n} DATA's received ($p_5$):} Number of data packets received. Ideally, this should be close to the packets sent as well. If $p_5$<$p_1$, then $p_1$-$p_5$ request packets were not replied.
 
 \noindent \textbf{\textit{n} packets not acknowledged in time ($p_6$):} Number of packets not acknowledged before the ARQ timer ran out. This is strongly related to the timers on the base station and heavily influenced by interference and signal noise. Also in our test set-up we tried to get as much data from the runner as possible, so timers were strict.
 
@@ -44,7 +44,7 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{table:datascenarios2}
 \end{table}
 
-\noindent As expected, the results vary depending on the track length and the channel used. When using a length of 56 centimeters (scenario two and four), we see $p5$=<$p_1$, meaning the base station received the same or less data packets than requested. In scenario four they are even fairly close. If $p5$>$p_1$, it could be due to fading or missed timers. Also worth noting is the increased use of relays ($p_2$ and $p_3$) when the length is 56cm. Changing channels between 11 and 4 does not seem to increase the amount of data packets received or lower the number not acknowledged in time.
+\noindent As expected, the results vary depending on the track length and the channel used. When using a length of $56cm$ (scenario two and four), we see $p5$=<$p_1$, meaning the base station received the same or less data packets than requested. In scenario four they are even fairly close. If $p5$>$p_1$, it could be due to fading or missed timers. Also worth noting is the increased use of relays ($p_2$ and $p_3$) when the length is $56cm$. Changing channels between 11 and 4 does not seem to increase the amount of data packets received or lower the number not acknowledged in time.
 
 \noindent Figure \ref{fig:noackreceived} shows the correlation between the number of ACK's received, $p_4$, at the base station per packet sent from it. These numbers should be close to each other. Scenario 2 received a large number of ACK's around the 24408 packet sent mark, perhaps due to deep fading.
 
@@ -55,7 +55,7 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{fig:noackreceived}
 \end{figure}
 
-\noindent Figure \ref{fig:nodatareceived} shows the number of data packets received , $p_5$, from the runner node either direct or via one of the relays per packet sent. Scenario 1 and 3 (length=43.5cm) follows each other, which means that changing channel from 11 to 4 does not have a impact on the received number of data packets when using length=43.5. However changing the length from 43.5cm to 56cm does. Scenario 4 looks to be the most successful one, as the number of data packets received is close to the number of packets sent. Scenario 1 and 3 sees more data packets being received than requested, a probable reason is multipath propagation.
+\noindent Figure \ref{fig:nodatareceived} shows the number of data packets received , $p_5$, from the runner node either direct or via one of the relays per packet sent. Scenario 1 and 3 (length=$43.5cm$) follows each other, which means that changing channel from 11 to 4 does not have a impact on the received number of data packets when using length=$43.5cm$. However changing the length from $43.5cm$ to $56cm$ does. Scenario 4 looks to be the most successful one, as the number of data packets received is close to the number of packets sent. Scenario 1 and 3 sees more data packets being received than requested, a probable reason is multipath propagation.
 
 \begin{figure}[h]
 	\centering
@@ -64,7 +64,7 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{fig:nodatareceived}
 \end{figure}
 
-\noindent Figure \ref{fig:nopacketsrelayed} shows the number of data relayed to the north  and south relay station combined per packet sent. As expected, scenario 2 and 4 (length=56cm) relays more packages, now that the runner node will be out of reach from the base station for a longer period of time. It might even be that neither can reach the runner due to deep fading.
+\noindent Figure \ref{fig:nopacketsrelayed} shows the number of data relayed to the north  and south relay station combined per packet sent. As expected, scenario 2 and 4 (length=$56cm$) relays more packages, now that the runner node will be out of reach from the base station for a longer period of time. It might even be that neither can reach the runner due to deep fading.
 
 \begin{figure}[h]
 	\centering
@@ -97,4 +97,3 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\caption{No. packets relayed to north and south node in scenario 4.}
 	\label{fig:nopacketsrelayedscenario4}
 \end{figure}
-
