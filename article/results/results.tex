@@ -16,19 +16,32 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 
 \noindent \textbf{\textit{n} packets not acknowledged in time ($p_6$):} Number of packets not acknowledged before the ARQ timer ran out. This is strongly related to the timers on the base station and heavily influenced by interference and signal noise. Also in our test set-up we tried to get as much data from the runner as possible, so timers were strict.
 
-\noindent Table \ref{table:datascenarios} shows the final result of each completed scenario lasting 48 minutes each, which equals about 144 rounds with the train. Each minute we recorded parameters $p_1$ to $p_6$. All are initially set to zero. We decided not to change the RSSI threshold in each scenario.
+\noindent Table \ref{table:datascenarios1} and \ref{table:datascenarios2} show the final result of each completed scenario lasting 48 minutes each, which equals about 144 rounds with the train. Each minute we recorded parameters $p_1$ to $p_6$. All are initially set to zero. We decided not to change the RSSI threshold in each scenario.
 
 \begin{table}[h]
 	\centering
-	\begin{tabular}{|l|l|l|l|l|l|l|} \hline
-		Sn. & \pbox{18cm}{$p_1$} & \pbox{18cm}{$p_2$} & \pbox{18cm}{$p_3$} & \pbox{18cm}{$p_4$} & \pbox{18cm}{$p_5$} & \pbox{18cm}{$p_6$} \\ \hline
-		1 & 29148 & 4066 & 3512 & 22169 & 34167 & 20700 \\ \hline
-		2 & 29838 & 8115 & 8499 & 17880 & 23563 & 21111 \\ \hline
-		3 & 29258 & 3706 & 4021 & 21944 & 32830 & 21244 \\ \hline
-		4 & 30523 & 1232 & 8425 & 19137 & 28874 & 23188 \\ \hline
+	\begin{tabular}{|l|l|l|l|} \hline
+		Sn. & \pbox{10cm}{$p_1$} & \pbox{17cm}{$p_2$} & \pbox{17cm}{$p_3$} \\ \hline
+		1 & 29148 & 4066 & 3512 \\ \hline
+		2 & 29838 & 8115 & 8499 \\ \hline
+		3 & 29258 & 3706 & 4021 \\ \hline
+		4 & 30523 & 1232 & 8425 \\ \hline
 	\end{tabular}
-	\caption{Data from scenarios 1-4 completed with 144 runs.}
-	\label{table:datascenarios}
+	\caption{Data from scenarios 1-4 for parameters 1-3.}
+	\label{table:datascenarios1}
+\end{table}
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|l|l|l|l|} \hline
+		Sn. & \pbox{17cm}{$p_4$} & \pbox{17cm}{$p_5$} & \pbox{17cm}{$p_6$} \\ \hline
+		1 & 22169 & 34167 & 20700 \\ \hline
+		2 & 17880 & 23563 & 21111 \\ \hline
+		3 & 21944 & 32830 & 21244 \\ \hline
+		4 & 19137 & 28874 & 23188 \\ \hline
+	\end{tabular}
+	\caption{Data from scenarios 1-4 for parameters 4-6.}
+	\label{table:datascenarios2}
 \end{table}
 
 \noindent As expected, the results vary depending on the track length and the channel used. When using a length of 56 centimeters (scenario two and four), we see $p5$=<$p_1$, meaning the base station received the same or less data packets than requested. In scenario four they are even fairly close. If $p5$>$p_1$, it could be due to fading or missed timers. Also worth noting is the increased use of relays ($p_2$ and $p_3$) when the length is 56cm. Changing channels between 11 and 4 does not seem to increase the amount of data packets received or lower the number not acknowledged in time.
