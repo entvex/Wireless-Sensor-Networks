@@ -92,13 +92,26 @@ PAirSouth_W_f = 10.^(PAirSouth_f./10);
 PAirCombined_sf = 10*log10((PAir_W_f + PAirNorth_W + PAirSouth_W)./0.001); %dBm
 PAirCombined_sf_All_Noisy = 10*log10((PAir_W_f + PAirNorth_W_f + PAirSouth_W_f)./0.001); %dBm
 
-x1 = [x_ellipse+N];
-P_TrackSignal_temp_Base = PAir_f(round(x_ellipse+N),round(y_ellipse+N));
-P_TrackSignal_Base      = diag(PAir_f(round(x_ellipse+N),round(y_ellipse+N)))';
+xe1 = round(x_ellipse+N);
+for i=1:length(xe1)
+   if xe1(i) < 1
+      xe1(i) = 1;
+   end
+end
+
+ye1 = round(y_ellipse+N);
+for i=1:length(ye1)
+   if ye1(i) < 1
+      ye1(i) = 1;
+   end
+end
+
+P_TrackSignal_temp_Base = PAir_f(xe1,ye1);
+P_TrackSignal_Base      = diag(P_TrackSignal_temp_Base)';
 P_TrackSignal_Base      = [P_TrackSignal_Base(272:length(P_TrackSignal_Base-1)) P_TrackSignal_Base(1:271)]; 
 P_TrackSignal_All_Rounds_Base(:,r) = P_TrackSignal_Base; 
 
-P_TrackSignal_temp_Combined = PAirCombined_sf(round(x_ellipse+N),round(y_ellipse+N));
+P_TrackSignal_temp_Combined = PAirCombined_sf(xe1,ye1);
 P_TrackSignal_Combined      = diag(P_TrackSignal_temp_Combined)';
 P_TrackSignal_Combined      = [P_TrackSignal_Combined(272:length(P_TrackSignal_Combined-1)) P_TrackSignal_Combined(1:271)]; 
 P_TrackSignal_All_Rounds_Combined(:,r) = P_TrackSignal_Combined; 
