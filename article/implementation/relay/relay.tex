@@ -1,2 +1,27 @@
 \subsection{Relay}\label{sc:relay}
-The Relay nodes in this setup are slaves to the base station. Their functionality is to relay messages to the Runner node, where the base station node is out of reach. Because of this the Relay node listens to the network and in case of being spoken to, will reply with an acknowledge and further send data to the Runner node. In case that the Relay node is not able to get in contact with the Runner node after three times, it sends an error message to the Base station. The Relay nodes are always in need of commands to them before sending a command themselves, they won't work on their own and therefore relies on the Base station.
+The Relay nodes in this setup are slaves to the base station. Their functionality is to relay messages to the Runner node, where the base station node is out of reach. Because of this the Relay node listens to the network and in case of being spoken to, will reply with an acknowledge and further send data to the Runner node. In case that the Relay node is not able to get in contact with the Runner node after three times, it sends an error message to the Base station.
+
+\begin{minipage}[t]{0.95\linewidth}
+	\begin{lstlisting}[caption=Receive message event of Relay., label={lst:relay1}]
+event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
+	if (len == sizeof(requestMessage)) {
+		requestMessage* reqmsg = (requestMessage*) payload;
+		
+		if (reqmsg->relayNodeid == TOS_NODE_ID) {
+			// Send Acknowledge
+			sendAcknowledge(reqmsg);
+			
+			if (reqmsg->data == 0) {	
+				requestFromBase = *reqmsg;
+				call Timer0.startPeriodic(TIMER0_PERIOD_MILLI);		
+			}
+			else {
+				requestFromRunner = *reqmsg;
+				call Timer1.startPeriodic(TIMER1_PERIOD_MILLI);
+			}
+		}
+	}
+	\end{lstlisting}
+\end{minipage}
+
+On listing \ref{lst:relay1} the main functionality of the Relay nodes can be seen. The Relay nodes are always in need of commands to them before sending a command themselves, they won't work on their own and therefore relies on requests from the Base station and answers from the Runner.
