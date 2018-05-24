@@ -5,11 +5,12 @@ The runner node's task in our WSN is to respond to data request messages sent fr
 \begin{minipage}[t]{0.95\linewidth}
 \begin{lstlisting}[label={lst:runner1}, caption={Runner receives requests and responds.}]
 Receive.receive(Message pkt){
-if(pkt == requestMessage) {
-//Check if the request is for me and if it is send sendAcknowledge.
-if (pkt.nodeid == requestpkt.relayNodeid && requestpkt.data == 0) {
-sendAcknowledge();
-Timer.sendDataTorequester(); }
+if pkt is requestMessage {
+if request is for runner {
+send_Acknowledgement
+
+Timer_sendDataTorequester 
+}
 \end{lstlisting}
 \end{minipage}
 
@@ -18,15 +19,15 @@ The data contains the heart rate of the runner and in this scenario we just retu
 \begin{minipage}[t]{0.95\linewidth}
 \begin{lstlisting}[label={lst:runner2}, caption={Runner sends data packet with runner's heart rate.}]
 sendData() {
-	if (!AntenaBusy) {
-		responsepkt.pulseData = currentpulse();
-		if (AMSend.send(responsepkt) == SUCCESS) {
-			AntenaBusy = TRUE;
-			resendCounter++;
+	if If is not AntenaBusy {
+		responsePacket_pulseData add runner_heart_beat
+		if AMSend_send(responsepkt) is SUCCESS {
+			AntenaBusy to TRUE
+			resendCounter++
 		}
-	}		
-	if(resendCounter >= TRIES_TO_RESEND){
-		resendCounter = 0; 
+	}
+	if resendCounter is bigger then and equal to TRIES_TO_RESEND {
+		resendCounter = 0
 	}
 }
 \end{lstlisting}
