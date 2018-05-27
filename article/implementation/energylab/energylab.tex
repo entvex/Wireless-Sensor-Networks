@@ -1,45 +1,45 @@
 \subsection{Energy lab}\label{sc:energylab}
 
-To test the energy consumption of the motes, a laboratory test has been conducted on two telosB units. On figure \ref{fig:energyLab_testSetup} the test setup is defined. The test was conducted with the same method as laboratory exercise 5\footnote{\cite{Madsen}}.\\
+To test the energy consumption of the motes, a laboratory test has been conducted on two telosB units. On figure \ref{fig:energyLab_testSetup} the test setup is defined. The test was conducted with the same method as laboratory exercise 5\footnote{\cite{Madsen}}.
 
-\noindent The measurements can be seen on figure \ref{fig:radioOn_idle}, \ref{fig:radioOn_sendHighSignal}, \ref{fig:radioOn_sendMidSignal} and \ref{fig:radioOn_sendLowSignal}. Inspecting the values of the three signal strengths on figure \ref{fig:radioOn_idle}, \ref{fig:radioOn_sendHighSignal}, \ref{fig:radioOn_sendMidSignal} and \ref{fig:radioOn_sendLowSignal}, and converting these voltages to a current, provides the results found in table \ref{tab:signalStrengthEnergyConsumption}. \\
+\noindent The measurements can be seen on figure \ref{fig:radioOn_idle}, \ref{fig:radioOn_sendHighSignal}, \ref{fig:radioOn_sendMidSignal} and \ref{fig:radioOn_sendLowSignal}. Inspecting the values of the three signal strengths on figure \ref{fig:radioOn_idle}, \ref{fig:radioOn_sendHighSignal}, \ref{fig:radioOn_sendMidSignal} and \ref{fig:radioOn_sendLowSignal}, and converting these voltages to a current, provides the results found in table \ref{tab:signalStrengthEnergyConsumption}.
 
-\begin{figure}[H]
+\begin{figure}[h]
 	\centering
 	\includegraphics[width=1\linewidth]{implementation/energylab/fig/energyLab_testSetup.png}
 	\caption{Energy lab test setup.}
 	\label{fig:energyLab_testSetup}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[h]
 	\centering
 	\includegraphics[width=1\linewidth]{implementation/energylab/fig/radioOn_idle.png}
 	\caption{Voltage drop at resistor $R=10\Omega$ in series with Receiver (yellow), radio on, doing nothing.}
 	\label{fig:radioOn_idle}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[h]
 	\centering
 	\includegraphics[width=1\linewidth]{implementation/energylab/fig/radioOn_sendHighSignal.png}
 	\caption{Voltage drop at resistor $R=10\Omega$ in series with Sender (blue) and Receiver (yellow), radio on, sending at $0.0dBm$.}
 	\label{fig:radioOn_sendHighSignal}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[h]
 	\centering
 	\includegraphics[width=1\linewidth]{implementation/energylab/fig/radioOn_sendMidSignal.png}
 	\caption{Voltage drop at resistor $R=10\Omega$ in series with Sender (blue) and Receiver (yellow), radio on, sending at $-12.5dBm$.}
 	\label{fig:radioOn_sendMidSignal}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[h]
 	\centering
 	\includegraphics[width=1\linewidth]{implementation/energylab/fig/radioOn_sendLowSignal.png}
 	\caption{Voltage drop at resistor $R=10\Omega$ in series with Sender (blue) and Receiver (yellow), radio on, sending at $-25.0dBm$.}
 	\label{fig:radioOn_sendLowSignal}
 \end{figure}
 
-\begin{table}[H]
+\begin{table}[h]
 	\centering
 	\begin{tabularx}{\linewidth}{|X|X|X|}
 		\hline
@@ -50,13 +50,13 @@ To test the energy consumption of the motes, a laboratory test has been conducte
 		Sending $-12.5dBm$	& $123.30$						& $12.33$					\\ \hline
 		Sending $-25.0dBm$	& $87.20$						& $8.72$					\\ \hline
 	\end{tabularx}
-	\caption{Mean current drawn from the TelosB, calculated with voltage drop at resistor $R$.}
+	\caption{Mean current drawn from the telosb calculated with voltage drop at resistor $R$.}
 	\label{tab:signalStrengthEnergyConsumption}
 \end{table}
 
 \noindent As can be seen in table \ref{tab:signalStrengthEnergyConsumption}, there is a big difference in how much current is drawn at different signal strengths. However at further inspection of the telosb units, it is concluded that turning the radio on, will make a unit automatically start listening for wireless signals. This results in the units always drawing a lot of current whenever the radio is turned on.
 
-\begin{figure}[H]
+\begin{figure}[h]
 	\centering
 	\includegraphics[width=\linewidth]{implementation/energylab/fig/radioSwitching.png}
 	\caption{Voltage drop at resistor $R=10\Omega$ in series with telosb unit (blue) and battery (yellow), radio switching between on and off.}

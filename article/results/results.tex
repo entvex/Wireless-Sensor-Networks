@@ -1,8 +1,6 @@
 \section{Results}\label{ch:results}
 
-Using the test setup and mechanics described in section \ref{ch:testAndPerformance}, we conducted a experiment of four different scenarios. We wanted to see whether the hopping frequency would increase, when we increased the circumference of the track, evaluate the packet sent/loss ratio and measure the overall perception of data. The test results would indicate if our relaying algorithm, the implemented stop-and-wait ARQ protocol and distance measurements were correct and working. All results are gathered from the base station.
-
-\noindent To quickly examine the parameters measured in the test runs:
+Using the test setup and mechanics described in section \ref{ch:testAndPerformance}, we conducted a experiment of four different scenarios. We wanted to see whether the hopping frequency would increase, when we increased the circumference of the track, evaluate the packet sent/loss ratio and measure the overall perception of data. The test results would indicate if our relaying algorithm, the implemented stop-and-wait ARQ protocol and distance measurements were correct and working. All results are gathered from the base station. To quickly iterate the parameters measured in the test runs: \\
 
 \noindent \textbf{\textit{n} request packets sent ($p_1$):} Number of packets sent from the base station over the course of the test. These include retries due to ARQ timers expiring. Read this number as "times we have asked for data".
 
@@ -14,7 +12,7 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 
 \noindent \textbf{\textit{n} DATA's received ($p_5$):} Number of data packets received. Ideally, this should be close to the packets sent as well. If $p_5$<$p_1$, then $p_1$-$p_5$ request packets were not replied.
 
-\noindent \textbf{\textit{n} packets not acknowledged in time ($p_6$):} Number of packets not acknowledged before the ARQ timer ran out. This is strongly related to the timers on the base station and heavily influenced by interference and signal noise. Also in our test set-up we tried to get as much data from the runner as possible, so timers were strict.
+\noindent \textbf{\textit{n} packets not acknowledged in time ($p_6$):} Number of packets not acknowledged before the ARQ timer ran out. This is strongly related to the timers on the base station and heavily influenced by interference and signal noise. Also in our test set-up we tried to get as much data from the runner as possible, so timers were strict. \\
 
 \noindent Table \ref{table:datascenarios1} and \ref{table:datascenarios2} show the final result of each completed scenario lasting 48 minutes each, which equals about 144 rounds with the train. Each minute we recorded parameters $p_1$ to $p_6$. All are initially set to zero. We decided not to change the RSSI threshold in each scenario.
 
@@ -55,7 +53,7 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{fig:noackreceived}
 \end{figure}
 
-\noindent Figure \ref{fig:nodatareceived} shows the number of data packets received , $p_5$, from the runner node either direct or via one of the relays per packet sent. Scenario 1 and 3 (length=$43.5cm$) follows each other, which means that changing channel from 11 to 4 does not have a impact on the received number of data packets when using length=$43.5cm$. However changing the length from $43.5cm$ to $56cm$ does. Scenario 4 looks to be the most successful one, as the number of data packets received is close to the number of packets sent. Scenario 1 and 3 sees more data packets being received than requested, a probable reason is multipath propagation.
+\noindent Figure \ref{fig:nodatareceived} shows the number of data packets received, $p_5$, from the runner node either direct or via one of the relays per packet sent. Scenario 1 and 3 (length=$43.5cm$) follows each other, which means that changing channel from 11 to 4 does not have a impact on the received number of data packets when using length=$43.5cm$. However changing the length from $43.5cm$ to $56cm$ does. Scenario 4 looks to be the most successful one, as the number of data packets received is close to the number of packets sent. Scenario 1 and 3 sees more data packets being received than requested, a probable reason is multipath propagation.
 
 \begin{figure}[h]
 	\centering
