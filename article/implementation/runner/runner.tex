@@ -5,16 +5,17 @@ The runner node's task in our WSN is to respond to data request messages sent fr
 \begin{minipage}[t]{0.95\linewidth}
 \begin{lstlisting}[label={lst:runner1}, caption={Runner receives requests and responds.}]
 Receive.receive(Message pkt){
-if pkt is requestMessage {
-if request is for runner {
-send_Acknowledgement
-
-Timer_sendDataTorequester 
+	if pkt is requestMessage {
+		if request is for runner {
+			send_Acknowledgement
+			Timer_sendDataTorequester
+		}
+	} 
 }
 \end{lstlisting}
 \end{minipage}
 
-The data contains the heart rate of the runner and in this scenario we just return a constant value. When sending data to the requesting node, it will start a timer and if it does not receive an ACK within a fixed time, it will resend the message three times followed by giving up on that reply.
+\noindent The data contains the heart rate of the runner and in this scenario we just return a constant value. When sending data to the requesting node, it will start a timer and if it does not receive an ACK within a fixed time, it will resend the message three times followed by giving up on that reply.
 
 \begin{minipage}[t]{0.95\linewidth}
 \begin{lstlisting}[label={lst:runner2}, caption={Runner sends data packet with runner's heart rate.}]
