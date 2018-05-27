@@ -1,7 +1,7 @@
 \section{Conclusion}\label{ch:conclusion}
 
-Our protocol works but does not ACK all packets in time because of testing timings.
-Use antenna is expensive.
-We can solve the problem of runner being out of range by using telosb nodes and tinyos and nesC programming code.
-RSSI is bad when measuring distances.
-RSSI is bad\footnote{\cite{Heurtefeux2012}}
+The focus of this project has been to build a WSN protocol that would relay packets based on accumulated transmissions errors and the received signal strength from RF input power measurements. The protocol was designed for a real-life running track with a base station actively requesting heart rate data from a runner carrying a sensor node, however for testing purposes we scaled parameters including track length, distance between nodes and the request interval to match a practical arrangement of a toy train driving a short oval-shaped track. 
+
+Our results show, that our protocol is able to relay packets when required to reach the runner node, but not all packets gets acknowledged in time by the data-link ARQ protocol built on top. This is possibly due to strict timings on the sender's part. We show with conducted measurements that the antenna (CC2420) can be very energy-consuming, while processor computations on the telosb are far cheaper. Therefore we conclude, that packet hopping should be kept at a minimum whenever possible to avoid additional energy dissipation.
+
+Regarding the use of RSSI to relay packets, we echo the thoughts of \cite{Heurtefeux2012} and find that the readings from CC2420 can be fairly inaccurate and do not represent a clear picture when predicting whether a packet will be lost, thus additional features should be included in the decision-making.
