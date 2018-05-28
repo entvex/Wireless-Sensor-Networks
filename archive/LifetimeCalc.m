@@ -74,3 +74,20 @@ PT_Total_max_sleep_OS = BatteryPower/P_Total_max_sleep_OS; %Lifetime in hours
 PT_Total_max_sleep_OS = PT_Total_max_sleep_OS/2                     %Halfpower Lifetime in hours
 PT_Total_min_sleep_OS = BatteryPower/P_Total_min_sleep_OS; %Lifetime in hours
 PT_Total_min_sleep_OS = PT_Total_min_sleep_OS/2                     %Halfpower Lifetime in hours
+
+
+%% Train scenario result, power consumption (no sleep)
+Timer_train_between_send = 0.070; %s - Time between each initialisation of a send package
+P_Train_send_per_package = (I_tx_min * packagePeriod + I_rx * (Timer_train_between_send - packagePeriod))/360; % Power used per package send
+
+% Assuming a cost only for each package send
+P_scenario_1 = (29148 + 4066 + 3515) * 4 * P_Train_send_per_package
+P_scenario_2 = (29838 + 8155 + 8499) * 4 * P_Train_send_per_package
+P_scenario_3 = (29258 + 3706 + 4021) * 4 * P_Train_send_per_package
+P_scenario_4 = (30523 + 1232 + 8425) * 4 * P_Train_send_per_package
+
+% Percentage of power used by base station
+P_basestation_scenario_1 = (29148 * 4 * P_Train_send_per_package) / Ah
+P_basestation_scenario_2 = (29838 * 4 * P_Train_send_per_package) / Ah
+P_basestation_scenario_3 = (29258 * 4 * P_Train_send_per_package) / Ah
+P_basestation_scenario_4 = (30523 * 4 * P_Train_send_per_package) / Ah
