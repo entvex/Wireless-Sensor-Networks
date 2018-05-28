@@ -4,7 +4,7 @@ No RSSI in the report or plots
 Conclude on the doppler effect that we do not consider it, because we run around the basestation and not towards it!
 Explain shortly the math behind doppler effect 
 
-(HENRIK) plus the extention of wavelength!
+(HENRIK) plus the extention of wavelength!  
 Explain better the choice of half battery lifetime as indicator vs other indicators
 
 (Coding Team): Test scenario:
