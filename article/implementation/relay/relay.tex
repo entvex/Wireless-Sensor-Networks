@@ -3,20 +3,20 @@ The relay stations in this setup are slaves to the base station. Their functiona
 
 \begin{minipage}[t]{0.95\linewidth}
 	\begin{lstlisting}[caption=Receive message event of Relay., label={lst:relay1}]
-event message_t * Receive.receive(message_t *msg, void *payload, uint8_t len){
-	if (len == sizeof(requestMessage)) {
-		requestMessage* reqmsg = (requestMessage*) payload;
+	Receive.receive(message_t msg, uint8_t len){
+	if len == sizeof(requestMessage) {
+		requestMessage reqmsg = (requestMessage) payload;
 		
-		if (reqmsg->relayNodeid == TOS_NODE_ID) {
+		if reqmsg_relayNodeid is TOS_NODE_ID {
 			// Send Acknowledge
 			sendAcknowledge(reqmsg);
 			
-			if (reqmsg->data == 0) {	
-				requestFromBase = *reqmsg;
+			if reqmsg_data = 0 {	
+				requestFromBase = reqmsg;
 				call Timer0.startPeriodic(TIMER0_PERIOD_MILLI);		
 			}
 			else {
-				requestFromRunner = *reqmsg;
+				requestFromRunner = reqmsg;
 				call Timer1.startPeriodic(TIMER1_PERIOD_MILLI);
 			}
 		}
