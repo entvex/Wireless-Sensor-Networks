@@ -130,7 +130,7 @@ plot(Samples,P_TrackSignal_Base)
 title({'RECEIVED SIGNAL PER SAMPLE AT TRACK';'BASE-Station, AIR, Trx = 0dBm'})
 xlabel('Number of Samples for ONE track lab')
 ylabel('Signal Strength in dBm')
-legend('RSSI at each package along ONE track round','Location','southwest');
+legend('dBm at each package along ONE track round','Location','southwest');
 hold off
 
 figure(2)
@@ -143,7 +143,7 @@ shading interp;
 set(gca, 'clim', [acc_dBm 0]); 
 colormap([0 0 0; jet]);
 colorbar;
-legend('RSSI at each package along 47 track rounds','Location','southwest');
+legend('dBm at each package along 47 track rounds','Location','southwest');
 hold off
 
 figure(3)
@@ -156,5 +156,5 @@ shading interp;
 set(gca, 'clim', [acc_dBm 0]); 
 colormap([0 0 0; jet]);
 colorbar;
-legend('RSSI at each package along 47 track rounds','Location','southwest');
+legend('dBm at each package along 47 track rounds','Location','southwest');
 hold off
