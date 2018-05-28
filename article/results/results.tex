@@ -42,7 +42,7 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{table:datascenarios2}
 \end{table}
 
-\noindent As expected, the results vary depending on the track length and the channel used. When using a length of $56cm$ (scenario two and four), we see $p5$=<$p_1$, meaning the base station received the same or less data packets than requested. In scenario four they are even fairly close. If $p5$>$p_1$, it could be due to fading or missed timers. Also worth noting is the increased use of relays ($p_2$ and $p_3$) when the length is $56cm$. Changing channels between 11 and 4 does not seem to increase the amount of data packets received or lower the number of not acknowledged in time.
+\noindent As expected, the results vary depending on the track length and the channel used. When using a length of $56cm$ (scenario two and four), we see $p5$=<$p_1$, meaning the base station received the same or less data packets than requested. In scenario four they are even fairly close. If $p5$>$p_1$, it could be due to fading or missed timers. Also worth noting is the increased use of relays ($p_2$ and $p_3$) when the length is $56cm$. Changing channels between 11 and 4 seem to lower the difference between $p_1$ and $p_5$ as well.
 
 \noindent Figure \ref{fig:noackreceived} shows the correlation between the number of ACK's received, $p_4$, at the base station per packet sent from it. These numbers should be close to each other. Scenario 2 received a large number of ACK's around the 24408 packet sent mark, perhaps due to deep fading.
 
@@ -53,7 +53,7 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{fig:noackreceived}
 \end{figure}
 
-\noindent Figure \ref{fig:nodatareceived} shows the number of data packets received, $p_5$, from the runner node either direct or via one of the relays per packet sent. Scenario 1 and 3 (length=$43.5cm$) follows each other, which means that changing channel from 11 to 4 does not have a impact on the received number of data packets when using length=$43.5cm$. However changing the length from $43.5cm$ to $56cm$ does. Scenario 4 looks to be the most successful one, as the number of data packets received is close to the number of packets sent. Scenario 1 and 3 sees more data packets being received than requested. A probable cause is a packet not being acknowledged in time by the base station, so the runner will resend it, even though it might already have been received by the base station.
+\noindent Figure \ref{fig:nodatareceived} shows the number of data packets received, $p_5$, from the runner node either direct or via one of the relays per packet sent. Scenario 1 and 3 (length=$43.5cm$) follows each other slightly, however changing channel from 11 to 4 decrease the amount of additional packets received ($p_5$>$p_1$) when using length=$43.5cm$. Scenario 4 looks to be the most successful one, as the number of data packets received is close to the number of requests sent. We reflect on this at the end of results. Scenario 1 and 3 sees more data packets being received than requested. A probable cause is a packet not being acknowledged in time by the base station, so the runner will resend it, even though it might already have been received by the base station.
 
 \begin{figure}[h]
 	\centering
@@ -71,7 +71,7 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{fig:nopacketsrelayed}
 \end{figure}
 
-\noindent Figure \ref{fig:nopacketsnotackintime} shows the number of packets not acknowledged over the data link in time per packet sent. All scenarios follows each-other, which points to a systematically error either due to strict timers or fading issues. An error that channel or length does not seem to affect. We noticed during the live testing that more ARQ errors occurred when communicating directly rather than relaying.
+\noindent Figure \ref{fig:nopacketsnotackintime} shows the number of packets not acknowledged in time per packet sent. All scenarios follows each-other, which points to a systematically error either due to strict timers or fading issues. An error that channel or length does not seem to affect. We noticed during the live testing that more ARQ errors occurred when communicating directly rather than relaying. Figure \ref{fig:nopacketsrelayedscenario2} and \ref{fig:nopacketsrelayedscenario4} show how the two scenarios that relay the most packets (2 and 4) distribute the data among our two relay stations (north and south) per packet relayed. A bit strange is the sudden drop of packets relayed to the north station in scenario 4, figure  \ref{fig:nopacketsrelayedscenario4}. Probable reason is fading.
 
 \begin{figure}[h]
 	\centering
@@ -80,8 +80,6 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{fig:nopacketsnotackintime}
 \end{figure}
 
-\noindent Figure \ref{fig:nopacketsrelayedscenario2} and \ref{fig:nopacketsrelayedscenario4} show how the two scenarios that relay the most packets (2 and 4) distribute the data among our two relay stations (north and south) per packet relayed. A bit strange is the sudden drop of packets relayed to the north station in scenario 4, figure  \ref{fig:nopacketsrelayedscenario4}. A explanation may again be deep fading.
-
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=1\linewidth]{results/NoPacketsRelayedScenario2}
@@ -89,9 +87,24 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{fig:nopacketsrelayedscenario2}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{results/NoPacketsRelayedScenario4}
 	\caption{No. packets relayed to north and south node in scenario 4.}
 	\label{fig:nopacketsrelayedscenario4}
 \end{figure}
+
+In terms of signal quality (number of packets requested ($p_1$) vs. received ($p_5$) the different scenarios has various characteristics. A optimal scenario is one where the number of requests sent is close to the number of data packets received, that is $p_1$\approx$p_5$. If $p_1$>$p_5$, we have asked for more events than received, i.e. packets have not been sent or lost. If $p_1$<$p_5$, we have received more events than asked for, i.e. information overhead. Table \ref{table:signalquality} shows signal quality for each scenario (1-4). We see that scenario 4 provides the overall best signal quality, i.e. using a channel with less traffic and increasing the length of the track, hence relying more on the relay stations.
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|l|l|l|l|} \hline
+		Scenario & \pbox{18cm}{Request sent} & \pbox{18cm}{Data's received} & \pbox{18cm}{\% Quality difference} \\ \hline
+		1 & 29148 & 34167 & $17.2\%$ \\ \hline
+		2 & 29838 & 23563 & $-21.0\%$ \\ \hline
+		3 & 29258 & 32830 & $12.2\%$ \\ \hline
+		4 & 30523 & 28874 & $-5.4\%$ \\ \hline
+	\end{tabular}
+	\caption{Signal quality from scenarios 1-4.}
+	\label{table:signalquality}
+\end{table}
