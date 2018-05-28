@@ -1,5 +1,5 @@
 \subsection{Relay}\label{sc:relay}
-The relay stations in this setup are slaves to the base station. Their functionality is to relay messages to the runner node, where the base station node is out of reach. Because of this the relay station listens to the network and in case of being spoken to, it replies with an acknowledge (ACK) and then sends a request for data to the runner node. In case it is not able to receive contact from the runner after three times, it sends an error message to the base station.
+The relay stations in this setup are slaves to the base station. Their functionality is to relay messages to the runner node, where the base station node is out of reach. Because of this the relay station listens to the network and in case of being spoken to, it replies with an ACK and then sends a request for data to the runner node. In case it is not able to receive contact from the runner after three times, it sends an error message to the base station.
 
 \begin{minipage}[t]{0.95\linewidth}
 	\begin{lstlisting}[caption=Receive message event of Relay., label={lst:relay1}]
@@ -24,4 +24,4 @@ The relay stations in this setup are slaves to the base station. Their functiona
 	\end{lstlisting}
 \end{minipage}
 
-\noindent On listing \ref{lst:relay1} the primary functionality of the two relay stations can be seen. The relay stations are always in need of commands to them before sending a command themselves, they will not work on their own and therefore relies on requests from the base station and answers from the runner.
+\noindent In listing \ref{lst:relay1} the primary functionality of the two relay stations can be seen. The relay stations are always in need of commands to them before sending a command themselves, they will not work on their own and therefore relies on requests from the base station and answers from the runner.

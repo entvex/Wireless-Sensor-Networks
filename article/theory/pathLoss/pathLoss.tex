@@ -4,14 +4,14 @@ To be able to understand the need for relaying, one must understand the boundari
 
 \noindent The telosb software specifies transmission power in dBm and the receiving/transmitting antenna have same the characteristics, so the need to understand the antennas workings beyond the far field distance estimation is not needed for this project. Since our main focus is a packet control protocol, each antenna is treated as isotropic being able to broadcast up to $100m$ in each direction as specified in the data sheet of the CC2420\footnote{\cite{Ieee}}. To simulate a real scenario, the transmitting antenna could be mounted on a rotational motor following the runner using computer vision hence the main beam, e.g. $153\deg$, of the antenna pattern would always point towards the runner verifying our calculation approach. Giving a far field distance of $0.01167m$ and optimal conditions in air, figure \ref{fig:logpathReceivedSignal_baseStation_air_highSignal} shows the expected received signal strength indication in dBm based on the range equation \ref{eq:rangeEquation} and the assumed assumptions. 
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{theory/pathLoss/fig/invertedAntenna.png}
 	\caption{Estimation of an inverted-F antenna's radiation pattern.}
 	\label{fig:invertedAntenna}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\begin{flalign*}
 		f &= 2.407 \cdot 10^{9} Hz \qquad
 		D = 2.7 \cdot 10^{-3} m \\
@@ -33,24 +33,25 @@ To be able to understand the need for relaying, one must understand the boundari
 \end{figure}
 
 %Figure 3
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{theory/pathLoss/fig/logpathReceivedSignal_baseStation_air_highSignal.png}
 	\caption{$-84dBm$ $159.3m$ received signal area of the running track. The antenna cannot cover the entire track.}
 	\label{fig:logpathReceivedSignal_baseStation_air_highSignal}
 \end{figure}
 
-\noindent Given a racetrack of $400m$ in width, under optimal conditions as shown in figure \ref{fig:logpathReceivedSignal_baseStation_air_highSignal} a telosb node will not be able to cover the entire track and two additional relay "hop" stations must be installed to provide sufficient cover. The antenna dimensions and transmission power gives a natural boundary to which relaying will be the only option. Figure \ref{fig:logpathReceivedSignal_eachStation_air_highSignal} shows the RF input power of two relay stations in comparison to the base station, while figure 4 \ref{fig:logpathReceivedSignal_combinedStations_air_highSignal} shows the combined RF input power of the runner node.
 
 %Figure 4
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{theory/pathLoss/fig/logpathReceivedSignal_eachStation_air_highSignal.png}
 	\caption{Three stations covering the entire track individually.}
 	\label{fig:logpathReceivedSignal_eachStation_air_highSignal}
 \end{figure}
 
-\begin{figure}[h]
+\noindent Given a racetrack of $400m$ in width, under optimal conditions as shown in figure \ref{fig:logpathReceivedSignal_baseStation_air_highSignal} a telosb node will not be able to cover the entire track and two additional relay "hop" stations must be installed to provide sufficient coverage. The antenna dimensions and transmission power gives a natural boundary to which relaying will be the only option. Figure \ref{fig:logpathReceivedSignal_eachStation_air_highSignal} shows the RF input power of two relay stations in comparison to the base station, while figure 4 \ref{fig:logpathReceivedSignal_combinedStations_air_highSignal} shows the combined RF input power of the runner node.
+
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{theory/pathLoss/fig/logpathReceivedSignal_combinedStations_air_highSignal.png}
 	\caption{Three stations covering the entire track combined.}
@@ -59,31 +60,32 @@ To be able to understand the need for relaying, one must understand the boundari
 
 \noindent Lowering the transmission power can prolong the lifetime of individual nodes and the wireless network all together, but at the cost of less coverage. Figure \ref{fig:logpathReceivedSignal_baseStation_air_lowSignal} shows the single and \ref{fig:logpathReceivedSignal_combinedStations_air_lowSignal} the combined RF input power of the runner node with all nodes using transmission power of $-24dBm$. The size of the track is now only $7.5\%$ of the full power track. 
 
+\noindent Further reduction in RF input power can happen for multiple reasons, e.g: reflection, diffraction, scattering and Doppler fading. An easy noise model can be to change $\gamma_{air}$ in equation \ref{eq:rangeEquation} to $\gamma_{building}$ with values taken from the WSN book\footnote{\cite[p.~98]{Karl2006}}. Figure \ref{fig:logpathReceivedSignal_baseStation_office_lowSignal} and \ref{fig:logpathReceivedSignal_combinedStations_office_lowSignal} show the distance at minimum transmitted power inside a building providing a stunning $0.035\%$ of the coverage related to full power in open AIR.
+
 %Figure 5
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{theory/pathLoss/fig/logpathReceivedSignal_baseStation_air_lowSignal.png}
 	\caption{$10.1m$ adequate RF input power for the base station.}
 	\label{fig:logpathReceivedSignal_baseStation_air_lowSignal}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{theory/pathLoss/fig/logpathReceivedSignal_combinedStations_air_lowSignal.png}
 	\caption{$10.1m$ Three stations combined RF input power.}
 	\label{fig:logpathReceivedSignal_combinedStations_air_lowSignal}
 \end{figure}
 
-\noindent Further reduction in RF input power can happen for multiple reasons, e.g: reflection, diffraction, scattering and Doppler fading. An easy noise model can be to change $\gamma_{air}$ in equation \ref{eq:rangeEquation} to $\gamma_{building}$ with values taken from page 93 \footnote{\cite{Karl2006}}. Figure \ref{fig:logpathReceivedSignal_baseStation_office_lowSignal} and \ref{fig:logpathReceivedSignal_combinedStations_office_lowSignal} show the distance at minimum transmitted power (TRX) inside a building providing a stunning $0.035\%$ of the coverage related to full power in open AIR.
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{theory/pathLoss/fig/logpathReceivedSignal_baseStation_office_lowSignal.png}
 	\caption{$13.1cm$ adequate RF input power for the base station.}
 	\label{fig:logpathReceivedSignal_baseStation_office_lowSignal}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{theory/pathLoss/fig/logpathReceivedSignal_combinedStations_office_lowSignal.png}
 	\caption{$13.1cm$ Three stations combined RF input power.}

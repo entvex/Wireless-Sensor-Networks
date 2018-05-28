@@ -1,6 +1,6 @@
 \subsection{Energy lab}\label{sc:energylab}
 
-To test the energy consumption of the motes, a laboratory test has been conducted on two telosB units. On figure \ref{fig:energyLab_testSetup} the test setup is defined. The test was conducted with the same method as laboratory exercise 5\footnote{\cite{Madsen}}. Data and pictures can be found in Appendix7, codes for conducting the laboratory experiments can be found in Appendix8.
+To test the energy consumption of the nodes, a laboratory test has been conducted on two telosB units. On figure \ref{fig:energyLab_testSetup} the test setup is defined. The test was conducted with the same method as laboratory exercise 5\footnote{\cite{Madsen}}. Data and pictures can be found in Appendix7, codes for conducting the laboratory experiments can be found in Appendix8.
 
 \noindent The measurements can be seen on figure \ref{fig:radioOn_idle}, \ref{fig:radioOn_sendHighSignal}, \ref{fig:radioOn_sendMidSignal} and \ref{fig:radioOn_sendLowSignal}. Inspecting the values of the three signal strengths on figure \ref{fig:radioOn_idle}, \ref{fig:radioOn_sendHighSignal}, \ref{fig:radioOn_sendMidSignal} and \ref{fig:radioOn_sendLowSignal}, and converting these voltages to a current, provides the results found in table \ref{tab:signalStrengthEnergyConsumption}.
 
@@ -54,7 +54,7 @@ To test the energy consumption of the motes, a laboratory test has been conducte
 	\label{tab:signalStrengthEnergyConsumption}
 \end{table}
 
-\noindent As can be seen in table \ref{tab:signalStrengthEnergyConsumption}, there is a big difference in how much current is drawn at different signal strengths. However at further inspection of the telosb units, it is concluded that turning the radio on, will make a unit automatically start listening for wireless signals. This results in the units always drawing a lot of current whenever the radio is turned on.
+\noindent Seen in table \ref{tab:signalStrengthEnergyConsumption}, there is a big difference in how much current is drawn at different signal strengths. However at further inspection of the telosb units, it is concluded that turning the radio on, will make a unit automatically start listening for wireless signals. This results in the units always drawing a lot of current whenever the radio is turned on.
 
 \begin{figure}[H]
 	\centering
@@ -63,4 +63,4 @@ To test the energy consumption of the motes, a laboratory test has been conducte
 	\label{fig:radioSwitching}
 \end{figure}
 
-\noindent As it can be seen on figure \ref{fig:radioSwitching}, turning on the radio is indeed expensive compared to having it turned off. A fast observation will result in a protocol decision that turns off the radio when not needed and on when needed. Of course this will require a protocol with time/clock synchronization of some sort to be implemented, and will not be implemented in this report. An overshoot can be observed at radio turn on, this means that it will cost an extra amount of energy whenever the radio is turned on. This concept have already been talked about in section \ref{sc:energyCalculations} in which the data came from this section.
+\noindent As seen in figure \ref{fig:radioSwitching}, turning on the radio is indeed expensive compared to having it turned off. At first thought one might design a protocol that turns off the radio when not needed and on when needed. This will require a protocol with time/clock synchronization of some sort to be implemented, and will not be implemented in this report. An overshoot can be observed at radio turn on, this means that it will cost an extra amount of energy whenever the radio is turned on. This concept have already been talked about in section \ref{sc:energyCalculations} in which the data came from this section.

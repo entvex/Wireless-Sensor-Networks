@@ -12,18 +12,18 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 
 \noindent \textbf{\textit{n} DATA's received ($p_5$):} Number of data packets received. Ideally, this should be close to the packets sent as well. If $p_5$<$p_1$, then $p_1$-$p_5$ request packets were not replied.
 
-\noindent \textbf{\textit{n} packets not acknowledged in time ($p_6$):} Number of packets not acknowledged before the ARQ timer ran out. This is strongly related to the timers on the base station and heavily influenced by interference and signal noise. Also in our test set-up we tried to get as much data from the runner as possible, so timers were strict. \\
+\noindent \textbf{\textit{n} packets not acknowledged in time ($p_6$):} Number of packets not acknowledged before the ARQ timer ran out. This is strongly related to the timers on the base station and heavily influenced by interference and signal noise. Also in our test set-up we tried to get as much data from the runner as possible, so timers were strict.\\
 
-\noindent Table \ref{table:datascenarios1} and \ref{table:datascenarios2} show the final result of each completed scenario lasting 48 minutes each, which equals about 144 rounds with the train. Each minute we recorded parameters $p_1$ to $p_6$. All are initially set to zero. We decided not to change the RSSI threshold in each scenario.
+\noindent Table \ref{table:datascenarios1} and \ref{table:datascenarios2} show the final result of each completed scenario lasting 48 minutes each, which equals about $168$ (small track) and $130$ (large track) rounds with the train. Both tracks have the same amount of total packages sent, $12280$. Each minute we recorded parameters $p_1$ to $p_6$. All are initially set to zero. We decided not to change the RSSI threshold in each scenario.
 
 \begin{table}[h]
 	\centering
-	\begin{tabular}{|l|l|l|l|} \hline
-		Sn. & \pbox{10cm}{$p_1$} & \pbox{17cm}{$p_2$} & \pbox{17cm}{$p_3$} \\ \hline
-		1 & 29148 & 4066 & 3512 \\ \hline
-		2 & 29838 & 8115 & 8499 \\ \hline
-		3 & 29258 & 3706 & 4021 \\ \hline
-		4 & 30523 & 1232 & 8425 \\ \hline
+	\begin{tabular}{|c|c|c|c|c|} \hline
+		Sn. & \pbox{10cm}{$p_1$} & \pbox{17cm}{$p_2$} & \pbox{17cm}{$p_3$} & \pbox{17cm}{$p_2 + p_3$} \\ \hline
+		1 & 29148 & 4066 & 3512 & 7578 \\ \hline
+		2 & 29838 & 8115 & 8499 & 16614 \\ \hline
+		3 & 29258 & 3706 & 4021 & 7727 \\ \hline
+		4 & 30523 & 1232 & 8425 & 9657 \\ \hline
 	\end{tabular}
 	\caption{Data from scenarios 1-4 for parameters 1-3.}
 	\label{table:datascenarios1}
@@ -31,7 +31,7 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 
 \begin{table}[h]
 	\centering
-	\begin{tabular}{|l|l|l|l|} \hline
+	\begin{tabular}{|c|c|c|c|} \hline
 		Sn. & \pbox{17cm}{$p_4$} & \pbox{17cm}{$p_5$} & \pbox{17cm}{$p_6$} \\ \hline
 		1 & 22169 & 34167 & 20700 \\ \hline
 		2 & 17880 & 23563 & 21111 \\ \hline
@@ -42,7 +42,7 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{table:datascenarios2}
 \end{table}
 
-\noindent As expected, the results vary depending on the track length and the channel used. When using a length of $56cm$ (scenario two and four), we see $p5$=<$p_1$, meaning the base station received the same or less data packets than requested. In scenario four they are even fairly close. If $p5$>$p_1$, it could be due to fading or missed timers. Also worth noting is the increased use of relays ($p_2$ and $p_3$) when the length is $56cm$. Changing channels between 11 and 4 seem to lower the difference between $p_1$ and $p_5$ as well.
+\noindent As expected, the results vary depending on the track length and the channel used. When using a length of $56cm$ (scenario 2 and 4), we see $p_5 \leq p_1$, meaning the base station received the same or less data packets than requested. In scenario four they are even fairly close. If $p_5 > p_1$, it could be due to fading or missed timers. Also worth noting is the increased use of relays ($p_2$ and $p_3$) when the length is $56cm$. Changing channels between 11 and 4 seem to lower the difference between $p_1$ and $p_5$ as well.
 
 \noindent Figure \ref{fig:noackreceived} shows the correlation between the number of ACK's received, $p_4$, at the base station per packet sent from it. These numbers should be close to each other. Scenario 2 received a large number of ACK's around the 24408 packet sent mark, perhaps due to deep fading.
 
@@ -53,7 +53,7 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{fig:noackreceived}
 \end{figure}
 
-\noindent Figure \ref{fig:nodatareceived} shows the number of data packets received, $p_5$, from the runner node either direct or via one of the relays per packet sent. Scenario 1 and 3 (length=$43.5cm$) follows each other slightly, however changing channel from 11 to 4 decrease the amount of additional packets received ($p_5$>$p_1$) when using length=$43.5cm$. Scenario 4 looks to be the most successful one, as the number of data packets received is close to the number of requests sent. We reflect on this at the end of results. Scenario 1 and 3 sees more data packets being received than requested. A probable cause is a packet not being acknowledged in time by the base station, so the runner will resend it, even though it might already have been received by the base station.
+\noindent Figure \ref{fig:nodatareceived} shows the number of data packets received, $p_5$, from the runner node either direct or via one of the relays per packet sent. Scenario 1 and 3 ($length = 43.5cm$) follows each other slightly, however changing channel from 11 to 4 decrease the amount of additional packets received ($p_5 > p_1$) when using $length = 43.5cm$. Scenario 4 looks to be the most successful one, as the number of data packets received is close to the number of requests sent. We reflect on this at the end of results. Scenario 1 and 3 sees more data packets being received than requested. A probable cause is a packet not being acknowledged in time by the base station, so the runner will resend it, even though it might already have been received by the base station.
 
 \begin{figure}[h]
 	\centering
@@ -62,7 +62,7 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{fig:nodatareceived}
 \end{figure}
 
-\noindent Figure \ref{fig:nopacketsrelayed} shows the number of data relayed to the north  and south relay station combined per packet sent. As expected, scenario 2 and 4 (length=$56cm$) relays more packages, now that the runner node will be out of reach from the base station for a longer period of time. It might even be that neither can reach the runner due to deep fading. Calculations made in Appendix 1 show the minimum theoretical packages send from the base station, which must be relayed at each of the track length. The total packages send from the base station ideally is 12280, the minimum relayed packages send from the the base station for scenario 1 and 3 are 2355 packages, and for scenario 2 and 4 the total packages send from the base station are 4961 packages. Both the number of relayed packages and the total number of packages send from the base station is flawed compared to theory and this will be further discussed in the discussion, but the inter scenario relative test results follows the theory well.
+\noindent Figure \ref{fig:nopacketsrelayed} shows the number of data relayed to the north  and south relay station combined per packet sent. As expected, scenario 2 and 4 ($length=56cm$) relays more packets, now that the runner node will be out of reach from the base station for a longer period of time. It might even be that neither can reach the runner due to deep fading. Calculations made in Appendix 1 show the minimum theoretical packets send from the base station, which must be relayed at each of the track length. The total packets sent from the base station ideally is 12280, the minimum relayed packets send from the the base station for scenario 1 and 3 are 2355 packets, and for scenario 2 and 4 are 4961 packets. Both the number of relayed packets and the total number of packets send from the base station is flawed compared to theory and this will be further discussed in the discussion, but the inter scenario relative test results follow the theory well. The base station should send a request to the runner after a specified time to investigate if the runner has returned into direct communication reach, of the base station. Alternative the RSSI of the relaying node could be evaluated by the base station to give an idea of the runner node position.
 
 \begin{figure}[h]
 	\centering
@@ -73,14 +73,14 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 
 \noindent Figure \ref{fig:nopacketsnotackintime} shows the number of packets not acknowledged in time per packet sent. All scenarios follows each-other, which points to a systematically error either due to strict timers or fading issues. An error that channel or length does not seem to affect. We noticed during the live testing that more ARQ errors occurred when communicating directly rather than relaying. Figure \ref{fig:nopacketsrelayedscenario2} and \ref{fig:nopacketsrelayedscenario4} show how the two scenarios that relay the most packets (2 and 4) distribute the data among our two relay stations (north and south) per packet relayed. A bit strange is the sudden drop of packets relayed to the north station in scenario 4, figure  \ref{fig:nopacketsrelayedscenario4}. Probable reason is fading.
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{results/NoPacketsNotACKInTime}
 	\caption{No. packets not acknowledged in time.}
 	\label{fig:nopacketsnotackintime}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{results/NoPacketsRelayedScenario2}
 	\caption{No. packets relayed to north and south node in scenario 2.}
@@ -94,12 +94,12 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{fig:nopacketsrelayedscenario4}
 \end{figure}
 
-\noindent In terms of event quality (number of packets requested ($p_1$) vs. received ($p_5$) the different scenarios has various characteristics. A optimal scenario is one where the number of requests sent is close to the number of data packets received, that is $p_1 \approx p_5$. If $p_1$>$p_5$, we have asked for more events than received, i.e. packets have not been send or lost. If $p_1$<$p_5$, we have received more events than asked for, i.e. information overhead. Table \ref{table:eventquality} shows event quality for each scenario (1-4). We see that scenario 4 provides the overall best event quality, i.e. using a channel with less traffic and increasing the length of the track, hence relying more on the relay stations.
+\noindent In terms of event quality (number of packets requested ($p_1$) vs. received ($p_5$)) the different scenarios has various characteristics. A optimal scenario is one where the number of requests sent is close to the number of data packets received, that is $p_1 \approx p_5$. If $p_1 > p_5$, we have asked for more events than received, i.e. packets have not been send or lost. If $p_1 < p_5$, we have received more events than asked for, i.e. information overload. Table \ref{table:eventquality} shows event quality for each scenario (1-4). Surprisingly scenario 4 provides the overall best event quality, and not scenario 3, i.e. using a channel with less traffic and increasing the length of the track, hence relying more on the relay stations.
 
 \begin{table}[h]
 	\centering
-	\begin{tabular}{|l|l|l|l|} \hline
-		Scenario & \pbox{4cm}{Requests \\ sent} & \pbox{18cm}{DATA's \\ received} & \pbox{18cm}{\% Quality \\ difference.} \\ \hline
+	\begin{tabular}{|c|l|l|r|} \hline
+		Sn. & \pbox{4cm}{Requests \\ sent} & \pbox{18cm}{DATA's \\ received} & \pbox{18cm}{\% Quality \\ difference.} \\ \hline
 		1 & 29148 & 34167 & $17.2\%$ \\ \hline
 		2 & 29838 & 23563 & $-21.0\%$ \\ \hline
 		3 & 29258 & 32830 & $12.2\%$ \\ \hline
@@ -109,13 +109,13 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{table:eventquality}
 \end{table}
 
-\noindent Looking at the energy consumption, the smaller the track the less total energy will be consumed because of less messages relayed. This result in less total energy consumed because the relays are inactive, assuming the relays are sleeping when inactive. However this is not true in the test scenarios, but in a optimized scenario this would be the case and is therefore concluded upon. Energy consumption per packet sent can be found in table \ref{table:energyConsumption}. As shown, the total energy consumption of the system as well as that of the base station itself is higher in scenario 2 and 4 because of the extra request messages send through relays. The conclusion is that the more messages or packets that needs relaying the more energy is consumed overall.
+\noindent Looking at the energy consumption, the smaller the track the less total energy will be consumed because of less messages relayed. This result in less total energy consumed because the relays are inactive, assuming the relays are sleeping when inactive. However this is not true in the test scenarios, but in a optimized scenario this would be the case and is therefore concluded upon. Energy consumption per packet sent can be found in table \ref{table:energyConsumption}. As shown, the total energy consumption of the system as well as that of the base station itself is higher in scenario 2 and 4 because of the extra request messages send through relays. The conclusion is that the more messages or packets that needs relaying the more energy is consumed overall. Surprisingly again scenario 3 was not the optimal setup, but it turned out to be scenario 1.
 
 \begin{table}[H]
 	\centering
-	\begin{tabularx}{\linewidth}{|X|X|X|}
+	\begin{tabularx}{\linewidth}{|c|X|X|}
 		\hline
-		Scenario	& Total energy [Ah]	& Base station percentage used [\%]	\\ \hline
+		Sn.	& Total energy [Ah]	& Base station percentage used [\%]	\\ \hline
 		1			& $0.577$			& $8.81$							\\ \hline
 		2			& $0.731$			& $9.02$							\\ \hline
 		3			& $0.581$			& $8.84$							\\ \hline
@@ -124,3 +124,5 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\caption{Energy consumption assuming a specific cost per packet sent. "Total energy" is the energy consumed by the whole system. "Base station percentage used" is the percentage of the total energy used by the base station.}
 	\label{table:energyConsumption}
 \end{table}
+
+\noindent The result of both event quality and energy consumption show that the size of the track matters. Increasing the size of the track and adding more relays improves the event quality but also increases the energy consumption. It all come down to a trade-off between event quality and energy consumption. Track size results show that the effect on event quality overshadow the drawback of intensified energy consumption when increasing the track size.

@@ -1,6 +1,6 @@
 \subsection{Runner}\label{sc:runner}
 
-The runner node's task in our WSN is to respond to data request messages sent from the base station or the relay nodes, as seen in the sequence digram in figure \ref{fig:tohopornotarqsequence}. The node contains various settings that can configured as constants, so they are easy to change eg. the transmit channel and the radiation power of the antenna. When it receives a packet it will check that the packet was intended for the runner and if so it will send an acknowledge (ACK) to the requester and get ready to send the data as a subsequent reply.
+The runner node's task in our WSN is to respond to data request messages sent from the base station or the relay nodes, as seen in the sequence digram in figure \ref{fig:tohopornotarqsequence}. The node contains various settings that can configured as constants, so they are easy to change eg. the transmit channel and the radiation power of the antenna. When it receives a packet it will check that the packet was intended for the runner and if so it will send an ACK to the requester and get ready to send the data as a subsequent reply.
 
 \begin{minipage}[t]{0.95\linewidth}
 \begin{lstlisting}[label={lst:runner1}, caption={Runner receives requests and responds.}]
