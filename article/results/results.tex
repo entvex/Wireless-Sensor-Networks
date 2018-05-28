@@ -94,12 +94,12 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{fig:nopacketsrelayedscenario4}
 \end{figure}
 
-\noindent In terms of event quality (number of packets requested ($p_1$) vs. received ($p_5$) the different scenarios has various characteristics. A optimal scenario is one where the number of requests sent is close to the number of data packets received, that is $p_1 \approx p_5$. If $p_1$>$p_5$, we have asked for more events than received, i.e. packets have not been sent or lost. If $p_1$<$p_5$, we have received more events than asked for, i.e. information overhead. Table \ref{table:eventquality} shows event quality for each scenario (1-4). We see that scenario 4 provides the overall best event quality, i.e. using a channel with less traffic and increasing the length of the track, hence relying more on the relay stations.
+\noindent In terms of event quality (number of packets requested ($p_1$) vs. received ($p_5$) the different scenarios has various characteristics. A optimal scenario is one where the number of requests sent is close to the number of data packets received, that is $p_1 \approx p_5$. If $p_1$>$p_5$, we have asked for more events than received, i.e. packets have not been send or lost. If $p_1$<$p_5$, we have received more events than asked for, i.e. information overhead. Table \ref{table:eventquality} shows event quality for each scenario (1-4). We see that scenario 4 provides the overall best event quality, i.e. using a channel with less traffic and increasing the length of the track, hence relying more on the relay stations.
 
 \begin{table}[h]
 	\centering
 	\begin{tabular}{|l|l|l|l|} \hline
-		Scenario & \pbox{10cm}{Request \\ sent} & \pbox{18cm}{Data's \\ received} & \pbox{18cm}{\% Quality \\ difference.} \\ \hline
+		Scenario & \pbox{4cm}{Requests \\ sent} & \pbox{18cm}{Data's \\ received} & \pbox{18cm}{\% Quality \\ difference.} \\ \hline
 		1 & 29148 & 34167 & $17.2\%$ \\ \hline
 		2 & 29838 & 23563 & $-21.0\%$ \\ \hline
 		3 & 29258 & 32830 & $12.2\%$ \\ \hline
@@ -109,18 +109,18 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{table:eventquality}
 \end{table}
 
-\noindent Looking at the energy consumption, the smaller the track the less energy will be consumed because of less messages relayed. This result in less total energy consumed because the relays are inactive, assuming the relays are sleeping when inactive. This is not true in the test scenario, however in a optimized scenario this is the case and is therefore concluded upon. Results can be found in table \ref{table:energyConsumption}. As can be seen the total energy consumption of the system as well as the energy consumption of the base station itself is higher at scenario 2 and 4, because of the extra messages send through relays. The conclusion is that the more messages that needs relaying the more energy is consumed.
+\noindent Looking at the energy consumption, the smaller the track the less total energy will be consumed because of less messages relayed. This result in less total energy consumed because the relays are inactive, assuming the relays are sleeping when inactive. However this is not true in the test scenarios, but in a optimized scenario this would be the case and is therefore concluded upon. Energy consumption per packet sent can be found in table \ref{table:energyConsumption}. As shown, the total energy consumption of the system as well as that of the base station itself is higher in scenario 2 and 4 because of the extra request messages send through relays. The conclusion is that the more messages or packets that needs relaying the more energy is consumed overall.
 
 \begin{table}[H]
 	\centering
 	\begin{tabularx}{\linewidth}{|X|X|X|}
 		\hline
-		Scenario	& Total Energy [Ah]	& Base Station Percentage Used [\%]	\\ \hline
+		Scenario	& Total energy [Ah]	& Base station percentage used [\%]	\\ \hline
 		1			& $0.577$			& $8.81$							\\ \hline
 		2			& $0.731$			& $9.02$							\\ \hline
 		3			& $0.581$			& $8.84$							\\ \hline
 		4			& $0.632$			& $9.23$							\\ \hline
 	\end{tabularx}
-	\caption{Energy consumption assuming a specific cost per package send. Total energy is the energy used of the full system. Base Station Percentage Used defines the total energy used of the Base station.}
+	\caption{Energy consumption assuming a specific cost per packet sent. "Total energy" is the energy consumed by the whole system. "Base station percentage used" is the percentage of the total energy used by the base station.}
 	\label{table:energyConsumption}
 \end{table}
