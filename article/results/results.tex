@@ -71,7 +71,7 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{fig:nopacketsrelayed}
 \end{figure}
 
-\noindent Figure \ref{fig:nopacketsnotackintime} shows the number of packets not acknowledged over the data link in time per packet sent. All scenarios follows each-other, which points to a systematically error either due to strict timers or fading issues. An error that channel or length does not seem to affect. We noticed during the live testing that more ARQ errors occurred when communicating directly rather than relaying.
+\noindent Figure \ref{fig:nopacketsnotackintime} shows the number of packets not acknowledged in time per packet sent. All scenarios follows each-other, which points to a systematically error either due to strict timers or fading issues. An error that channel or length does not seem to affect. We noticed during the live testing that more ARQ errors occurred when communicating directly rather than relaying. Figure \ref{fig:nopacketsrelayedscenario2} and \ref{fig:nopacketsrelayedscenario4} show how the two scenarios that relay the most packets (2 and 4) distribute the data among our two relay stations (north and south) per packet relayed. A bit strange is the sudden drop of packets relayed to the north station in scenario 4, figure  \ref{fig:nopacketsrelayedscenario4}. Probable reason is fading.
 
 \begin{figure}[h]
 	\centering
@@ -80,8 +80,6 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{fig:nopacketsnotackintime}
 \end{figure}
 
-\noindent Figure \ref{fig:nopacketsrelayedscenario2} and \ref{fig:nopacketsrelayedscenario4} show how the two scenarios that relay the most packets (2 and 4) distribute the data among our two relay stations (north and south) per packet relayed. A bit strange is the sudden drop of packets relayed to the north station in scenario 4, figure  \ref{fig:nopacketsrelayedscenario4}. A explanation may again be deep fading.
-
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=1\linewidth]{results/NoPacketsRelayedScenario2}
@@ -89,7 +87,7 @@ Using the test setup and mechanics described in section \ref{ch:testAndPerforman
 	\label{fig:nopacketsrelayedscenario2}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{results/NoPacketsRelayedScenario4}
 	\caption{No. packets relayed to north and south node in scenario 4.}
