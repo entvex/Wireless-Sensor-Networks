@@ -12,7 +12,8 @@ os_time        = 0.05; %-os = overshoot                    %Seconds
 
 sleep_Period    = 1-packagePeriod*timesPerSecond;  %Sleep period for one package every second
 sleep_Period_OS = sleep_Period-os_time*timesPerSecond;
-R = 1;                                        %Measurement Shunt-Resistance
+R = sqrt(3);                                        %Measurement Shunt-Resistance 
+%R has been redefined so that it will give sense
 
 I_tx_max  = 17.5*10.^(-3);                    %Transmit current
 I_tx_min  = 8*10.^(-3);                       %I_tx_max - 24dBm
