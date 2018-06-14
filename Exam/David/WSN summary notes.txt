@@ -1,0 +1,90 @@
+WSN summary
+
+
+1ST PART:
+
+Sensor node architecture
+- Three characteristics
+- Pros/Cons in the five different major components
+
+
+Power/Energy supply
+- Hardware requirements knowledge
+- Lithium and alkaline battery most used batteries
+- Continuous Power get worse with time
+- Quality relation between each other battery no more is needed
+
+
+Duty Cycle
+- 1st condition: Hardware should support sleep mode (Our mode Active/Idle/Sleep)
+- 2nd condition: Time it takes to switch between states, do you actually save energy? Energy save should be higher than energy overhead (turn on)
+
+
+Dynamic Voltage Scaling
+- Lower the voltage when possible
+
+
+Peak Power Matters
+- Lowering the voltage power can increase the overall peak power, beacuse the microcontroller won't die as fast
+
+
+Computatuion vs. communication energy cost
+- Better to compute to decrease communication
+
+
+Modeling energy consumption during transmission
+
+
+Modeling energy consumption during receiving
+
+
+
+2ND PART
+
+Constraints in WSN
+- Hard to make a detailed hardware planning in a WSN
+
+
+Network architecture
+- Optimisations goals are very important
+- Quality of service = loss of important events (not packages)
+- Scalability, too much sclability can be expensive, it depends a lot on what is needed of the WSN
+
+- Distributed Organization, mac protocl, other layers (distributed protocols/mechanism), where is the brain in the system - it might be distributed ====== Read about this ======
+
+
+MAC
+- Important to understand the 4 main energy problems (waste of energy)
+
+
+Contention based MAC protocls
+- How do these protocol deal with the 4 main energy problems
+- Message passing = less overhead
+- LPL, Low Power Listening
+
+
+Link Layer
+- The different versions of ARQ
+- FEC uses redundancy of messages to correct errors
+- What are the tradeoffs of ARQ vs. FEC (good picture in previous slides of this subject)
+
+
+Data centric networking (networkign layer)
+- A purpose to discover the route, but how do we discover the route
+
+
+Data aggregation (networking layer)
+- Spatial and time correlation makes this possible <---- Important
+- Reduce network conjestion and energy usage
+
+
+Transport Layer
+- End to End, is the sender that should retransmit
+- Hop to Hop, is the last data sender that needs to retransmit
+
+
+Security
+- Avoidance of jamming = mapping of jammer and avoid area or change transmission power to get signal through
+
+
+Physical Layer
